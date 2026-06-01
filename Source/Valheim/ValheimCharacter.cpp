@@ -72,6 +72,11 @@ void AValheimCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	}
 }
 
+void AValheimCharacter::BeginPlay()
+{
+	//Cast<Valhein>GetWorld()->GetFirstPlayerController();
+}
+
 void AValheimCharacter::Move(const FInputActionValue& Value)
 {
 	// input is a Vector2D

@@ -11,6 +11,7 @@ class UCameraComponent;
 class UInputAction;
 class UInputMappingContext;
 struct FInputActionValue;
+class UAnimMontage;
 
 UCLASS()
 class VALHEIM_API AArcher : public ACharacter
@@ -49,6 +50,13 @@ protected:
 
 	void StopCrouch();
 
+	void CallAttack();
+
+	UFUNCTION(Server, Reliable)
+	void ServerAttack();
+	UFUNCTION(NetMulticast, Reliable)
+	void MultiAttack();
+
 
 
 	//---------------Property
@@ -56,6 +64,11 @@ protected:
 protected:
 
 	class AArcherPC* PlayerController;
+
+protected:
+	//Animation
+	UPROPERTY(EditAnywhere, Category = "Anim")
+	TObjectPtr<UAnimMontage> AttackMontage;
 
 protected:
 
@@ -77,4 +90,8 @@ protected:
 	/** Crouch Input Action */
 	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* CrouchAction;
+
+	/** Attack Input Action */
+	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputAction* AttackAction;
 };

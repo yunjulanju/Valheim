@@ -78,6 +78,9 @@ void AArcher::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 		//Crouching
 		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Started, this, &AArcher::StartCrouch);
 		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Completed, this, &AArcher::StopCrouch);
+
+		// Attacking
+		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Triggered, this, &AArcher::CallAttack);
 		
 	}
 	else
@@ -121,4 +124,22 @@ void AArcher::StartCrouch()
 void AArcher::StopCrouch()
 {
 	UnCrouch();
+}
+
+void AArcher::CallAttack()
+{
+	ServerAttack();
+}
+
+void AArcher::ServerAttack_Implementation()
+{
+	MultiAttack();
+}
+
+void AArcher::MultiAttack_Implementation()
+{
+	if (AttackMontage)
+	{
+		PlayAnimMontage(AttackMontage);
+	}	
 }

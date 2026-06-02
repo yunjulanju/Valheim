@@ -36,6 +36,8 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -63,8 +65,9 @@ protected:
 	UFUNCTION(Server, Reliable)
 	void ServerCallAttackCollision();
 
-
-
+public:
+	FORCEINLINE bool IsAttacking() const { return bIsAttacking; }
+	FORCEINLINE void SetIsAttacking(bool bNewAttacking) { bIsAttacking = bNewAttacking; }
 
 	//---------------Property
 
@@ -101,4 +104,7 @@ protected:
 	/** Attack Input Action */
 	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* AttackAction;
+
+	UPROPERTY(Replicated)
+	bool bIsAttacking = false;
 };

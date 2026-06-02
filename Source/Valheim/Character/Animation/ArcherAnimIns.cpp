@@ -47,10 +47,12 @@ void UArcherAnimIns::NativeUpdateAnimation(float DeltaTimeX)
 
 void UArcherAnimIns::AnimNotify_AttackStart()
 {
+	CharacterRef->SetIsAttacking(true);
 }
 
 void UArcherAnimIns::AnimNotify_AttackEnd()
 {
+	CharacterRef->SetIsAttacking(false);
 }
 
 void UArcherAnimIns::AnimNotify_Attack()

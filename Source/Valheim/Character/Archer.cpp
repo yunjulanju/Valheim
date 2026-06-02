@@ -3,17 +3,22 @@
 
 #include "Character/Archer.h"
 #include "Character/ArcherPC.h"
+#include "GameFramework/Controller.h"
+#include "Valheim.h"
+#include "Net/UnrealNetwork.h" 
+
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
-#include "GameFramework/Controller.h"
+
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
-#include "Valheim.h"
+
 #include "Kismet/GameplayStatics.h"
 #include <Monster/Monster.h>
+
 
 // Sets default values
 AArcher::AArcher()
@@ -90,6 +95,7 @@ void AArcher::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 		UE_LOG(LogValheim, Error, TEXT("'%s' Failed to find an Enhanced Input component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
 	}
 }
+
 void AArcher::Look(const FInputActionValue& Value)
 {
 	FVector2D LookAxisVector = Value.Get<FVector2D>();
@@ -176,6 +182,10 @@ void AArcher::ServerCallAttackCollision_Implementation()
 
 void AArcher::CallAttack()
 {
+	if (bIsAttacking)
+	{
+		return;
+	}
 	ServerAttack();
 }
 
@@ -190,4 +200,10 @@ void AArcher::MultiAttack_Implementation()
 	{
 		PlayAnimMontage(AttackMontage);
 	}	
+}
+
+
+void AArcher::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	DOREPLIFETIME(AArcher, bIsAttacking);
 }

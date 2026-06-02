@@ -12,6 +12,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "Valheim.h"
+#include "Kismet/KismetMathLibrary.h"
 
 // Sets default values
 AArcher::AArcher()
@@ -28,13 +29,12 @@ AArcher::AArcher()
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
 	CameraBoom->TargetArmLength = 300.0f;
-	CameraBoom->SoketOffset = FVector(0,0,80);
+	CameraBoom->SocketOffset = FVector(0,0,80);
 	CameraBoom->bUsePawnControlRotation = true;
 
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	FollowCamera->bUsePawnControlRotation = false;
-
 }
 
 // Called when the game starts or when spawned
@@ -42,7 +42,14 @@ void AArcher::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	PlayerController = Cast<AArcherPC>(GetWorld()->GetFirstPlayerController());
+	if (APlayerController* PC = Cast<APlayerController>(GetController()))
+	{
+		PlayerController = Cast<AArcherPC>(PC);
+		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+		{
+			Subsystem->AddMappingContext(DefaultMappingContext, 0);
+		}
+	}
 }
 
 // Called every frame
@@ -64,10 +71,14 @@ void AArcher::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 		// Moving
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AArcher::Move);
-		EnhancedInputComponent->BindAction(MouseLookAction, ETriggerEvent::Triggered, this, &AArcher::Look);
 
 		// Looking
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AArcher::Look);
+
+		//Crouching
+		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Started, this, &AArcher::StartCrouch);
+		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Completed, this, &AArcher::StopCrouch);
+		
 	}
 	else
 	{
@@ -76,16 +87,38 @@ void AArcher::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 }
 void AArcher::Look(const FInputActionValue& Value)
 {
-	// input is a Vector2D
 	FVector2D LookAxisVector = Value.Get<FVector2D>();
-
-
+	if (PlayerController)
+	{
+		PlayerController->AddYawInput(LookAxisVector.X);
+		PlayerController->AddPitchInput((-1) * LookAxisVector.Y);
+	}
 }
 
 void AArcher::Move(const FInputActionValue& Value)
 {
 	// input is a Vector2D
 	FVector2D MovementVector = Value.Get<FVector2D>();
+	FRotator ControlRotation = GetControlRotation();
 
+	// Get Forward Vector
+	FRotator ForwardRotation = FRotator(0.f, ControlRotation.Yaw, ControlRotation.Roll);
+	FVector ForwardVector = FRotationMatrix(ForwardRotation).GetUnitAxis(EAxis::X);
 
+	// Get Right Vector
+	FRotator RightRotation = FRotator(0.f, ControlRotation.Yaw, ControlRotation.Roll);
+	FVector RightVector = FRotationMatrix(RightRotation).GetUnitAxis(EAxis::Y);
+
+	AddMovementInput(ForwardVector, MovementVector.X);
+	AddMovementInput(RightVector, MovementVector.Y);
+}
+
+void AArcher::StartCrouch()
+{
+	Crouch();
+}
+
+void AArcher::StopCrouch()
+{
+	UnCrouch();
 }

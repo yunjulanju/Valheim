@@ -9,6 +9,7 @@
 class USpringArmComponent;
 class UCameraComponent;
 class UInputAction;
+class UInputMappingContext;
 struct FInputActionValue;
 
 UCLASS()
@@ -44,6 +45,10 @@ protected:
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
 
+	void StartCrouch();
+
+	void StopCrouch();
+
 
 
 	//---------------Property
@@ -53,6 +58,9 @@ protected:
 	class AArcherPC* PlayerController;
 
 protected:
+
+	UPROPERTY(EditAnywhere, Category = "Input")
+	TObjectPtr<UInputMappingContext> DefaultMappingContext;
 
 	/** Jump Input Action */
 	UPROPERTY(EditAnywhere, Category = "Input")
@@ -66,7 +74,7 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* LookAction;
 
-	/** Mouse Look Input Action */
+	/** Crouch Input Action */
 	UPROPERTY(EditAnywhere, Category = "Input")
-	UInputAction* MouseLookAction;
+	UInputAction* CrouchAction;
 };

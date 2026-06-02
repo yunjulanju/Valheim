@@ -51,11 +51,18 @@ protected:
 	void StopCrouch();
 
 	void CallAttack();
-
 	UFUNCTION(Server, Reliable)
 	void ServerAttack();
 	UFUNCTION(NetMulticast, Reliable)
 	void MultiAttack();
+
+public:
+	void CallAttackCollision();
+
+protected:
+	UFUNCTION(Server, Reliable)
+	void ServerCallAttackCollision();
+
 
 
 

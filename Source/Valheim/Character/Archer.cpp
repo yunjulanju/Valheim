@@ -128,12 +128,12 @@ void AArcher::StopCrouch()
 	UnCrouch();
 }
 
-void AArcher::CallAttack()
+void AArcher::CallAttackCollision()
 {
-	ServerAttack();
+	ServerCallAttackCollision();
 }
 
-void AArcher::ServerAttack_Implementation()
+void AArcher::ServerCallAttackCollision_Implementation()
 {
 	TArray<AActor*> HitActors;
 	TArray<FHitResult> OutHits;
@@ -172,7 +172,15 @@ void AArcher::ServerAttack_Implementation()
 	}
 
 	DrawDebugSphere(GetWorld(), SpawnLocation, SphereRadius, 12, FColor::Red, false, 1.f);
+}
 
+void AArcher::CallAttack()
+{
+	ServerAttack();
+}
+
+void AArcher::ServerAttack_Implementation()
+{
 	MultiAttack();
 }
 

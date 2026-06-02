@@ -12,7 +12,8 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "Valheim.h"
-#include "Kismet/KismetMathLibrary.h"
+#include "Kismet/GameplayStatics.h"
+#include <Monster/Monster.h>
 
 // Sets default values
 AArcher::AArcher()
@@ -31,6 +32,7 @@ AArcher::AArcher()
 	CameraBoom->TargetArmLength = 300.0f;
 	CameraBoom->SocketOffset = FVector(0,0,80);
 	CameraBoom->bUsePawnControlRotation = true;
+	CameraBoom->bDoCollisionTest = false;
 
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
@@ -80,7 +82,7 @@ void AArcher::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Completed, this, &AArcher::StopCrouch);
 
 		// Attacking
-		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Triggered, this, &AArcher::CallAttack);
+		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Started, this, &AArcher::CallAttack);
 		
 	}
 	else
@@ -133,6 +135,44 @@ void AArcher::CallAttack()
 
 void AArcher::ServerAttack_Implementation()
 {
+	TArray<AActor*> HitActors;
+	TArray<FHitResult> OutHits;
+	FVector SpawnLocation = GetActorLocation() + (GetActorForwardVector() * 110.f);
+	float SphereRadius = 50.0f;
+	FCollisionShape MySphere = FCollisionShape::MakeSphere(SphereRadius);
+	bool bIsHit = GetWorld()->SweepMultiByChannel(
+		OutHits,
+		SpawnLocation,
+		SpawnLocation,
+		FQuat::Identity,
+		ECC_WorldDynamic,
+		MySphere);
+
+	if (bIsHit)
+	{
+		for (const FHitResult& Hit : OutHits)
+		{
+			AActor* HitActor = Hit.GetActor();
+			if (AMonster* Monster = Cast<AMonster>(HitActor))
+			{
+				if (!HitActors.Contains(HitActor))
+				{
+					HitActors.Add(HitActor);
+					UE_LOG(LogTemp, Warning, TEXT("Hit Monster: %s"), *Monster->GetName());
+					UGameplayStatics::ApplyDamage(
+						Monster,
+						10.f,
+						GetController(),
+						this,
+						UDamageType::StaticClass() // 데미지 타입
+					);
+				}
+			}
+		}
+	}
+
+	DrawDebugSphere(GetWorld(), SpawnLocation, SphereRadius, 12, FColor::Red, false, 1.f);
+
 	MultiAttack();
 }
 

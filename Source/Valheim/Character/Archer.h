@@ -38,6 +38,9 @@ public:
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
+	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent,
+		AController* EventInstigator, AActor* DamageCauser) override;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -72,6 +75,9 @@ public:
 	//---------------Property
 
 protected:
+
+	float MaxHP = 100;
+	float HP;
 
 	class AArcherPC* PlayerController;
 

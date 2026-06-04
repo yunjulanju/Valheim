@@ -2,6 +2,8 @@
 
 
 #include "Monster/Monster.h"
+#include "Kismet/GameplayStatics.h"
+#include <Character/Archer.h>
 
 // Sets default values
 AMonster::AMonster()
@@ -60,5 +62,42 @@ void AMonster::CallAttackCollision()
 
 void AMonster::ServerCallAttackCollision_Implementation()
 {
+	TArray<AActor*> HitActors;
+	TArray<FHitResult> OutHits;
+	FVector SpawnLocation = GetActorLocation() + (GetActorForwardVector() * 140.f);
+	float SphereRadius = 60.0f;
+	FCollisionShape MySphere = FCollisionShape::MakeSphere(SphereRadius);
+	bool bIsHit = GetWorld()->SweepMultiByChannel(
+		OutHits,
+		SpawnLocation,
+		SpawnLocation,
+		FQuat::Identity,
+		ECC_WorldDynamic,
+		MySphere);
+
+	if (bIsHit)
+	{
+		for (const FHitResult& Hit : OutHits)
+		{
+			AActor* HitActor = Hit.GetActor();
+			if (AArcher* Archer = Cast<AArcher>(HitActor))
+			{
+				if (!HitActors.Contains(HitActor))
+				{
+					HitActors.Add(HitActor);
+					UE_LOG(LogTemp, Warning, TEXT("Hit Archer: %s"), *Archer->GetName());
+					UGameplayStatics::ApplyDamage(
+						Archer,
+						10.f,
+						GetController(),
+						this,
+						UDamageType::StaticClass() // 데미지 타입
+					);
+				}
+			}
+		}
+	}
+
+	DrawDebugSphere(GetWorld(), SpawnLocation, SphereRadius, 12, FColor::Magenta, false, 1.f);
 }
 

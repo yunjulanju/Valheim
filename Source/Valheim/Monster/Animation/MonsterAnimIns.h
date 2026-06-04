@@ -18,6 +18,9 @@ public:
 	virtual void NativeInitializeAnimation() override;
 	virtual void NativeUpdateAnimation(float DeltaTimeX) override;
 
+	UFUNCTION()
+	void AnimNotify_MonsterAttack();
+
 	class AMonster* MonsterRef;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")

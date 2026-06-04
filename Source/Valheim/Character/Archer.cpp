@@ -42,6 +42,8 @@ AArcher::AArcher()
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	FollowCamera->bUsePawnControlRotation = false;
+
+	HP = MaxHP;
 }
 
 // Called when the game starts or when spawned
@@ -52,9 +54,14 @@ void AArcher::BeginPlay()
 	if (APlayerController* PC = Cast<APlayerController>(GetController()))
 	{
 		PlayerController = Cast<AArcherPC>(PC);
-		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+		if (UEnhancedInputLocalPlayerSubsystem* Subsystem =
+			ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer()))
 		{
-			Subsystem->AddMappingContext(DefaultMappingContext, 0);
+			// IMC null 체크 필수
+			if (Subsystem)
+			{
+				Subsystem->AddMappingContext(DefaultMappingContext, 0);
+			}
 		}
 	}
 }
@@ -206,4 +213,12 @@ void AArcher::MultiAttack_Implementation()
 void AArcher::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	DOREPLIFETIME(AArcher, bIsAttacking);
+}
+
+float AArcher::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	HP -= DamageAmount;
+	UE_LOG(LogTemp, Warning, TEXT("Archer HP: %f"), HP);
+
+	return DamageAmount;
 }

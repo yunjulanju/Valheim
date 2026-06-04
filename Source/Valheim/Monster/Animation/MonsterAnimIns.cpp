@@ -19,3 +19,12 @@ void UMonsterAnimIns::NativeUpdateAnimation(float DeltaTimeX)
 	Velocity = MonsterRef->GetVelocity();
 	Speed = Velocity.Size2D();
 }
+
+void UMonsterAnimIns::AnimNotify_MonsterAttack()
+{
+	if (!MonsterRef)
+	{
+		return;
+	}
+	MonsterRef->CallAttackCollision();
+}

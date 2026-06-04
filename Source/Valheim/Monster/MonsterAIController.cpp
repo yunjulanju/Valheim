@@ -40,3 +40,17 @@ void AMonsterAIController::OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus 
 {
 
 }
+
+void AMonsterAIController::StopAI()
+{
+    CleanupBrainComponent();
+
+    /*UBehaviorTreeComponent* BTC = Cast<UBehaviorTreeComponent>(GetBrainComponent());
+    if (nullptr == BTC)
+    {
+        return;
+    }
+       
+
+    BTC->StopTree(EBTStopMode::Safe);*/
+}

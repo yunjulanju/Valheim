@@ -33,13 +33,13 @@ public:
     class UCharacterMovementComponent* CharacterMovementRef;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
+    FVector Velocity;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
     float Speed;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
     float Direction;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
-    FVector Velocity;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
     bool bShoudMove;

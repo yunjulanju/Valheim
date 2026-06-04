@@ -29,8 +29,18 @@ public:
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent,
 		AController* EventInstigator, AActor* DamageCauser) override;
 
-	//PRPOPERTY
+	//Animation
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	void CallAttack();
 
+	//Attack Collision
+	void CallAttackCollision();
+
+protected:
+	UFUNCTION(Server, Reliable)
+	void ServerCallAttackCollision();
+
+///////////////////////////////////////////////////PRPOPERTY
 protected:
 	float MaxHP = 50.0f;
 

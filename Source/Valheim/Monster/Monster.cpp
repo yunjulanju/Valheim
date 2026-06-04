@@ -49,10 +49,6 @@ float AMonster::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, 
 	return DamageAmount;
 }
 
-void AMonster::CallAttack()
-{
-}
-
 void AMonster::CallAttack_Implementation()
 {
 }

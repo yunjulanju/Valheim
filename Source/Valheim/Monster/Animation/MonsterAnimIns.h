@@ -20,6 +20,8 @@ public:
 
 	UFUNCTION()
 	void AnimNotify_MonsterAttack();
+	UFUNCTION()
+	void AnimNotify_MonsterDeath();
 
 	class AMonster* MonsterRef;
 

@@ -45,7 +45,7 @@ float AMonster::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, 
 
 	if (HP <= 0)
 	{
-		Destroy();
+		CallDeathAnimation();
 	}
 
 	return DamageAmount;
@@ -58,6 +58,16 @@ void AMonster::CallAttack_Implementation()
 void AMonster::CallAttackCollision()
 {
 	ServerCallAttackCollision();
+}
+
+void AMonster::EndDeath()
+{
+	Server_EndDeath();
+}
+
+void AMonster::Server_EndDeath_Implementation()
+{
+	Destroy();
 }
 
 void AMonster::ServerCallAttackCollision_Implementation()
@@ -101,3 +111,6 @@ void AMonster::ServerCallAttackCollision_Implementation()
 	DrawDebugSphere(GetWorld(), SpawnLocation, SphereRadius, 12, FColor::Magenta, false, 1.f);
 }
 
+void AMonster::CallDeathAnimation_Implementation()
+{
+}

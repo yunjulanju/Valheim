@@ -28,3 +28,11 @@ void UMonsterAnimIns::AnimNotify_MonsterAttack()
 	}
 	MonsterRef->CallAttackCollision();
 }
+void UMonsterAnimIns::AnimNotify_MonsterDeath()
+{
+	if (!MonsterRef)
+	{
+		return;
+	}
+	MonsterRef->EndDeath();
+}

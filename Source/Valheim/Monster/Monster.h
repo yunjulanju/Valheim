@@ -36,6 +36,14 @@ public:
 	//Attack Collision
 	void CallAttackCollision();
 
+	//Death
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	void CallDeathAnimation();
+
+	void EndDeath();
+	UFUNCTION(Server, Reliable)
+	void Server_EndDeath();
+
 protected:
 	UFUNCTION(Server, Reliable)
 	void ServerCallAttackCollision();

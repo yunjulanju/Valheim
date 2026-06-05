@@ -15,6 +15,8 @@ public:
 	// Sets default values for this character's properties
 	AMonster();
 
+	class AMonsterAIController* MonsterAIController;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -50,7 +52,7 @@ protected:
 
 ///////////////////////////////////////////////////PRPOPERTY
 protected:
-	float MaxHP = 50.0f;
+	float MaxHP = 20.0f;
 
 	float HP;
 

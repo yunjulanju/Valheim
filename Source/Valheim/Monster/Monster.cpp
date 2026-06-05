@@ -3,7 +3,8 @@
 
 #include "Monster/Monster.h"
 #include "Kismet/GameplayStatics.h"
-#include <Character/Archer.h>
+#include "Character/Archer.h"
+#include "Monster/MonsterAIController.h"
 
 // Sets default values
 AMonster::AMonster()
@@ -45,6 +46,10 @@ float AMonster::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, 
 
 	if (HP <= 0)
 	{
+		if (MonsterAIController)
+		{
+			MonsterAIController->StopAI();
+		}
 		CallDeathAnimation();
 	}
 

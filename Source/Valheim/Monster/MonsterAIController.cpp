@@ -5,6 +5,7 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISenseConfig_Sight.h"
+#include <BehaviorTree/BehaviorTreeComponent.h>
 
 AMonsterAIController::AMonsterAIController()
 {
@@ -43,14 +44,14 @@ void AMonsterAIController::OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus 
 
 void AMonsterAIController::StopAI()
 {
-    CleanupBrainComponent();
+    //StopTree(EBTStopMode::Safe);
+    //CleanupBrainComponent();
 
-    /*UBehaviorTreeComponent* BTC = Cast<UBehaviorTreeComponent>(GetBrainComponent());
+    UBehaviorTreeComponent* BTC = Cast<UBehaviorTreeComponent>(GetBrainComponent());
     if (nullptr == BTC)
     {
         return;
     }
        
-
-    BTC->StopTree(EBTStopMode::Safe);*/
+    BTC->StopTree(EBTStopMode::Safe);
 }

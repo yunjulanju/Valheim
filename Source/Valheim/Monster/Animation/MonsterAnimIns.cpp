@@ -18,15 +18,23 @@ void UMonsterAnimIns::NativeUpdateAnimation(float DeltaTimeX)
 
 	Velocity = MonsterRef->GetVelocity();
 	Speed = Velocity.Size2D();
+
 	if (Speed > 1.0f)
 	{
+		StopAllMontages(0.3);
 		MonsterRef->SetCurrentState(EMonsterState::Moving);
 		CurrentState = EMonsterState::Moving;
 	}
-	else {
+	else if (MonsterRef->GetCurrentState() != EMonsterState::Attacking)
+	{
 		MonsterRef->SetCurrentState(EMonsterState::Idle);
 		CurrentState = EMonsterState::Idle;
+		
+	}else
+	{
+		CurrentState = EMonsterState::Attacking;
 	}
+
 }
 
 void UMonsterAnimIns::AnimNotify_MonsterAttack()
@@ -36,6 +44,14 @@ void UMonsterAnimIns::AnimNotify_MonsterAttack()
 		return;
 	}
 	MonsterRef->CallAttackCollision();
+}
+void UMonsterAnimIns::AnimNotify_MonsterAttackEnd()
+{
+	if (!MonsterRef)
+	{
+		return;
+	}
+	MonsterRef->SetCurrentState(EMonsterState::Idle);
 }
 void UMonsterAnimIns::AnimNotify_MonsterDeath()
 {

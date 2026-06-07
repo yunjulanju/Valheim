@@ -7,7 +7,7 @@
 #include "Monster.generated.h"
 
 UENUM(BlueprintType)
-enum class ECharacterState : uint8
+enum class EMonsterState : uint8
 {
 	Idle,
 	Moving,

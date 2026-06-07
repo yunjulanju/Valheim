@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimInstance.h"
+#include "Monster/Monster.h"
 #include "MonsterAnimIns.generated.h"
 
 /**

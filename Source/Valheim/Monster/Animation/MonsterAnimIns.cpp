@@ -18,6 +18,15 @@ void UMonsterAnimIns::NativeUpdateAnimation(float DeltaTimeX)
 
 	Velocity = MonsterRef->GetVelocity();
 	Speed = Velocity.Size2D();
+	if (Speed > 1.0f)
+	{
+		MonsterRef->SetCurrentState(EMonsterState::Moving);
+		CurrentState = EMonsterState::Moving;
+	}
+	else {
+		MonsterRef->SetCurrentState(EMonsterState::Idle);
+		CurrentState = EMonsterState::Idle;
+	}
 }
 
 void UMonsterAnimIns::AnimNotify_MonsterAttack()

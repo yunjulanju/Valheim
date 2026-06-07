@@ -6,6 +6,14 @@
 #include "GameFramework/Character.h"
 #include "Monster.generated.h"
 
+UENUM(BlueprintType)
+enum class ECharacterState : uint8
+{
+	Idle,
+	Moving,
+	Attacking
+};
+
 UCLASS()
 class VALHEIM_API AMonster : public ACharacter
 {
@@ -50,8 +58,15 @@ protected:
 	UFUNCTION(Server, Reliable)
 	void ServerCallAttackCollision();
 
+public:
+	FORCEINLINE EMonsterState GetCurrentState() const { return CurrentState; }
+	FORCEINLINE void SetCurrentState(EMonsterState NewState) { CurrentState = NewState; }
+
 ///////////////////////////////////////////////////PRPOPERTY
 protected:
+	UPROPERTY(BlueprintReadWrite, Category = "State")
+	EMonsterState CurrentState = EMonsterState::Idle;
+
 	float MaxHP = 20.0f;
 
 	float HP;

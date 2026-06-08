@@ -12,12 +12,15 @@ class UInputAction;
 class UInputMappingContext;
 struct FInputActionValue;
 class UAnimMontage;
+class ASword;
+class UStaticMeshComponent;
 
 UCLASS()
 class VALHEIM_API AArcher : public ACharacter
 {
 	GENERATED_BODY()
 
+protected:
 	/** Camera boom positioning the camera behind the character */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	USpringArmComponent* CameraBoom;
@@ -25,6 +28,10 @@ class VALHEIM_API AArcher : public ACharacter
 	/** Follow camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* FollowCamera;
+
+	/** Sword Component */
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UStaticMeshComponent* SwordMesh;
 
 public:
 	// Sets default values for this character's properties
@@ -60,6 +67,10 @@ protected:
 	void ServerAttack();
 	UFUNCTION(NetMulticast, Reliable)
 	void MultiAttack();
+
+	void Interaction();
+
+	void AttachWeapon(ASword* Sword);
 
 public:
 	void CallAttackCollision();
@@ -113,4 +124,8 @@ protected:
 
 	UPROPERTY(Replicated)
 	bool bIsAttacking = false;
+
+	/** Interaction Input Action */
+	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputAction* InteractAction;
 };

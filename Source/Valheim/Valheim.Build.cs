@@ -25,19 +25,19 @@ public class Valheim : ModuleRules
 
 		PublicIncludePaths.AddRange(new string[] {
 			"Valheim",
-			"Valheim/Variant_Platforming",
-			"Valheim/Variant_Platforming/Animation",
-			"Valheim/Variant_Combat",
-			"Valheim/Variant_Combat/AI",
-			"Valheim/Variant_Combat/Animation",
-			"Valheim/Variant_Combat/Gameplay",
-			"Valheim/Variant_Combat/Interfaces",
-			"Valheim/Variant_Combat/UI",
-			"Valheim/Variant_SideScrolling",
-			"Valheim/Variant_SideScrolling/AI",
-			"Valheim/Variant_SideScrolling/Gameplay",
-			"Valheim/Variant_SideScrolling/Interfaces",
-			"Valheim/Variant_SideScrolling/UI"
+		//	"Valheim/Variant_Platforming",
+		//	"Valheim/Variant_Platforming/Animation",
+		//	"Valheim/Variant_Combat",
+		//	"Valheim/Variant_Combat/AI",
+		//	"Valheim/Variant_Combat/Animation",
+		//	"Valheim/Variant_Combat/Gameplay",
+		//	"Valheim/Variant_Combat/Interfaces",
+		//	"Valheim/Variant_Combat/UI",
+		//	"Valheim/Variant_SideScrolling",
+		//	"Valheim/Variant_SideScrolling/AI",
+		//	"Valheim/Variant_SideScrolling/Gameplay",
+		//	"Valheim/Variant_SideScrolling/Interfaces",
+		//	"Valheim/Variant_SideScrolling/UI"
 		});
 
 		// Uncomment if you are using Slate UI

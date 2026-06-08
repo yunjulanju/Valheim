@@ -18,6 +18,8 @@
 
 #include "Kismet/GameplayStatics.h"
 #include <Monster/Monster.h>
+#include <Item/ItemBase.h>
+#include <Item/Sword.h>
 
 
 // Sets default values
@@ -34,14 +36,18 @@ AArcher::AArcher()
 
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
-	CameraBoom->TargetArmLength = 300.0f;
-	CameraBoom->SocketOffset = FVector(0,0,80);
+	CameraBoom->TargetArmLength = 400.0f;
+	CameraBoom->SocketOffset = FVector(0,0,100);
 	CameraBoom->bUsePawnControlRotation = true;
 	CameraBoom->bDoCollisionTest = false;
 
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	FollowCamera->bUsePawnControlRotation = false;
+
+	SwordMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SwordMesh"));
+	SwordMesh->SetupAttachment(GetMesh(), FName("RightHandSocket"));
+	SwordMesh->SetVisibility(false);
 
 	HP = MaxHP;
 }
@@ -95,6 +101,9 @@ void AArcher::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 		// Attacking
 		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Started, this, &AArcher::CallAttack);
+
+		// Interacting
+		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &AArcher::Interaction);
 		
 	}
 	else
@@ -139,6 +148,82 @@ void AArcher::StartCrouch()
 void AArcher::StopCrouch()
 {
 	UnCrouch();
+}
+
+void AArcher::Interaction()
+{
+	APlayerController* PC = Cast<APlayerController>(GetController());
+	if (!PC) return;
+
+	float InteractDistance = 1000.0f;
+	FVector CameraLocation;
+	FRotator CameraRotation;
+	PC->GetPlayerViewPoint(CameraLocation, CameraRotation);
+
+	FVector Start = CameraLocation;
+	FVector End = Start + CameraRotation.Vector() * InteractDistance;
+
+	FHitResult HitResult;
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(this); // 자기 자신 무시
+
+	bool bHit = GetWorld()->LineTraceSingleByChannel(
+		HitResult,
+		Start,
+		End,
+		ECC_WorldDynamic
+	);
+
+	DrawDebugLine(
+		GetWorld(),Start,End,FColor::Green,false,1.f,0,1.f);
+
+	if (bHit)
+	{
+		AItemBase* HitItem = Cast<AItemBase>(HitResult.GetActor());
+		if (HitItem)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("ItemCategory: %s"),
+				*UEnum::GetValueAsString(HitItem->ItemCategory));
+
+			switch (HitItem->ItemCategory)
+			{
+			case EItemCategory::Weapon:
+			{
+				ASword* HitSword = Cast<ASword>(HitItem);
+				if (HitSword)
+				{
+					UE_LOG(LogTemp, Warning, TEXT("HitSword"));
+					SwordMesh->SetVisibility(true);
+					HitSword->PickItem();
+				}
+			}
+				break;
+			default:
+				break;
+			}
+		}
+
+		//DebugLine
+		DrawDebugPoint(GetWorld(), HitResult.ImpactPoint, 10.f, FColor::Red, false, 1.f);
+		DrawDebugLine(GetWorld(), Start, HitResult.ImpactPoint, FColor::Red, false, 1.f, 0, 1.f);
+	}
+
+}
+
+void AArcher::AttachWeapon(ASword* Sword)
+{
+	if (!Sword || !GetMesh())
+	{
+		return;
+	}
+
+	Sword->ItemMesh->SetSimulatePhysics(false);
+	Sword->ItemMesh->AttachToComponent(GetMesh(),
+		FAttachmentTransformRules::SnapToTargetNotIncludingScale,
+		FName("RightHandSocket"));
+
+
+	Sword->PickItem();
 }
 
 void AArcher::CallAttackCollision()

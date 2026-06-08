@@ -49,13 +49,16 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-protected:
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+    EItemCategory ItemCategory;
+
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
     UStaticMeshComponent* ItemMesh;
+
+protected:
 
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
     class UBoxComponent* BoxCollision;
 
-    UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-    EItemCategory ItemCategory;
+
 };

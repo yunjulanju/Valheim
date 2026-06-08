@@ -42,16 +42,19 @@ float AMonster::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, 
 	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
 	HP -= DamageAmount;
-	UE_LOG(LogTemp, Warning, TEXT("Monster HP: %f"), HP);
 
 	if (HP <= 0)
 	{
+		HP = 0;
+		SetCurrentState(EMonsterState::Death);
 		if (MonsterAIController)
 		{
 			MonsterAIController->StopAI();
 		}
 		CallDeathAnimation();
 	}
+
+	UE_LOG(LogTemp, Warning, TEXT("Monster HP: %f"), HP);
 
 	return DamageAmount;
 }

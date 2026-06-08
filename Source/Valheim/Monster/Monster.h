@@ -11,7 +11,8 @@ enum class EMonsterState : uint8
 {
 	Idle,
 	Moving,
-	Attacking
+	Attacking,
+	Death
 };
 
 UCLASS()

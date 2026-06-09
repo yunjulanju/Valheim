@@ -20,7 +20,7 @@ void AMonster::BeginPlay()
 	Super::BeginPlay();
 
 	HP = MaxHP;
-	
+	MonsterAIController = Cast<AMonsterAIController>(GetController());
 }
 
 // Called every frame
@@ -49,6 +49,7 @@ float AMonster::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, 
 		SetCurrentState(EMonsterState::Death);
 		if (MonsterAIController)
 		{
+			UE_LOG(LogTemp, Warning, TEXT("MonsterAIController->StopAI()"));
 			MonsterAIController->StopAI();
 		}
 		CallDeathAnimation();

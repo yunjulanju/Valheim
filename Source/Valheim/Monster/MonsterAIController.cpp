@@ -52,6 +52,6 @@ void AMonsterAIController::StopAI()
     {
         return;
     }
-       
+    UE_LOG(LogTemp, Warning, TEXT("StopTree"));
     BTC->StopTree(EBTStopMode::Safe);
 }

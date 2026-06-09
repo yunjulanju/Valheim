@@ -89,16 +89,17 @@ protected:
 
 	float MaxHP = 100;
 	float HP;
+	float DefaultDamage = 10.0f;
+
+	bool bEquipWeapon = false;
 
 	class AArcherPC* PlayerController;
 
-protected:
 	//Animation
 	UPROPERTY(EditAnywhere, Category = "Anim")
 	TObjectPtr<UAnimMontage> AttackMontage;
 
-protected:
-
+	//Input
 	UPROPERTY(EditAnywhere, Category = "Input")
 	TObjectPtr<UInputMappingContext> DefaultMappingContext;
 

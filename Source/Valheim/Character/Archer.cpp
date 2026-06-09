@@ -152,6 +152,11 @@ void AArcher::StopCrouch()
 
 void AArcher::Interaction()
 {
+	if (bEquipWeapon)
+	{
+		return;
+	}
+
 	APlayerController* PC = Cast<APlayerController>(GetController());
 	if (!PC) return;
 
@@ -195,6 +200,7 @@ void AArcher::Interaction()
 					UE_LOG(LogTemp, Warning, TEXT("HitSword"));
 					SwordMesh->SetVisibility(true);
 					HitSword->PickItem();
+					bEquipWeapon = true;
 				}
 			}
 				break;
@@ -257,9 +263,19 @@ void AArcher::ServerCallAttackCollision_Implementation()
 				{
 					HitActors.Add(HitActor);
 					UE_LOG(LogTemp, Warning, TEXT("Hit Monster: %s"), *Monster->GetName());
+					float Damage;
+					if (bEquipWeapon)
+					{
+						Damage = DefaultDamage * 2;
+					}
+					else
+					{
+						Damage = DefaultDamage;
+					}
+					//UE_LOG(LogTemp, Warning, TEXT("Hit Damage: %f"), Damage);
 					UGameplayStatics::ApplyDamage(
 						Monster,
-						10.f,
+						Damage,
 						GetController(),
 						this,
 						UDamageType::StaticClass() // 데미지 타입

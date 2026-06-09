@@ -24,6 +24,10 @@ void AItemBase::BeginPlay()
 	
 }
 
+void AItemBase::SetInfo()
+{
+}
+
 // Called every frame
 void AItemBase::Tick(float DeltaTime)
 {

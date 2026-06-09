@@ -30,6 +30,9 @@ struct FItemBaseRow : public FTableRowBase
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     TSubclassOf<AItemBase> ItemClass;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    int MaxStackSize = 99;
 };
 
 UCLASS()
@@ -45,9 +48,13 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+    void SetInfo();
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+    //Property ///////
 
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
     EItemCategory ItemCategory;

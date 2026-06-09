@@ -10,8 +10,10 @@ UENUM(BlueprintType)
 enum class EMonsterState : uint8
 {
 	Idle,
-	Moving,
-	Attacking
+	Patrol,
+	Chase,
+	Attack,
+	Death
 };
 
 UCLASS()
@@ -65,7 +67,7 @@ public:
 ///////////////////////////////////////////////////PRPOPERTY
 protected:
 	UPROPERTY(BlueprintReadWrite, Category = "State")
-	EMonsterState CurrentState = EMonsterState::Idle;
+	EMonsterState CurrentState = EMonsterState::Patrol;
 
 	float MaxHP = 20.0f;
 

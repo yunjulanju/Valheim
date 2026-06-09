@@ -34,6 +34,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	float Speed;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
+	bool bIsMoving;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "State")
 	EMonsterState CurrentState = EMonsterState::Idle;
 

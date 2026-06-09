@@ -23,10 +23,10 @@ struct FItemBaseRow : public FTableRowBase
     FName ItemName;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    EItemCategory ItemCategory;
+    EItemCategory ItemCategory = EItemCategory::Etc;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    UTexture2D* ItemImage;
+    UTexture2D* ItemImage = nullptr;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     TSubclassOf<AItemBase> ItemClass;

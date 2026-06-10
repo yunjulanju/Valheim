@@ -4,42 +4,16 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Data/ItemDataStruct.h"
 #include "ItemBase.generated.h"
 
-UENUM(BlueprintType)
-enum class EItemCategory : uint8
-{
-    Weapon      UMETA(DisplayName = "Weapon"),
-    Consumable  UMETA(DisplayName = "Consumable"),
-    Etc         UMETA(DisplayName = "Etc")
-};
-
-USTRUCT(BlueprintType)
-struct FItemBaseRow : public FTableRowBase
-{
-    GENERATED_BODY()
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    FName ItemName;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    EItemCategory ItemCategory;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    UTexture2D* ItemImage;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    TSubclassOf<AItemBase> ItemClass;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    int MaxStackSize = 99;
-};
 
 UCLASS()
 class VALHEIM_API AItemBase : public AActor
 {
 	GENERATED_BODY()
-	
+
+    //------------------------------Function ////
 public:	
 	// Sets default values for this actor's properties
 	AItemBase();
@@ -48,21 +22,30 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-    void SetInfo();
-
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-    //Property ///////
+    FORCEINLINE bool IsStackable() const { return ItemData && ItemData->NumericData.bIsStackable; };
 
+    FORCEINLINE bool IsFullStack() const { return ItemData && Quantity == ItemData->NumericData.MaxStackSize; };
+
+    void SetQuantity(const int32 NewQuantity);
+
+    //------------------------------Property ////
+
+    //Data
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    FDataTableRowHandle ItemDataRowHandle;
+    FItemBaseRow* ItemData = nullptr;
+
+    //Item
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-    EItemCategory ItemCategory;
+    int32 Quantity = 1;
 
+    //Component
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
     UStaticMeshComponent* ItemMesh;
-
-protected:
 
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
     class UBoxComponent* BoxCollision;

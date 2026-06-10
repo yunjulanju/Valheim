@@ -21,17 +21,25 @@ AItemBase::AItemBase()
 void AItemBase::BeginPlay()
 {
 	Super::BeginPlay();
-	
-}
 
-void AItemBase::SetInfo()
-{
+	ItemData = ItemDataRowHandle.GetRow<FItemBaseRow>(TEXT("ItemBase"));
 }
 
 // Called every frame
 void AItemBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+}
+
+void AItemBase::SetQuantity(const int32 NewQuantity)
+{
+	if (NewQuantity == Quantity)
+	{
+		return;
+	}
+
+	Quantity = FMath::Clamp(NewQuantity, 1, ItemData->NumericData.MaxStackSize);
 
 }
 

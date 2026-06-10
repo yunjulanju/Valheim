@@ -188,9 +188,9 @@ void AArcher::Interaction()
 		if (HitItem)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("ItemCategory: %s"),
-				*UEnum::GetValueAsString(HitItem->ItemCategory));
+				*UEnum::GetValueAsString(HitItem->ItemData->ItemCategory));
 
-			switch (HitItem->ItemCategory)
+			switch (HitItem->ItemData->ItemCategory)
 			{
 			case EItemCategory::Weapon:
 			{

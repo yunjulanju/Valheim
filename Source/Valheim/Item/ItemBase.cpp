@@ -3,6 +3,7 @@
 
 #include "Item/ItemBase.h"
 #include "Components/BoxComponent.h"
+#include "ItemDataBase.h"
 
 // Sets default values
 AItemBase::AItemBase()
@@ -29,17 +30,6 @@ void AItemBase::BeginPlay()
 void AItemBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-}
-
-void AItemBase::SetQuantity(const int32 NewQuantity)
-{
-	if (NewQuantity == Quantity)
-	{
-		return;
-	}
-
-	Quantity = FMath::Clamp(NewQuantity, 1, ItemData->NumericData.MaxStackSize);
 
 }
 

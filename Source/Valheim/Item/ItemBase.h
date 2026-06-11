@@ -26,12 +26,6 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-    FORCEINLINE bool IsStackable() const { return ItemData && ItemData->NumericData.bIsStackable; };
-
-    FORCEINLINE bool IsFullStack() const { return ItemData && Quantity == ItemData->NumericData.MaxStackSize; };
-
-    void SetQuantity(const int32 NewQuantity);
-
     //------------------------------Property ////
 
     //Data

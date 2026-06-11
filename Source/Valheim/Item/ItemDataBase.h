@@ -16,22 +16,53 @@ class VALHEIM_API UItemDataBase : public UObject
 	GENERATED_BODY()
 public:
     //------------------------------Function ////
+    UItemDataBase();
 
-	FORCEINLINE bool IsStackable() const { return ItemData && ItemData->NumericData.bIsStackable; };
+    UItemDataBase* CreateItemCopy() const;
 
-	FORCEINLINE bool IsFullStack() const { return ItemData && Quantity == ItemData->NumericData.MaxStackSize; };
+    UFUNCTION()
+    FORCEINLINE bool IsStackable() const { return NumericData.bIsStackable; };
 
+    UFUNCTION()
+    FORCEINLINE bool IsFullStack() const { return  Quantity == NumericData.MaxStackSize; };
+
+    UFUNCTION()
 	void SetQuantity(const int32 NewQuantity);
+
+    //Use Funtion? - Interface function
 
     //------------------------------Property ////
 
 //Data
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    /*UPROPERTY(EditAnywhere, BlueprintReadWrite)
     FDataTableRowHandle ItemDataRowHandle;
-    FItemBaseRow* ItemData = nullptr;
+    FItemBaseRow* ItemData = nullptr;*/
 
     //Item
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+    FName  ItemID;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+    FItemTextData TextData;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+    EItemCategory ItemCategory;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+    FItemAssetData AssetData;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+    FItemNumericData NumericData;
+
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
     int32 Quantity = 1;
+
+protected:
+
+    bool operator ==(const FName& OtherID) const
+    {
+        return this->ItemID == OtherID;
+    }
 	
 };

@@ -14,9 +14,9 @@ AMonsterAIController::AMonsterAIController()
 
     // Sight Config 설정
     SightConfig = CreateDefaultSubobject<UAISenseConfig_Sight>(TEXT("SightConfig"));
-    SightConfig->SightRadius = 5000.f;          // 시야 범위
-    SightConfig->LoseSightRadius = 6200.f;       // 잃는 범위    
-    SightConfig->PeripheralVisionAngleDegrees = 120.f; // 시야각
+    SightConfig->SightRadius = 500;          // 시야 범위
+    SightConfig->LoseSightRadius = 600;       // 잃는 범위    
+    SightConfig->PeripheralVisionAngleDegrees = 100; // 시야각
     SightConfig->SetMaxAge(2.f);                 // 기억 유지 시간
     SightConfig->DetectionByAffiliation.bDetectEnemies = true;
     SightConfig->DetectionByAffiliation.bDetectNeutrals = true;

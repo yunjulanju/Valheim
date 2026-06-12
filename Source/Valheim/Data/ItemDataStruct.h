@@ -35,7 +35,7 @@ struct FItemAssetData : public FTableRowBase
     UTexture2D* ItemImage;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    TSubclassOf<AItemBase> ItemClass;
+    UStaticMesh* ItemMesh;
 };
 
 USTRUCT(BlueprintType)

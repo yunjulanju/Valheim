@@ -187,7 +187,7 @@ void AArcher::Interaction()
 		AItemBase* HitItem = Cast<AItemBase>(HitResult.GetActor());
 		if (HitItem)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("ItemCategory: %s"),
+			/*UE_LOG(LogTemp, Warning, TEXT("ItemCategory: %s"),
 				*UEnum::GetValueAsString(HitItem->ItemData->ItemCategory));
 
 			switch (HitItem->ItemData->ItemCategory)
@@ -206,7 +206,7 @@ void AArcher::Interaction()
 				break;
 			default:
 				break;
-			}
+			}*/
 		}
 
 		//DebugLine
@@ -223,10 +223,10 @@ void AArcher::AttachWeapon(ASword* Sword)
 		return;
 	}
 
-	Sword->ItemMesh->SetSimulatePhysics(false);
+	/*Sword->ItemMesh->SetSimulatePhysics(false);
 	Sword->ItemMesh->AttachToComponent(GetMesh(),
 		FAttachmentTransformRules::SnapToTargetNotIncludingScale,
-		FName("RightHandSocket"));
+		FName("RightHandSocket"));*/
 
 
 	Sword->PickItem();

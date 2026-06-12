@@ -34,9 +34,6 @@ public:
     //------------------------------Property ////
 
 //Data
-    /*UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    FDataTableRowHandle ItemDataRowHandle;
-    FItemBaseRow* ItemData = nullptr;*/
 
     //Item
 

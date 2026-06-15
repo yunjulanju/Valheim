@@ -15,24 +15,31 @@ void AArcherHUD::BeginPlay()
         {
             MainWidget->AddToViewport();
             MainWidget->SetVisibility(ESlateVisibility::Hidden);
-        }        
+        }
     }
-
 }
 
-void AArcherHUD::ToggleInventoryPannel()
+void AArcherHUD::ToggleMainWidget()
 {
     if (!MainWidget)
     {
         return;
     }
 
-    if (MainWidget->IsVisible())
+    if (bIsMenuVisible)
     {
+        bIsMenuVisible = false;
         MainWidget->SetVisibility(ESlateVisibility::Hidden);
+        const FInputModeGameOnly InputMode;
+        GetOwningPlayerController()->SetInputMode(InputMode);
+        GetOwningPlayerController()->SetShowMouseCursor(false);
     }
     else
     {
+        bIsMenuVisible = true;
         MainWidget->SetVisibility(ESlateVisibility::Visible);
+        const FInputModeGameAndUI InputMode;
+        GetOwningPlayerController()->SetInputMode(InputMode);
+        GetOwningPlayerController()->SetShowMouseCursor(true);
     }
 }

@@ -13,8 +13,8 @@ enum class EItemAddResult : uint8
 {
 	NoItemAdded UMETA(DisplayName = "No Item added"),
 	PartialItemAdded UMETA(DisplayName = "Partial amount of Item added"),
-	AllItemAdded UMETA(DisplayName = "All of Item added"),
-}
+	AllItemAdded UMETA(DisplayName = "All of Item added")
+};
 
 USTRUCT(BlueprintType)
 struct FItemAddResult

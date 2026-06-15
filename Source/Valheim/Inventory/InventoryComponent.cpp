@@ -110,6 +110,8 @@ FItemAddResult UInventoryComponent::HandleNoneStackableItems(UItemDataBase* Inpu
 int32 UInventoryComponent::HandleStackableItems(UItemDataBase* InputItem, int32 RequestedAddAmount)
 {
 
+	
+	return 0;
 }
 
 FItemAddResult UInventoryComponent::HandleAddItem(UItemDataBase* InputItem)
@@ -127,15 +129,15 @@ FItemAddResult UInventoryComponent::HandleAddItem(UItemDataBase* InputItem)
 
 		if (StackableAmountAdded == InitialRequestedAddAmount)
 		{
-			//return added all result
+			return FItemAddResult::AddedAll(InitialRequestedAddAmount);
 		}
 		if (StackableAmountAdded < InitialRequestedAddAmount && StackableAmountAdded >0)
 		{
-			//return added partial result
+			return FItemAddResult::AddedPartial(InitialRequestedAddAmount);
 		}
 		if (StackableAmountAdded <= 0)
 		{
-			//return added none result
+			return FItemAddResult::AddedNone();
 		}
 	}
 

@@ -21,6 +21,7 @@
 #include <Item/ItemBase.h>
 #include <Item/Sword.h>
 #include "Inventory/InventoryComponent.h"
+#include "UserInterface/ArcherHUD.h"
 
 
 // Sets default values
@@ -74,6 +75,7 @@ void AArcher::BeginPlay()
 				Subsystem->AddMappingContext(DefaultMappingContext, 0);
 			}
 		}
+		HUD = Cast<AArcherHUD>(PC->GetHUD());
 	}
 }
 
@@ -109,6 +111,10 @@ void AArcher::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 		// Interacting
 		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &AArcher::Interaction);
+
+		// MenuToggle
+		EnhancedInputComponent->BindAction(MenuAction
+			, ETriggerEvent::Started, this, &AArcher::ToggleMenuWidget);
 		
 	}
 	else
@@ -155,6 +161,11 @@ void AArcher::StopCrouch()
 	UnCrouch();
 }
 
+void AArcher::ToggleMenuWidget()
+{
+	HUD->ToggleMainWidget();
+}
+
 void AArcher::Interaction()
 {
 	if (bEquipWeapon)
@@ -192,6 +203,8 @@ void AArcher::Interaction()
 		AItemBase* HitItem = Cast<AItemBase>(HitResult.GetActor());
 		if (HitItem)
 		{
+
+			HitItem->TakePickUp(this);
 			/*UE_LOG(LogTemp, Warning, TEXT("ItemCategory: %s"),
 				*UEnum::GetValueAsString(HitItem->ItemData->ItemCategory));
 

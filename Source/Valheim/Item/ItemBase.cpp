@@ -116,8 +116,10 @@ void AItemBase::TakePickUp(const AArcher* Taker)
 					
 					break;
 				case EItemAddResult::PartialItemAdded:
+					
 					break;
 				case EItemAddResult::AllItemAdded:
+					Destroy();
 					break;
 				}
 			}

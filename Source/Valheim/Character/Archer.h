@@ -66,6 +66,8 @@ protected:
 
 	void StopCrouch();
 
+	void ToggleMenuWidget();
+
 	void CallAttack();
 	UFUNCTION(Server, Reliable)
 	void ServerAttack();
@@ -101,6 +103,8 @@ protected:
 
 	class AArcherPC* PlayerController;
 
+	class AArcherHUD* HUD;
+
 	//Animation
 	UPROPERTY(EditAnywhere, Category = "Anim")
 	TObjectPtr<UAnimMontage> AttackMontage;
@@ -135,4 +139,8 @@ protected:
 	/** Interaction Input Action */
 	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* InteractAction;
+
+	/** Attack Input Action */
+	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputAction* MenuAction;
 };

@@ -17,7 +17,7 @@ class VALHEIM_API AArcherHUD : public AHUD
 public:
 	virtual void BeginPlay() override;
 
-	void ToggleInventoryPannel();
+	void ToggleMainWidget();
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Widget")
 	TSubclassOf<UUserWidget> MainWidgetClass;
@@ -25,6 +25,7 @@ public:
 	UPROPERTY()
 	UMainWidget* MainWidget;
 
+	bool bIsMenuVisible = false;
 
 	
 };

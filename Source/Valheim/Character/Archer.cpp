@@ -20,6 +20,7 @@
 #include <Monster/Monster.h>
 #include <Item/ItemBase.h>
 #include <Item/Sword.h>
+#include "Inventory/InventoryComponent.h"
 
 
 // Sets default values
@@ -50,6 +51,10 @@ AArcher::AArcher()
 	SwordMesh->SetVisibility(false);
 
 	HP = MaxHP;
+
+	PlayerInventory = CreateDefaultSubobject<UInventoryComponent>(TEXT("Inventory"));
+	PlayerInventory->SetSlotsCapacity(20);
+
 }
 
 // Called when the game starts or when spawned

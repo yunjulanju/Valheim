@@ -10,6 +10,7 @@
 /**
  * 
  */
+class UInventoryComponent;
 UCLASS()
 class VALHEIM_API UItemDataBase : public UObject
 {
@@ -29,12 +30,19 @@ public:
     UFUNCTION()
 	void SetQuantity(const int32 NewQuantity);
 
+    void ResetItemFlags();
+
     //Use Funtion? - Interface function
 
     //------------------------------Property ////
 
 //Data
 
+    UPROPERTY()
+    UInventoryComponent* OwningInventory;
+
+    bool bIsCopy;
+    bool bIsPickup;
     //Item
 
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite)

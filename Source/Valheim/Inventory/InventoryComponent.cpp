@@ -65,30 +65,100 @@ UItemDataBase* UInventoryComponent::FindNextPartialStack(UItemDataBase* ItemIn) 
 	
 }
 
-void UInventoryComponent::RemoveSingleInstanceOfItem(UItemDataBase* ItemIn)
+void UInventoryComponent::RemoveSingleInstanceOfItem(UItemDataBase* ItemToRemove)
 {
+	InventoryContents.RemoveSingle(ItemToRemove);
+	OnInventoryUpdated.Broadcast();
 }
 
 int32 UInventoryComponent::RemoveAmountOfItem(UItemDataBase* ItemIn, int32 DesiredAmountToRemove)
 {
-	return int32();
+	const int32 ActualAmountToRemove = FMath::Min(DesiredAmountToRemove, ItemIn->Quantity);
+	ItemIn->SetQuantity(ItemIn->Quantity - ActualAmountToRemove);
+	OnInventoryUpdated.Broadcast();
+
+	return ActualAmountToRemove;
 }
 
 void UInventoryComponent::SplitExistingStack(UItemDataBase* ItemIn, const int32 AmountToSplit)
 {
+	if (!(InventoryContents.Num() + 1 > InventorySlotsCapacity))
+	{
+		RemoveAmountOfItem(ItemIn, AmountToSplit);
+		AddNewItem(ItemIn, AmountToSplit);
+	}
 }
 
-int32 UInventoryComponent::HandleStackableItems(UItemDataBase*, int32 RequestedAddAmount)
+int32 UInventoryComponent::CalculateNumberForFullStack(UItemDataBase* StackableItem, int32 InitialRequestedAddAmount)
 {
-	return int32();
+	const int32 AddAmountToMakeFullStack = StackableItem->NumericData.MaxStackSize - StackableItem->Quantity;
+	return FMath::Min(InitialRequestedAddAmount, AddAmountToMakeFullStack);
 }
 
-int32 UInventoryComponent::CalculateNumberForFullStack(UItemDataBase* ExistingItem, int32 InitialRequestedAddAmount)
+FItemAddResult UInventoryComponent::HandleNoneStackableItems(UItemDataBase* InputItem, int32 RequestedAddAmount)
 {
-	return int32();
+	if (InventoryContents.Num() + 1 > InventorySlotsCapacity)
+	{
+		return FItemAddResult::AddedNone();
+	}
+
+	AddNewItem(InputItem, RequestedAddAmount);
+
+	return FItemAddResult::AddedAll(RequestedAddAmount);
+}
+
+int32 UInventoryComponent::HandleStackableItems(UItemDataBase* InputItem, int32 RequestedAddAmount)
+{
+
+}
+
+FItemAddResult UInventoryComponent::HandleAddItem(UItemDataBase* InputItem)
+{
+	if (GetOwner())
+	{
+		const int32 InitialRequestedAddAmount = InputItem->Quantity;
+
+		if (!InputItem->NumericData.bIsStackable)
+		{
+			return HandleNoneStackableItems(InputItem, InitialRequestedAddAmount);
+		}
+
+		const int32 StackableAmountAdded = HandleStackableItems(InputItem, InitialRequestedAddAmount);
+
+		if (StackableAmountAdded == InitialRequestedAddAmount)
+		{
+			//return added all result
+		}
+		if (StackableAmountAdded < InitialRequestedAddAmount && StackableAmountAdded >0)
+		{
+			//return added partial result
+		}
+		if (StackableAmountAdded <= 0)
+		{
+			//return added none result
+		}
+	}
+
+	return FItemAddResult();
 }
 
 void UInventoryComponent::AddNewItem(UItemDataBase* Item, int32 AmountToAdd)
 {
-}
+	UItemDataBase* NewItem;
 
+	if (Item->bIsCopy || Item->bIsPickup)
+	{ //땅에 있는 것을 줍는 거라 copy가 필요 없음.
+		NewItem = Item;
+		NewItem->ResetItemFlags();
+	}
+	else
+	{
+		NewItem = Item->CreateItemCopy();
+	}
+
+	NewItem->OwningInventory = this;
+	NewItem->SetQuantity(AmountToAdd);
+
+	InventoryContents.Add(NewItem);
+	OnInventoryUpdated.Broadcast();
+}

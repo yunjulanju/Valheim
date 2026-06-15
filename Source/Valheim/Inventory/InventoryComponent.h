@@ -8,6 +8,53 @@
 
 DECLARE_MULTICAST_DELEGATE(FOnInventoryUpdated);
 
+UENUM(BlueprintType)
+enum class EItemAddResult : uint8
+{
+	NoItemAdded UMETA(DisplayName = "No Item added"),
+	PartialItemAdded UMETA(DisplayName = "Partial amount of Item added"),
+	AllItemAdded UMETA(DisplayName = "All of Item added"),
+}
+
+USTRUCT(BlueprintType)
+struct FItemAddResult
+{
+	GENERATED_BODY()
+
+	FItemAddResult() : ActualAmountAdded(0), OperationResult(EItemAddResult::NoItemAdded)
+	{};
+	
+	UPROPERTY(BlueprintReadOnly)
+	int32 ActualAmountAdded;
+	UPROPERTY(BlueprintReadOnly)
+	EItemAddResult OperationResult;
+
+	static FItemAddResult AddedNone()
+	{
+		FItemAddResult AddedNoneResult;
+		AddedNoneResult.ActualAmountAdded = 0;
+		AddedNoneResult.OperationResult = EItemAddResult::NoItemAdded;
+		return AddedNoneResult;
+	}
+
+	static FItemAddResult AddedPartial(const int32 PartialAmountAdded)
+	{
+		FItemAddResult PartialAddedResult;
+		PartialAddedResult.ActualAmountAdded = PartialAmountAdded;
+		PartialAddedResult.OperationResult = EItemAddResult::PartialItemAdded;
+		return PartialAddedResult;
+	}
+
+	static FItemAddResult AddedAll(const int32 AmountAdded)
+	{
+		FItemAddResult AddedAllResult;
+		AddedAllResult.ActualAmountAdded = AmountAdded;
+		AddedAllResult.OperationResult = EItemAddResult::AllItemAdded;
+		return AddedAllResult;
+	}
+
+};
+
 class UItemDataBase;
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class VALHEIM_API UInventoryComponent : public UActorComponent
@@ -20,7 +67,6 @@ public:
 
 	FOnInventoryUpdated OnInventoryUpdated;
 
-protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 	UFUNCTION()
@@ -33,7 +79,7 @@ protected:
 	UItemDataBase* FindNextPartialStack(UItemDataBase* ItemIn) const;
 
 	UFUNCTION()
-	void RemoveSingleInstanceOfItem(UItemDataBase* ItemIn);
+	void RemoveSingleInstanceOfItem(UItemDataBase* ItemToRemove);
 
 	UFUNCTION()
 	int32 RemoveAmountOfItem(UItemDataBase* ItemIn, int32 DesiredAmountToRemove);
@@ -51,16 +97,24 @@ protected:
 	FORCEINLINE void SetSlotsCapacity(const int32 NewSlotsCapacity) {InventorySlotsCapacity = NewSlotsCapacity;};
 
 	UFUNCTION()
-	int32 HandleStackableItems(UItemDataBase* ExistingItem, int32 RequestedAddAmount);
+	FItemAddResult HandleAddItem(UItemDataBase* InputItem);
 
 	UFUNCTION()
-	int32 CalculateNumberForFullStack(UItemDataBase* ExistingItem, int32 InitialRequestedAddAmount);
+	FItemAddResult HandleNoneStackableItems(UItemDataBase* InputItem, int32 RequestedAddAmount);
+
+	UFUNCTION()
+	int32 HandleStackableItems(UItemDataBase* InputItem, int32 RequestedAddAmount);
+
+
+	UFUNCTION()
+	int32 CalculateNumberForFullStack(UItemDataBase* StackableItem, int32 InitialRequestedAddAmount);
 
 	UFUNCTION()
 	void AddNewItem(UItemDataBase* Item, int32 AmountToAdd);
 
 
 
+protected:
 	// Property ///////////////////////////////////////////////
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
 	int32 InventorySlotsCapacity;

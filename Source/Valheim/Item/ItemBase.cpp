@@ -5,6 +5,7 @@
 #include "Components/BoxComponent.h"
 #include "ItemDataBase.h"
 #include <Character/Archer.h>
+#include "Inventory/InventoryComponent.h"
 
 // Sets default values
 AItemBase::AItemBase()
@@ -105,6 +106,21 @@ void AItemBase::TakePickUp(const AArcher* Taker)
 		if (ItemReference)
 		{
 			//인벤토리
+			if(UInventoryComponent* PlayerInventory = Taker->GetInventory())
+			{
+				const FItemAddResult AddResult = PlayerInventory->HandleAddItem(ItemReference);
+
+				switch (AddResult.OperationResult)
+				{
+				case EItemAddResult::NoItemAdded:
+					
+					break;
+				case EItemAddResult::PartialItemAdded:
+					break;
+				case EItemAddResult::AllItemAdded:
+					break;
+				}
+			}
 		}
 	}	
 }

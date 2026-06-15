@@ -14,6 +14,7 @@ struct FInputActionValue;
 class UAnimMontage;
 class ASword;
 class UStaticMeshComponent;
+class UInventoryComponent;
 
 UCLASS()
 class VALHEIM_API AArcher : public ACharacter
@@ -32,6 +33,9 @@ protected:
 	/** Sword Component */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	UStaticMeshComponent* SwordMesh;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UInventoryComponent* PlayerInventory;
 
 public:
 	// Sets default values for this character's properties
@@ -82,6 +86,8 @@ protected:
 public:
 	FORCEINLINE bool IsAttacking() const { return bIsAttacking; }
 	FORCEINLINE void SetIsAttacking(bool bNewAttacking) { bIsAttacking = bNewAttacking; }
+
+	FORCEINLINE UInventoryComponent* GetInventory() const { return PlayerInventory; }
 
 	//---------------Property
 

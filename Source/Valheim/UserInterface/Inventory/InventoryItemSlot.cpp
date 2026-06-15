@@ -14,6 +14,7 @@ void UInventoryItemSlot::NativeOnInitialized()
 	if (ToolTipClass)
 	{
 		UInventoryToolTip* ToolTip = CreateWidget<UInventoryToolTip>(this, ToolTipClass);
+		ToolTip->InventorySlotBeingHovered = this;
 		if (ToolTip)
 		{
 			SetToolTip(ToolTip);

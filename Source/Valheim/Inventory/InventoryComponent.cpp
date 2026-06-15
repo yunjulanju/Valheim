@@ -109,9 +109,43 @@ FItemAddResult UInventoryComponent::HandleNoneStackableItems(UItemDataBase* Inpu
 
 int32 UInventoryComponent::HandleStackableItems(UItemDataBase* InputItem, int32 RequestedAddAmount)
 {
+	int32 AmountToDistribute = RequestedAddAmount;
 
-	
-	return 0;
+	// 기존 부분 스택에 채워넣기
+	UItemDataBase* ExistingItem = FindNextPartialStack(InputItem);
+
+	while (ExistingItem)
+	{
+		const int32 AmountToMakeFullStack = CalculateNumberForFullStack(ExistingItem, AmountToDistribute);
+
+		ExistingItem->SetQuantity(ExistingItem->Quantity + AmountToMakeFullStack);
+		AmountToDistribute -= AmountToMakeFullStack;
+
+		if (AmountToDistribute <= 0)
+		{
+			OnInventoryUpdated.Broadcast();
+			return RequestedAddAmount; // 전부 분배 완료
+		}
+
+		ExistingItem = FindNextPartialStack(InputItem);
+	}
+
+	// 새 슬롯에 추가 (슬롯 여유가 있을 때)
+	while (AmountToDistribute > 0 && InventoryContents.Num() + 1 <= InventorySlotsCapacity)
+	{
+		const int32 AmountForNewStack = FMath::Min(AmountToDistribute, InputItem->NumericData.MaxStackSize);
+
+		UItemDataBase* NewStackItem = InputItem->CreateItemCopy();
+		NewStackItem->SetQuantity(AmountForNewStack);
+		InventoryContents.Add(NewStackItem);
+
+		AmountToDistribute -= AmountForNewStack;
+	}
+
+	OnInventoryUpdated.Broadcast();
+
+	// 실제로 인벤토리에 들어간 양 = 요청한 양 - 못 들어간 양
+	return RequestedAddAmount - AmountToDistribute;
 }
 
 FItemAddResult UInventoryComponent::HandleAddItem(UItemDataBase* InputItem)
@@ -122,21 +156,26 @@ FItemAddResult UInventoryComponent::HandleAddItem(UItemDataBase* InputItem)
 
 		if (!InputItem->NumericData.bIsStackable)
 		{
+			//UE_LOG(LogTemp, Warning, TEXT("HandleNoneStackableItems"))
 			return HandleNoneStackableItems(InputItem, InitialRequestedAddAmount);
 		}
 
+		//내가 주운 아이템과 넣어야 할 값을 
 		const int32 StackableAmountAdded = HandleStackableItems(InputItem, InitialRequestedAddAmount);
 
 		if (StackableAmountAdded == InitialRequestedAddAmount)
 		{
+			//UE_LOG(LogTemp, Warning, TEXT("HandleAddItem AddedAll"))
 			return FItemAddResult::AddedAll(InitialRequestedAddAmount);
 		}
 		if (StackableAmountAdded < InitialRequestedAddAmount && StackableAmountAdded >0)
 		{
+			//UE_LOG(LogTemp, Warning, TEXT("HandleAddItem AddedPartial"))
 			return FItemAddResult::AddedPartial(InitialRequestedAddAmount);
 		}
 		if (StackableAmountAdded <= 0)
 		{
+			//UE_LOG(LogTemp, Warning, TEXT("HandleAddItem AddedNone"))
 			return FItemAddResult::AddedNone();
 		}
 	}
@@ -146,6 +185,7 @@ FItemAddResult UInventoryComponent::HandleAddItem(UItemDataBase* InputItem)
 
 void UInventoryComponent::AddNewItem(UItemDataBase* Item, int32 AmountToAdd)
 {
+	//UE_LOG(LogTemp, Warning, TEXT("UInventoryComponent::AddNewItem"))
 	UItemDataBase* NewItem;
 
 	if (Item->bIsCopy || Item->bIsPickup)

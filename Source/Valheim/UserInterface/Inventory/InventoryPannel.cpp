@@ -38,8 +38,9 @@ void UInventoryPannel::RefreshInventory()
 		InventoryPannel->ClearChildren();
 		for (UItemDataBase* const& InventoryItem : InventoryReference->GetInventoryContents())
 		{
+			//UE_LOG(LogTemp, Warning, TEXT("InventoryReference->GetInventoryContents()"))
 			UInventoryItemSlot* ItemSlot = CreateWidget<UInventoryItemSlot>(this, InventorySlotClass);
-			//ItemSlot->SetItemReference(InventoryItem);
+			ItemSlot->SetItemReference(InventoryItem);
 
 			InventoryPannel->AddChildToWrapBox(ItemSlot);
 		}

@@ -115,13 +115,13 @@ void AItemBase::TakePickUp(const AArcher* Taker)
 				switch (AddResult.OperationResult)
 				{
 				case EItemAddResult::NoItemAdded:
-					UE_LOG(LogTemp, Warning, TEXT("NoItemAdded"))
+					//UE_LOG(LogTemp, Warning, TEXT("NoItemAdded"))
 					break;
 				case EItemAddResult::PartialItemAdded:
-					UE_LOG(LogTemp, Warning, TEXT("PartialItemAdded"))
+					//UE_LOG(LogTemp, Warning, TEXT("PartialItemAdded"))
 					break;
 				case EItemAddResult::AllItemAdded:
-					UE_LOG(LogTemp, Warning, TEXT("AllItemAdded"))
+					//UE_LOG(LogTemp, Warning, TEXT("AllItemAdded"))
 					Destroy();
 					break;
 				}

@@ -9,9 +9,19 @@
 /**
  * 
  */
+class UBorder;
+class UImage;
+class UTextBlock;
 UCLASS()
 class VALHEIM_API UDragItemVisual : public UUserWidget
 {
 	GENERATED_BODY()
-	
+public:
+	UPROPERTY(meta = (BindWidget))
+	UBorder* ItemBorder;
+	UPROPERTY(meta = (BindWidget))
+	UImage* ItemIcon;
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* ItemQuantity;
+
 };

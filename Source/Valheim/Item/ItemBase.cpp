@@ -10,7 +10,7 @@
 // Sets default values
 AItemBase::AItemBase()
 {
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
 	BoxCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxCollision"));
 	SetRootComponent(BoxCollision);
@@ -71,6 +71,8 @@ void AItemBase::InitializeItem(const TSubclassOf<UItemDataBase> BaseClass, const
 		ItemReference->NumericData = ItemData->NumericData;
 		ItemReference->TextData = ItemData->TextData;
 
+		UE_LOG(LogTemp, Warning, TEXT("%d"), InQuantity);
+
 		if (InQuantity <= 0)
 		{
 			ItemReference->SetQuantity(0);
@@ -113,17 +115,24 @@ void AItemBase::TakePickUp(const AArcher* Taker)
 				switch (AddResult.OperationResult)
 				{
 				case EItemAddResult::NoItemAdded:
-					
+					UE_LOG(LogTemp, Warning, TEXT("NoItemAdded"))
 					break;
 				case EItemAddResult::PartialItemAdded:
-					
+					UE_LOG(LogTemp, Warning, TEXT("PartialItemAdded"))
 					break;
 				case EItemAddResult::AllItemAdded:
+					UE_LOG(LogTemp, Warning, TEXT("AllItemAdded"))
 					Destroy();
 					break;
 				}
 			}
+			else {
+				UE_LOG(LogTemp, Warning, TEXT("PlayerInventory NO"))
+			}
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("ItemReference NO"))
 		}
 	}	
 }
-

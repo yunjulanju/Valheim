@@ -88,7 +88,10 @@ void AItemBase::InitializeItem(const TSubclassOf<UItemDataBase> BaseClass, const
 
 void AItemBase::InitiallizeDrop(UItemDataBase* ItemToDrop, const int32 InQuantity)
 {
-	ItemReference = ItemToDrop;
+	//UE_LOG(LogTemp, Warning, TEXT("AItemBase InitiallizeDrop - InQuantity %d"), InQuantity);
+	ItemReference = ItemToDrop->CreateItemCopy();
+	ItemReference->bIsPickup = true;
+
 	if (InQuantity <= 0)
 	{ 
 		ItemReference->SetQuantity(0);
@@ -110,6 +113,7 @@ void AItemBase::TakePickUp(const AArcher* Taker)
 			//인벤토리
 			if(UInventoryComponent* PlayerInventory = Taker->GetInventory())
 			{
+				ItemReference->bIsPickup = true;
 				const FItemAddResult AddResult = PlayerInventory->HandleAddItem(ItemReference);
 
 				switch (AddResult.OperationResult)

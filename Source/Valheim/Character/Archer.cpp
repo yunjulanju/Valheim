@@ -258,9 +258,11 @@ void AArcher::CallAttackCollision()
 
 void AArcher::DropItem(UItemDataBase* ItemToDrop, const int32 QuantityToDrop)
 {
+	UE_LOG(LogTemp, Warning, TEXT("OwningInventory: %s"),
+		ItemToDrop->OwningInventory ? TEXT("Valid") : TEXT("Nullptr"));
 	if (PlayerInventory->FindMatchingItem(ItemToDrop))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Archer DropItem - QuantityToDrop %d"), QuantityToDrop);
+		//UE_LOG(LogTemp, Warning, TEXT("Archer DropItem - QuantityToDrop %d"), QuantityToDrop);
 		FActorSpawnParameters SpawnParam;
 		SpawnParam.Owner = this;
 		SpawnParam.bNoFail = true;
@@ -270,7 +272,7 @@ void AArcher::DropItem(UItemDataBase* ItemToDrop, const int32 QuantityToDrop)
 		const FTransform SpawnTransform(GetActorRotation(), SpawnLocation);
 
 		const int32 RemovedQuantity = PlayerInventory->RemoveAmountOfItem(ItemToDrop, QuantityToDrop);
-		UE_LOG(LogTemp, Warning, TEXT("Archer DropItem - RemovedQuantity %d"), RemovedQuantity);
+		//UE_LOG(LogTemp, Warning, TEXT("Archer DropItem - RemovedQuantity %d"), RemovedQuantity);
 		AItemBase* PickUp = GetWorld()->SpawnActor<AItemBase>(AItemBase::StaticClass(), SpawnTransform, SpawnParam);
 
 		if (PickUp)

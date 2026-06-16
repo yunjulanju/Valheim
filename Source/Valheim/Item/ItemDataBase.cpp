@@ -30,10 +30,11 @@ UItemDataBase* UItemDataBase::CreateItemCopy() const
 
 void UItemDataBase::SetQuantity(const int32 NewQuantity)
 {
+	//UE_LOG(LogTemp, Warning, TEXT("UItemDataBase SetQuantity - NewQuantity %d"), NewQuantity);
 	if (Quantity != NewQuantity)
 	{
-		Quantity = FMath::Clamp(NewQuantity, 1, NumericData.MaxStackSize);
-
+		Quantity = FMath::Clamp(NewQuantity, 0, NumericData.MaxStackSize);
+		UE_LOG(LogTemp, Warning, TEXT("UItemDataBase SetQuantity - Clamp Quantity %d"), Quantity);
 		if(OwningInventory)
 		{
 			if (Quantity <= 0)

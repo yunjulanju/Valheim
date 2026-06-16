@@ -67,12 +67,17 @@ UItemDataBase* UInventoryComponent::FindNextPartialStack(UItemDataBase* ItemIn) 
 
 void UInventoryComponent::RemoveSingleInstanceOfItem(UItemDataBase* ItemToRemove)
 {
+	UE_LOG(LogTemp, Warning, TEXT("RemoveSingleInstanceOfItem - OwningInventory: %s"),
+		ItemToRemove->OwningInventory ? TEXT("Valid") : TEXT("Nullptr"));
 	InventoryContents.RemoveSingle(ItemToRemove);
 	OnInventoryUpdated.Broadcast();
 }
 
 int32 UInventoryComponent::RemoveAmountOfItem(UItemDataBase* ItemIn, int32 DesiredAmountToRemove)
 {
+	UE_LOG(LogTemp, Warning, TEXT("RemoveAmountOfItem - OwningInventory: %s"),
+		ItemIn->OwningInventory ? TEXT("Valid") : TEXT("Nullptr"));
+
 	const int32 ActualAmountToRemove = FMath::Min(DesiredAmountToRemove, ItemIn->Quantity);
 	ItemIn->SetQuantity(ItemIn->Quantity - ActualAmountToRemove);
 	OnInventoryUpdated.Broadcast();
@@ -136,6 +141,7 @@ int32 UInventoryComponent::HandleStackableItems(UItemDataBase* InputItem, int32 
 		const int32 AmountForNewStack = FMath::Min(AmountToDistribute, InputItem->NumericData.MaxStackSize);
 
 		UItemDataBase* NewStackItem = InputItem->CreateItemCopy();
+		NewStackItem->OwningInventory = this;
 		NewStackItem->SetQuantity(AmountForNewStack);
 		InventoryContents.Add(NewStackItem);
 
@@ -152,6 +158,9 @@ FItemAddResult UInventoryComponent::HandleAddItem(UItemDataBase* InputItem)
 {
 	if (GetOwner())
 	{
+		UE_LOG(LogTemp, Warning, TEXT("HandleAddItem - bIsStackable: %d"),
+			InputItem->NumericData.bIsStackable);
+
 		const int32 InitialRequestedAddAmount = InputItem->Quantity;
 
 		if (!InputItem->NumericData.bIsStackable)
@@ -188,6 +197,9 @@ void UInventoryComponent::AddNewItem(UItemDataBase* Item, int32 AmountToAdd)
 	//UE_LOG(LogTemp, Warning, TEXT("UInventoryComponent::AddNewItem"))
 	UItemDataBase* NewItem;
 
+	UE_LOG(LogTemp, Warning, TEXT("AddNewItem - bIsCopy: %d, bIsPickup: %d"),
+		Item->bIsCopy, Item->bIsPickup);
+
 	if (Item->bIsCopy || Item->bIsPickup)
 	{ //땅에 있는 것을 줍는 거라 copy가 필요 없음.
 		NewItem = Item;
@@ -200,6 +212,9 @@ void UInventoryComponent::AddNewItem(UItemDataBase* Item, int32 AmountToAdd)
 
 	NewItem->OwningInventory = this;
 	NewItem->SetQuantity(AmountToAdd);
+
+	UE_LOG(LogTemp, Warning, TEXT("AddNewItem - OwningInventory after set: %s"),
+		NewItem->OwningInventory ? TEXT("Valid") : TEXT("Nullptr"));
 
 	InventoryContents.Add(NewItem);
 	OnInventoryUpdated.Broadcast();

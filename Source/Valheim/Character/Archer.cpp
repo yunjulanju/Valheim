@@ -22,6 +22,7 @@
 #include <Item/Sword.h>
 #include "Inventory/InventoryComponent.h"
 #include "UserInterface/ArcherHUD.h"
+#include "Item/ItemDataBase.h"
 
 
 // Sets default values
@@ -255,6 +256,33 @@ void AArcher::CallAttackCollision()
 	ServerCallAttackCollision();
 }
 
+void AArcher::DropItem(UItemDataBase* ItemToDrop, const int32 QuantityToDrop)
+{
+	if (PlayerInventory->FindMatchingItem(ItemToDrop))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Archer DropItem - QuantityToDrop %d"), QuantityToDrop);
+		FActorSpawnParameters SpawnParam;
+		SpawnParam.Owner = this;
+		SpawnParam.bNoFail = true;
+		SpawnParam.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+
+		const FVector SpawnLocation{ GetActorLocation() + (GetActorForwardVector() * 50) };
+		const FTransform SpawnTransform(GetActorRotation(), SpawnLocation);
+
+		const int32 RemovedQuantity = PlayerInventory->RemoveAmountOfItem(ItemToDrop, QuantityToDrop);
+		UE_LOG(LogTemp, Warning, TEXT("Archer DropItem - RemovedQuantity %d"), RemovedQuantity);
+		AItemBase* PickUp = GetWorld()->SpawnActor<AItemBase>(AItemBase::StaticClass(), SpawnTransform, SpawnParam);
+
+		if (PickUp)
+		{
+			PickUp->InitiallizeDrop(ItemToDrop, RemovedQuantity);
+		}
+	}
+	else {
+		UE_LOG(LogTemp, Warning, TEXT("Item to drop was FindMatchingItem Null"));
+	}
+}
+ 
 void AArcher::ServerCallAttackCollision_Implementation()
 {
 	TArray<AActor*> HitActors;

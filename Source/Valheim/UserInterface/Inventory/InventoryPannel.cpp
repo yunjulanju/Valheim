@@ -8,6 +8,7 @@
 #include "Components/WrapBox.h"
 #include "Item/ItemDataBase.h"
 #include "UserInterface/Inventory/InventoryItemSlot.h"
+#include "ItemDragDropOperation.h"
 
 void UInventoryPannel::NativeOnInitialized()
 {
@@ -49,5 +50,12 @@ void UInventoryPannel::RefreshInventory()
 
 bool UInventoryPannel::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
 {
+	const UItemDragDropOperation* ItemDragDrop = Cast<UItemDragDropOperation>(InOperation);
+
+	if (ItemDragDrop->SourceItem && InventoryReference)
+	{
+		return true;
+	}
+
 	return false;
 }

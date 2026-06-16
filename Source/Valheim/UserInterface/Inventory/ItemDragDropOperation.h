@@ -9,9 +9,17 @@
 /**
  * 
  */
+class UItemDataBase;
+class UInventoryComponent;
 UCLASS()
 class VALHEIM_API UItemDragDropOperation : public UDragDropOperation
 {
 	GENERATED_BODY()
 	
+public:
+	UPROPERTY(VisibleAnywhere)
+	UItemDataBase* SourceItem;
+
+	UPROPERTY(VisibleAnywhere)
+	UInventoryComponent* SourceInventory;
 };

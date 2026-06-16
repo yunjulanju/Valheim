@@ -15,6 +15,7 @@ class UAnimMontage;
 class ASword;
 class UStaticMeshComponent;
 class UInventoryComponent;
+class UItemDataBase;
 
 UCLASS()
 class VALHEIM_API AArcher : public ACharacter
@@ -90,6 +91,9 @@ public:
 	FORCEINLINE void SetIsAttacking(bool bNewAttacking) { bIsAttacking = bNewAttacking; }
 
 	FORCEINLINE UInventoryComponent* GetInventory() const { return PlayerInventory; }
+
+	//Inventory
+	void DropItem(UItemDataBase* ItemToDrop, const int32 QuantityToDrop);
 
 	//---------------Property
 

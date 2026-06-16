@@ -18,7 +18,7 @@ public class Valheim : ModuleRules
 			"StateTreeModule",
 			"GameplayStateTreeModule",
 			"UMG",
-			"Slate" , "AIModule","GameplayTasks"
+			"Slate",   "SlateCore","AIModule","GameplayTasks"
         });
 
 		PrivateDependencyModuleNames.AddRange(new string[] { });

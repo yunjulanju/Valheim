@@ -9,9 +9,18 @@
 /**
  * 
  */
+class AArcher;
 UCLASS()
 class VALHEIM_API UMainWidget : public UUserWidget
 {
 	GENERATED_BODY()
+public:
+
+	virtual void NativeOnInitialized() override;
+	virtual void NativeConstruct() override;
+	virtual bool NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override;
+
+	UPROPERTY()
+	AArcher* PlayerCharacter;
 	
 };

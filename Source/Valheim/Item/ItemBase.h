@@ -23,7 +23,7 @@ public:
     // Called every frame
     virtual void Tick(float DeltaTime) override;
 
-    void InitializeItem(const TSubclassOf<UItemDataBase> BaseClass, const int32 InQuantity);
+    void InitializeItem(const int32 InQuantity);
 
     void InitiallizeDrop(UItemDataBase* ItemToDrop, const int32 InQuantity);
 

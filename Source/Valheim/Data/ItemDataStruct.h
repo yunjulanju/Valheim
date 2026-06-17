@@ -4,7 +4,7 @@
 #include "Engine/DataTable.h"
 #include "ItemDataStruct.generated.h" 
 
-class AItemBase;
+class UItemDataBase;
 
 UENUM(BlueprintType)
 enum class EItemCategory : uint8
@@ -12,6 +12,31 @@ enum class EItemCategory : uint8
     Weapon      UMETA(DisplayName = "Weapon"),
     Consumable  UMETA(DisplayName = "Consumable"),
     Etc         UMETA(DisplayName = "Etc")
+};
+
+UENUM(BlueprintType)
+enum class EItemType : uint8
+{
+    Heal      UMETA(DisplayName = "Heal"),
+    Damage  UMETA(DisplayName = "Damage"),
+    Defense       UMETA(DisplayName = "Defense")
+};
+
+USTRUCT(BlueprintType)
+struct FItemCategory : public FTableRowBase
+{
+    GENERATED_BODY()
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    EItemCategory ItemCategory;
+
+    //Consumable type
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    EItemType ItemType;
+
+    //type Value
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    float Value;
 };
 
 USTRUCT(BlueprintType)
@@ -62,11 +87,14 @@ struct FItemBaseRow : public FTableRowBase
     FItemTextData TextData;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    EItemCategory ItemCategory;
+    FItemCategory ItemCategory;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     FItemAssetData AssetData;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     FItemNumericData NumericData;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    TSubclassOf<UItemDataBase> ItemDataClass;
 };

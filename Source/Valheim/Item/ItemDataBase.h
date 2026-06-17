@@ -10,6 +10,7 @@
 /**
  * 
  */
+class AArcher;
 class UInventoryComponent;
 UCLASS()
 class VALHEIM_API UItemDataBase : public UObject
@@ -32,7 +33,7 @@ public:
 
     void ResetItemFlags();
 
-    //Use Funtion? - Interface function
+    virtual void Use(AArcher* User);
 
     //------------------------------Property ////
 

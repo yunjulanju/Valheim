@@ -14,6 +14,11 @@ void UItemDataBase::ResetItemFlags()
 	bIsPickup = false;
 }
 
+void UItemDataBase::Use(AArcher* User)
+{
+	UE_LOG(LogTemp, Warning, TEXT("UItemDataBase::Use"));
+}
+
 UItemDataBase* UItemDataBase::CreateItemCopy() const
 {
 	UItemDataBase* ItemCopy = NewObject<UItemDataBase>(StaticClass());

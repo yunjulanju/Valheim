@@ -25,7 +25,7 @@ void AItemBase::BeginPlay()
 	Super::BeginPlay();
 
 	//초기화
-	InitializeItem(UItemDataBase::StaticClass(), Quantity);
+	InitializeItem(Quantity);
 }
 
 //에디터에서 값을 바꿀 때 바로 적용할 수 있도록 하는 함수 (없어도 될듯)
@@ -57,13 +57,13 @@ void AItemBase::Tick(float DeltaTime)
 
 }
 
-void AItemBase::InitializeItem(const TSubclassOf<UItemDataBase> BaseClass, const int32 InQuantity)
+void AItemBase::InitializeItem(const int32 InQuantity)
 {
 	if (ItemDataTable && !DesiredItemID.IsNone())
 	{
 		const FItemBaseRow* ItemData = ItemDataTable->FindRow<FItemBaseRow>(DesiredItemID, DesiredItemID.ToString());
 
-		ItemReference = NewObject<UItemDataBase>(this, BaseClass);
+		ItemReference = NewObject<UItemDataBase>(this, ItemData->ItemDataClass);
 
 		ItemReference->ItemID = ItemData->ItemID;
 		ItemReference->ItemCategory = ItemData->ItemCategory;

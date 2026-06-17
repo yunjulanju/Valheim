@@ -8,6 +8,8 @@
 #include "Item/ItemDataBase.h"
 #include "UserInterface/Inventory/DragItemVisual.h"
 #include "ItemDragDropOperation.h"
+#include "Character/Archer.h"
+
 
 void UInventoryItemSlot::NativeOnInitialized()
 {
@@ -50,6 +52,18 @@ FReply UInventoryItemSlot::NativeOnMouseButtonDown(const FGeometry& InGeometry, 
 	if (InMouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
 	{
 		return Reply.Handled().DetectDrag(TakeWidget(), EKeys::LeftMouseButton);
+	}
+
+	if (InMouseEvent.GetEffectingButton() == EKeys::RightMouseButton)
+	{
+		if (ItemReference && ItemReference->ItemCategory == EItemCategory::Consumable)
+		{
+			if (AArcher* Player = Cast<AArcher>(GetOwningPlayerPawn()))
+			{
+				ItemReference->Use(Player);
+			}
+		}
+		return Reply.Handled();
 	}
 
 	return Reply.Unhandled();

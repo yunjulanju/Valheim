@@ -7,14 +7,11 @@
 UInventoryComponent::UInventoryComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
-
 }
 
 void UInventoryComponent::BeginPlay()
 {
 	Super::BeginPlay();
-
-
 }
 
 UItemDataBase* UInventoryComponent::FindMatchingItem(UItemDataBase* ItemIn) const

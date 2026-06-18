@@ -94,7 +94,4 @@ struct FItemBaseRow : public FTableRowBase
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     FItemNumericData NumericData;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    TSubclassOf<UItemDataBase> ItemDataClass;
 };

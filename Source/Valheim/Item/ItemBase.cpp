@@ -63,7 +63,7 @@ void AItemBase::InitializeItem(const int32 InQuantity)
 	{
 		const FItemBaseRow* ItemData = ItemDataTable->FindRow<FItemBaseRow>(DesiredItemID, DesiredItemID.ToString());
 
-		ItemReference = NewObject<UItemDataBase>(this, ItemData->ItemDataClass);
+		ItemReference = NewObject<UItemDataBase>(this, UItemDataBase::StaticClass());
 
 		ItemReference->ItemID = ItemData->ItemID;
 		ItemReference->ItemCategory = ItemData->ItemCategory;

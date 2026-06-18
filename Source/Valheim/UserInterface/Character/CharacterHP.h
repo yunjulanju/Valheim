@@ -19,6 +19,10 @@ class VALHEIM_API UCharacterHP : public UUserWidget
 
 public:
 	virtual void NativeOnInitialized() override;
+	virtual void NativeConstruct() override;
+
+	UFUNCTION()
+	void UpdateHP();
 
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UTextBlock> HPText;
@@ -27,5 +31,6 @@ public:
 
 	UPROPERTY()
 	AArcher* PlayerCharacter;
+
 	
 };

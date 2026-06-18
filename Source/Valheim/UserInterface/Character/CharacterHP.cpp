@@ -14,6 +14,19 @@ void UCharacterHP::NativeOnInitialized()
 	PlayerCharacter = Cast<AArcher>(GetOwningPlayerPawn());
 	if (PlayerCharacter)
 	{
+		PlayerCharacter->OnHPChanged.AddDynamic(this,&UCharacterHP::UpdateHP);
+	}
+}
+
+void UCharacterHP::NativeConstruct()
+{
+	UpdateHP();
+}
+
+void UCharacterHP::UpdateHP()
+{
+	if (PlayerCharacter)
+	{
 		if (HPText)
 		{
 			HPText->SetText(FText::AsNumber(PlayerCharacter->GetCurrentHP()));

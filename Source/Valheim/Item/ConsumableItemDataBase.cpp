@@ -8,9 +8,10 @@ void UConsumableItemDataBase::Use(AArcher* User)
 {
 	if (ItemCategory.ItemCategory != EItemCategory::Consumable || !User)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("UConsumableItemDataBase Null"));
 		return;
 	}
-
+	UE_LOG(LogTemp, Warning, TEXT("UConsumableItemDataBase::Use"));
 	switch (ItemCategory.ItemType)
 	{
 	case EItemType::Heal:

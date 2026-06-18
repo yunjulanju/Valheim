@@ -284,6 +284,12 @@ void AArcher::DropItem(UItemDataBase* ItemToDrop, const int32 QuantityToDrop)
 		UE_LOG(LogTemp, Warning, TEXT("Item to drop was FindMatchingItem Null"));
 	}
 }
+
+void AArcher::SetHP(float NewHP)
+{
+	HP = FMath::Clamp((HP+NewHP), 0, MaxHP);
+	OnHPChanged.Broadcast();
+}
  
 void AArcher::ServerCallAttackCollision_Implementation()
 {

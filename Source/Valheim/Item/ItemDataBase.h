@@ -64,6 +64,9 @@ public:
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
     int32 Quantity = 1;
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    TSubclassOf<UItemDataBase> ItemDataClass;
+
 protected:
 
     bool operator ==(const FName& OtherID) const

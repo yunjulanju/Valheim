@@ -21,13 +21,15 @@ void UItemDataBase::Use(AArcher* User)
 
 UItemDataBase* UItemDataBase::CreateItemCopy() const
 {
-	UItemDataBase* ItemCopy = NewObject<UItemDataBase>(StaticClass());
-
+	UItemDataBase* ItemCopy = NewObject<UItemDataBase>(this->ItemDataClass);
+	UE_LOG(LogTemp, Warning, TEXT("Copy Class : %s"), *ItemCopy->GetClass()->GetName());
 	ItemCopy->ItemID = this->ItemID;
 	ItemCopy->ItemCategory = this->ItemCategory;
 	ItemCopy->AssetData = this->AssetData;
 	ItemCopy->NumericData = this->NumericData;
 	ItemCopy->TextData = this->TextData;
+	ItemCopy->ItemDataClass = this->ItemDataClass;
+
 	ItemCopy->bIsCopy = true;
 
 	return ItemCopy;

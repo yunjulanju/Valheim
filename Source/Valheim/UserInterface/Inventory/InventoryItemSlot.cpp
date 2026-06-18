@@ -59,6 +59,7 @@ FReply UInventoryItemSlot::NativeOnMouseButtonDown(const FGeometry& InGeometry, 
 		if (AArcher* Player = Cast<AArcher>(GetOwningPlayerPawn()))
 		{
 			ItemReference->Use(Player);
+			//ItemReference->
 		}
 		return Reply.Handled();
 	}

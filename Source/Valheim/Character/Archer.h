@@ -17,6 +17,8 @@ class UStaticMeshComponent;
 class UInventoryComponent;
 class UItemDataBase;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnHPChanged);
+
 UCLASS()
 class VALHEIM_API AArcher : public ACharacter
 {
@@ -39,13 +41,10 @@ protected:
 	UInventoryComponent* PlayerInventory;
 
 public:
-	// Sets default values for this character's properties
 	AArcher();
 
-	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
@@ -54,13 +53,10 @@ public:
 		AController* EventInstigator, AActor* DamageCauser) override;
 
 protected:
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	/** Called for movement input */
 	void Move(const FInputActionValue& Value);
 
-	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
 
 	void StartCrouch();
@@ -95,11 +91,15 @@ public:
 	//Inventory
 	void DropItem(UItemDataBase* ItemToDrop, const int32 QuantityToDrop);
 
-	FORCEINLINE void AddHP(float HealValue) { HP+=HealValue; }
+	void SetHP(float NewHP);
+	FORCEINLINE void AddHP(float HealValue) { SetHP(HealValue); }
 	FORCEINLINE float GetCurrentHP() { return HP; }
 	FORCEINLINE float GetCurrentPercentHP() { return HP/MaxHP; }
 
 	//---------------Property
+
+	UPROPERTY(BlueprintAssignable)
+	FOnHPChanged OnHPChanged;
 
 protected:
 

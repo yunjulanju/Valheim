@@ -39,10 +39,6 @@ void UInventoryPannel::RefreshInventory()
 		InventoryPannel->ClearChildren();
 		for (UItemDataBase* const& InventoryItem : InventoryReference->GetInventoryContents())
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Item: %s, OwningInventory: %s"),
-				*InventoryItem->ItemID.ToString(),
-				InventoryItem->OwningInventory ? TEXT("Valid") : TEXT("Nullptr"));
-
 			if (InventoryItem->Quantity <= 0) continue;
 			//UE_LOG(LogTemp, Warning, TEXT("InventoryReference->GetInventoryContents()"))
 			UInventoryItemSlot* ItemSlot = CreateWidget<UInventoryItemSlot>(this, InventorySlotClass);

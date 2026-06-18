@@ -56,12 +56,9 @@ FReply UInventoryItemSlot::NativeOnMouseButtonDown(const FGeometry& InGeometry, 
 
 	if (InMouseEvent.GetEffectingButton() == EKeys::RightMouseButton)
 	{
-		if (ItemReference && ItemReference->ItemCategory == EItemCategory::Consumable)
+		if (AArcher* Player = Cast<AArcher>(GetOwningPlayerPawn()))
 		{
-			if (AArcher* Player = Cast<AArcher>(GetOwningPlayerPawn()))
-			{
-				ItemReference->Use(Player);
-			}
+			ItemReference->Use(Player);
 		}
 		return Reply.Handled();
 	}

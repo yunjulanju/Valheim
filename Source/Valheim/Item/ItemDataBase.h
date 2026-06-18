@@ -53,7 +53,7 @@ public:
     FItemTextData TextData;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-    EItemCategory ItemCategory;
+    FItemCategory ItemCategory;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
     FItemAssetData AssetData;

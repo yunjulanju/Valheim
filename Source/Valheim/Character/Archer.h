@@ -95,6 +95,10 @@ public:
 	//Inventory
 	void DropItem(UItemDataBase* ItemToDrop, const int32 QuantityToDrop);
 
+	FORCEINLINE void AddHP(float HealValue) { HP+=HealValue; }
+	FORCEINLINE float GetCurrentHP() { return HP; }
+	FORCEINLINE float GetCurrentPercentHP() { return HP/MaxHP; }
+
 	//---------------Property
 
 protected:

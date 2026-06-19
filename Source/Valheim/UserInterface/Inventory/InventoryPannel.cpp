@@ -31,6 +31,7 @@ void UInventoryPannel::NativeOnInitialized()
 
 void UInventoryPannel::NativeConstruct()
 {
+    Super::NativeConstruct();
     RefreshInventory();
 }
 
@@ -74,27 +75,35 @@ void UInventoryPannel::RefreshInventory()
 
 void UInventoryPannel::RefreshHotbar()
 {
-    if (InventorySlotClass)
+    if (HotbarSlotClass)
     {
         HotbarBox->ClearChildren();
         HotbarSlots.Empty();
 
         for (int32 i = 0; i < HotbarSlotCount; i++)
         {
-            UInventoryItemSlot* HotbarSlot = CreateWidget<UInventoryItemSlot>(this, InventorySlotClass);
-
-            HotbarBox->AddChildToHorizontalBox(HotbarSlot);
-            HotbarSlots.Add(HotbarSlot);
-
-            UHotbarSlot* Slot = CreateWidget<UHotbarSlot>(this, HotbarSlotClass);
-            Slot->SlotIndex = i;
-            Slot->HotKeyNumber->SetText(FText::AsNumber(i + 1));
+            UHotBarSlot* HotBarSlot = CreateWidget<UHotBarSlot>(this, HotbarSlotClass);
+            HotBarSlot->SlotIndex = i;
+            HotBarSlot->HotKeyNumber->SetText(FText::AsNumber(i + 1));
 
             UItemDataBase* HotbarItem = InventoryReference->GetHotbarItem(i);
-            Slot->SetItemReference(HotbarItem);
 
-            HotbarBox->AddChildToHorizontalBox(Slot);
-            HotbarSlots.Add(Slot);
+            UE_LOG(LogTemp, Warning, TEXT("Slot %d : %s"),
+                i,
+                HotbarItem ? TEXT("Valid") : TEXT("NULL"));
+
+            if (HotbarItem)
+            {
+                HotBarSlot->SetItemReference(HotbarItem);
+            }
+            else
+            {
+                HotBarSlot->SetItemReference(nullptr);
+            }
+           
+
+            HotbarBox->AddChildToHorizontalBox(HotBarSlot);
+            HotbarSlots.Add(HotBarSlot);
         }
     }
 }

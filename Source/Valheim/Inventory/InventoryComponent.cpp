@@ -12,6 +12,7 @@ UInventoryComponent::UInventoryComponent()
 void UInventoryComponent::BeginPlay()
 {
 	Super::BeginPlay();
+	HotBarContents.SetNum(HotBarSlotsCapacity);
 }
 
 UItemDataBase* UInventoryComponent::FindMatchingItem(UItemDataBase* ItemIn) const
@@ -83,6 +84,15 @@ void UInventoryComponent::SplitExistingStack(UItemDataBase* ItemIn, const int32 
 	{
 		RemoveAmountOfItem(ItemIn, AmountToSplit);
 		AddNewItem(ItemIn, AmountToSplit);
+	}
+}
+
+void UInventoryComponent::SetHotbarItem(int32 index, UItemDataBase* Item)
+{
+	if (HotBarContents.IsValidIndex(index))
+	{
+		HotBarContents[index] = Item;
+		OnInventoryUpdated.Broadcast();
 	}
 }
 

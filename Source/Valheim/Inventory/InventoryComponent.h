@@ -91,7 +91,10 @@ public:
 	FORCEINLINE TArray<UItemDataBase*> GetHotBarContents() const { return HotBarContents; };
 
 	UFUNCTION()
-	FORCEINLINE UItemDataBase* GetHotbarItem(int32 index) { return HotBarContents[index]; };
+	FORCEINLINE UItemDataBase* GetHotbarItem(int32 index) { return HotBarContents.IsValidIndex(index) ? HotBarContents[index] : nullptr;};
+
+	UFUNCTION()
+	void SetHotbarItem(int32 index, UItemDataBase* Item);
 
 	UFUNCTION()
 	FORCEINLINE int32 GetSlotsCapacity() const {return InventorySlotsCapacity;};

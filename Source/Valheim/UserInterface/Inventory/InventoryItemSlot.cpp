@@ -14,13 +14,11 @@
 void UInventoryItemSlot::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
-
 }
 
 void UInventoryItemSlot::NativeConstruct()
 {
 	Super::NativeConstruct();
-
 
 	if (ToolTipClass)
 	{

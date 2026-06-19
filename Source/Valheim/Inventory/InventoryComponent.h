@@ -88,6 +88,12 @@ public:
 	void SplitExistingStack(UItemDataBase* ItemIn, const int32 AmountToSplit);
 
 	UFUNCTION()
+	FORCEINLINE TArray<UItemDataBase*> GetHotBarContents() const { return HotBarContents; };
+
+	UFUNCTION()
+	FORCEINLINE UItemDataBase* GetHotbarItem(int32 index) { return HotBarContents[index]; };
+
+	UFUNCTION()
 	FORCEINLINE int32 GetSlotsCapacity() const {return InventorySlotsCapacity;};
 
 	UFUNCTION()
@@ -114,6 +120,8 @@ public:
 
 
 
+
+
 protected:
 	// Property ///////////////////////////////////////////////
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
@@ -121,4 +129,10 @@ protected:
 
 	UPROPERTY(VisibleAnywhere)
 	TArray<TObjectPtr<UItemDataBase>> InventoryContents;
+
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
+	int32 HotBarSlotsCapacity = 9;
+
+	UPROPERTY(VisibleAnywhere)
+	TArray<TObjectPtr<UItemDataBase>> HotBarContents;
 };

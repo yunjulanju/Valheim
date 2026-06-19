@@ -15,6 +15,8 @@ class AArcher;
 class UInventoryComponent;
 class UInventoryItemSlot;
 class UHorizontalBox;
+class UInventoryItemSlot;
+class UHotBarSlot;
 UCLASS()
 class VALHEIM_API UInventoryPannel : public UUserWidget
 {
@@ -31,7 +33,10 @@ public:
 	class UHorizontalBox* HotbarBox;
 
 	UPROPERTY()
-	TArray<UInventoryItemSlot*> HotbarSlots;
+	TArray<UHotBarSlot*> HotbarSlots;
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<UHotBarSlot> HotbarSlotClass;
 
 	UPROPERTY(EditAnywhere)
 	int32 HotbarSlotCount = 9;

@@ -10,6 +10,7 @@
 #include "UserInterface/Inventory/InventoryItemSlot.h"
 #include "ItemDragDropOperation.h"
 #include "Components/HorizontalBox.h"
+#include "UserInterface/Inventory/HotBarSlot.h"
 
 void UInventoryPannel::NativeOnInitialized()
 {
@@ -84,6 +85,16 @@ void UInventoryPannel::RefreshHotbar()
 
             HotbarBox->AddChildToHorizontalBox(HotbarSlot);
             HotbarSlots.Add(HotbarSlot);
+
+            UHotbarSlot* Slot = CreateWidget<UHotbarSlot>(this, HotbarSlotClass);
+            Slot->SlotIndex = i;
+            Slot->HotKeyNumber->SetText(FText::AsNumber(i + 1));
+
+            UItemDataBase* HotbarItem = InventoryReference->GetHotbarItem(i);
+            Slot->SetItemReference(HotbarItem);
+
+            HotbarBox->AddChildToHorizontalBox(Slot);
+            HotbarSlots.Add(Slot);
         }
     }
 }

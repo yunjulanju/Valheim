@@ -1,0 +1,28 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "UserInterface/Inventory/InventoryItemSlot.h"
+#include "HotBarSlot.generated.h"
+
+/**
+ * 
+ */
+UCLASS()
+class VALHEIM_API UHotBarSlot : public UInventoryItemSlot
+{
+	GENERATED_BODY()
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	int32 SlotIndex = 0;
+
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* HotKeyNumber;
+
+protected:
+	virtual void NativeConstruct() override;
+	virtual void NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation) override;
+	virtual bool NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override;
+	
+};

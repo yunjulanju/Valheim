@@ -9,6 +9,7 @@
 #include "Item/ItemDataBase.h"
 #include "UserInterface/Inventory/InventoryItemSlot.h"
 #include "ItemDragDropOperation.h"
+#include "Components/HorizontalBox.h"
 
 void UInventoryPannel::NativeOnInitialized()
 {
@@ -27,6 +28,11 @@ void UInventoryPannel::NativeOnInitialized()
 
 }
 
+void UInventoryPannel::NativeConstruct()
+{
+    RefreshInventory();
+}
+
 void UInventoryPannel::SetInfoText() const
 {
 	CapacityInfo->SetText(FText::Format(FText::FromString("{0}/{1}"), InventoryReference->GetInventoryContents().Num(), InventoryReference->GetSlotsCapacity()));
@@ -34,20 +40,52 @@ void UInventoryPannel::SetInfoText() const
 
 void UInventoryPannel::RefreshInventory()
 {
-	if (InventoryReference && InventorySlotClass)
-	{
-		InventoryPannel->ClearChildren();
-		for (UItemDataBase* const& InventoryItem : InventoryReference->GetInventoryContents())
-		{
-			if (InventoryItem->Quantity <= 0) continue;
-			//UE_LOG(LogTemp, Warning, TEXT("InventoryReference->GetInventoryContents()"))
-			UInventoryItemSlot* ItemSlot = CreateWidget<UInventoryItemSlot>(this, InventorySlotClass);
-			ItemSlot->SetItemReference(InventoryItem);
+    if (InventoryReference && InventorySlotClass)
+    {
+        InventoryPannel->ClearChildren();
 
-			InventoryPannel->AddChildToWrapBox(ItemSlot);
-		}
-		SetInfoText();
-	}
+        int32 FilledCount = 0;
+
+        for (UItemDataBase* const& InventoryItem : InventoryReference->GetInventoryContents())
+        {
+            if (!InventoryItem || InventoryItem->Quantity <= 0) continue;
+
+            UInventoryItemSlot* ItemSlot = CreateWidget<UInventoryItemSlot>(this, InventorySlotClass);
+            ItemSlot->SetItemReference(InventoryItem);
+            ItemSlot->bShowToolTip = true;
+            InventoryPannel->AddChildToWrapBox(ItemSlot);
+            FilledCount++;
+        }
+
+        // capacity¸¸Å­ ºó ½½·Ô Ã¤¿ì±â
+        const int32 EmptySlotCount = InventoryReference->GetSlotsCapacity() - FilledCount;
+        for (int32 i = 0; i < EmptySlotCount; i++)
+        {
+            UInventoryItemSlot* EmptySlot = CreateWidget<UInventoryItemSlot>(this, InventorySlotClass);
+            EmptySlot->SetItemReference(nullptr);
+            EmptySlot->bShowToolTip = false;
+            InventoryPannel->AddChildToWrapBox(EmptySlot);
+        }
+        RefreshHotbar();
+        SetInfoText();
+    }
+}
+
+void UInventoryPannel::RefreshHotbar()
+{
+    if (InventorySlotClass)
+    {
+        HotbarBox->ClearChildren();
+        HotbarSlots.Empty();
+
+        for (int32 i = 0; i < HotbarSlotCount; i++)
+        {
+            UInventoryItemSlot* HotbarSlot = CreateWidget<UInventoryItemSlot>(this, InventorySlotClass);
+
+            HotbarBox->AddChildToHorizontalBox(HotbarSlot);
+            HotbarSlots.Add(HotbarSlot);
+        }
+    }
 }
 
 bool UInventoryPannel::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)

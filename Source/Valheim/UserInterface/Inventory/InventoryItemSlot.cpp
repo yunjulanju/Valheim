@@ -15,20 +15,26 @@ void UInventoryItemSlot::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
 
-	if (ToolTipClass)
-	{
-		UInventoryToolTip* ToolTip = CreateWidget<UInventoryToolTip>(this, ToolTipClass);
-		ToolTip->InventorySlotBeingHovered = this;
-		if (ToolTip)
-		{
-			SetToolTip(ToolTip);
-		}
-	}
 }
 
 void UInventoryItemSlot::NativeConstruct()
 {
 	Super::NativeConstruct();
+
+
+	if (ToolTipClass)
+	{
+		UInventoryToolTip* ToolTip = CreateWidget<UInventoryToolTip>(this, ToolTipClass);
+		if (ToolTip)
+		{
+			ToolTip->InventorySlotBeingHovered = this;
+			SetToolTip(ToolTip);
+		}
+	}		
+	else
+	{
+		SetToolTip(nullptr); // ºó ½½·ÔÀÌ¸é ÅøÆÁ Á¦°Å
+	}
 
 	if (ItemReference)
 	{
@@ -43,6 +49,11 @@ void UInventoryItemSlot::NativeConstruct()
 			ItemQuantity->SetVisibility(ESlateVisibility::Collapsed);
 		}
 	}
+	else
+	{
+		ItemIcon->SetVisibility(ESlateVisibility::Collapsed);
+		ItemQuantity->SetVisibility(ESlateVisibility::Collapsed);
+	}
 }
 
 FReply UInventoryItemSlot::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
@@ -51,7 +62,10 @@ FReply UInventoryItemSlot::NativeOnMouseButtonDown(const FGeometry& InGeometry, 
 
 	if (InMouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
 	{
-		return Reply.Handled().DetectDrag(TakeWidget(), EKeys::LeftMouseButton);
+		if(bShowToolTip)
+			return Reply.Handled().DetectDrag(TakeWidget(), EKeys::LeftMouseButton);
+		else
+			return Reply.Unhandled();
 	}
 
 	if (InMouseEvent.GetEffectingButton() == EKeys::RightMouseButton)

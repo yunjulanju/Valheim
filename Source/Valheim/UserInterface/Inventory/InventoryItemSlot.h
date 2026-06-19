@@ -24,6 +24,8 @@ public:
 	FORCEINLINE void SetItemReference(UItemDataBase* ItemIn) { ItemReference = ItemIn; }
 	FORCEINLINE UItemDataBase* GetItemReference() const { return ItemReference; }
 
+	bool bShowToolTip = true;
+
 protected:
 
 	virtual void NativeOnInitialized() override;

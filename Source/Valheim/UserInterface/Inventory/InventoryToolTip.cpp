@@ -10,20 +10,33 @@ void UInventoryToolTip::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	UItemDataBase* ItemBeingHovered = InventorySlotBeingHovered->GetItemReference();
-
-	//TextAsset
-	ItemName->SetText(ItemBeingHovered->TextData.Name);
-	ItemCategory->SetText(FText::AsNumber(ItemBeingHovered->Quantity));
-	ItemDescription->SetText(ItemBeingHovered->TextData.Description);
-
-	//NumericAsset
-	if (ItemBeingHovered->NumericData.bIsStackable)
+	if (!InventorySlotBeingHovered)
 	{
-		MaxStackSize->SetText(FText::AsNumber(ItemBeingHovered->NumericData.MaxStackSize));
+		SetVisibility(ESlateVisibility::Collapsed);
+		return;
+	}
+
+
+	UItemDataBase* ItemBeingHovered = InventorySlotBeingHovered->GetItemReference();
+	if (ItemBeingHovered)
+	{
+		//TextAsset
+		ItemName->SetText(ItemBeingHovered->TextData.Name);
+		ItemCategory->SetText(FText::AsNumber(ItemBeingHovered->Quantity));
+		ItemDescription->SetText(ItemBeingHovered->TextData.Description);
+
+		//NumericAsset
+		if (ItemBeingHovered->NumericData.bIsStackable)
+		{
+			MaxStackSize->SetText(FText::AsNumber(ItemBeingHovered->NumericData.MaxStackSize));
+		}
+		else
+		{
+			MaxStackSize->SetVisibility(ESlateVisibility::Collapsed);
+		}
 	}
 	else
 	{
-		MaxStackSize->SetVisibility(ESlateVisibility::Collapsed);
+		SetVisibility(ESlateVisibility::Collapsed);
 	}
 }

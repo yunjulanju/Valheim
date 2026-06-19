@@ -14,6 +14,7 @@ class UTextBlock;
 class AArcher;
 class UInventoryComponent;
 class UInventoryItemSlot;
+class UHorizontalBox;
 UCLASS()
 class VALHEIM_API UInventoryPannel : public UUserWidget
 {
@@ -22,6 +23,21 @@ class VALHEIM_API UInventoryPannel : public UUserWidget
 public:
 	UFUNCTION()
 	void RefreshInventory();
+
+	UFUNCTION()
+	void RefreshHotbar();
+
+	UPROPERTY(meta = (BindWidget))
+	class UHorizontalBox* HotbarBox;
+
+	UPROPERTY()
+	TArray<UInventoryItemSlot*> HotbarSlots;
+
+	UPROPERTY(EditAnywhere)
+	int32 HotbarSlotCount = 9;
+
+	UPROPERTY(EditAnywhere)
+	int32 SlotCount;
 
 	UPROPERTY(meta = (BindWidget))
 	UWrapBox* InventoryPannel;
@@ -37,5 +53,6 @@ public:
 protected:
 	void SetInfoText() const;
 	virtual void NativeOnInitialized() override;
+	virtual void NativeConstruct() override;
 	virtual bool NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override;
 };

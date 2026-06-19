@@ -25,6 +25,12 @@ public:
 	UPROPERTY()
 	UMainWidget* MainWidget;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Widget")
+	TSubclassOf<UUserWidget> CharacterWidgetClass;
+
+	UPROPERTY()
+	UUserWidget* CharacterWidget;
+
 	bool bIsMenuVisible = false;
 
 	

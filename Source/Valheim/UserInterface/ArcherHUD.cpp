@@ -13,8 +13,17 @@ void AArcherHUD::BeginPlay()
         MainWidget = CreateWidget<UMainWidget>(GetWorld(), MainWidgetClass);
         if (MainWidget)
         {
-            MainWidget->AddToViewport();
+            MainWidget->AddToViewport(5);
             MainWidget->SetVisibility(ESlateVisibility::Hidden);
+        }
+    }
+    if (CharacterWidgetClass)
+    {  
+        CharacterWidget = CreateWidget<UUserWidget>(GetWorld(), CharacterWidgetClass);
+        if (CharacterWidget)
+        {
+            CharacterWidget->AddToViewport();
+            CharacterWidget->SetVisibility(ESlateVisibility::Visible);
         }
     }
 }

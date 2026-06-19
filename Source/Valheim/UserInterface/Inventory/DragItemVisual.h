@@ -22,6 +22,8 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	UImage* ItemIcon;
 	UPROPERTY(meta = (BindWidget))
+	UTextBlock* ItemName;
+	UPROPERTY(meta = (BindWidget))
 	UTextBlock* ItemQuantity;
 
 };

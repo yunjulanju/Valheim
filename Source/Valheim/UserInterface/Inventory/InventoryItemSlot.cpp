@@ -34,8 +34,6 @@ void UInventoryItemSlot::NativeConstruct()
 	{
 		ItemIcon->SetBrushFromTexture(ItemReference->AssetData.ItemImage);
 
-		ItemName->SetText(ItemReference->TextData.Name);
-
 		if (ItemReference->NumericData.bIsStackable)
 		{
 			ItemQuantity->SetText(FText::AsNumber(ItemReference->Quantity));

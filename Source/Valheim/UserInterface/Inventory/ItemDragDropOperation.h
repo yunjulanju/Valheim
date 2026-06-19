@@ -22,4 +22,10 @@ public:
 
 	UPROPERTY(VisibleAnywhere)
 	UInventoryComponent* SourceInventory;
+
+	UPROPERTY(VisibleAnywhere)
+	bool bFromHotbar = false;
+
+	UPROPERTY(VisibleAnywhere)
+	int32 SourceHotbarIndex = -1;
 };

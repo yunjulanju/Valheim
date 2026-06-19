@@ -121,7 +121,17 @@ public:
 	UFUNCTION()
 	void AddNewItem(UItemDataBase* Item, int32 AmountToAdd);
 
+	UFUNCTION()
+	void RemoveItemFromInventoryOnly(UItemDataBase* ItemToRemove);
 
+	UFUNCTION()
+	void RemoveItemFromHotbarIfPresent(UItemDataBase* ItemToCheck);
+
+	UFUNCTION()
+	bool MoveItemToHotbar(UItemDataBase* ItemIn, int32 HotbarIndex);
+
+	UFUNCTION()
+	bool MoveItemFromHotbarToInventory(int32 HotbarIndex);
 
 
 

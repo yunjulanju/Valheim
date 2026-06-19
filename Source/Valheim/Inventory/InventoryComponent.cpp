@@ -66,6 +66,7 @@ UItemDataBase* UInventoryComponent::FindNextPartialStack(UItemDataBase* ItemIn) 
 void UInventoryComponent::RemoveSingleInstanceOfItem(UItemDataBase* ItemToRemove)
 {
 	InventoryContents.RemoveSingle(ItemToRemove);
+	RemoveItemFromHotbarIfPresent(ItemToRemove);
 	OnInventoryUpdated.Broadcast();
 }
 
@@ -210,4 +211,68 @@ void UInventoryComponent::AddNewItem(UItemDataBase* Item, int32 AmountToAdd)
 
 	InventoryContents.Add(NewItem);
 	OnInventoryUpdated.Broadcast();
+}
+
+void UInventoryComponent::RemoveItemFromInventoryOnly(UItemDataBase* ItemToRemove)
+{
+	InventoryContents.RemoveSingle(ItemToRemove);
+	OnInventoryUpdated.Broadcast();
+}
+
+void UInventoryComponent::RemoveItemFromHotbarIfPresent(UItemDataBase* ItemToCheck)
+{
+	for (int32 i = 0; i < HotBarContents.Num(); i++)
+	{
+		if (HotBarContents[i] == ItemToCheck)
+		{
+			HotBarContents[i] = nullptr;
+		}
+	}
+}
+
+bool UInventoryComponent::MoveItemToHotbar(UItemDataBase* ItemIn, int32 HotbarIndex)
+{
+	if (!ItemIn || !HotBarContents.IsValidIndex(HotbarIndex))
+	{
+		return false;
+	}
+
+	if (!InventoryContents.Contains(ItemIn))
+	{
+		return false;
+	}
+
+	RemoveItemFromHotbarIfPresent(ItemIn);
+
+	HotBarContents[HotbarIndex] = ItemIn;
+
+	InventoryContents.RemoveSingle(ItemIn);
+
+	OnInventoryUpdated.Broadcast();
+	return true;
+}
+
+bool UInventoryComponent::MoveItemFromHotbarToInventory(int32 HotbarIndex)
+{
+	if (!HotBarContents.IsValidIndex(HotbarIndex))
+	{
+		return false;
+	}
+
+	UItemDataBase* Item = HotBarContents[HotbarIndex];
+	if (!Item)
+	{
+		return false;
+	}
+
+	if (InventoryContents.Num() + 1 > InventorySlotsCapacity)
+	{
+		return false;
+	}
+
+	HotBarContents[HotbarIndex] = nullptr;
+	InventoryContents.Add(Item);
+
+	OnInventoryUpdated.Broadcast();
+	return true;
 }

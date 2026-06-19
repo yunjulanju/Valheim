@@ -88,10 +88,6 @@ void UInventoryPannel::RefreshHotbar()
 
             UItemDataBase* HotbarItem = InventoryReference->GetHotbarItem(i);
 
-            UE_LOG(LogTemp, Warning, TEXT("Slot %d : %s"),
-                i,
-                HotbarItem ? TEXT("Valid") : TEXT("NULL"));
-
             if (HotbarItem)
             {
                 HotBarSlot->SetItemReference(HotbarItem);
@@ -110,12 +106,17 @@ void UInventoryPannel::RefreshHotbar()
 
 bool UInventoryPannel::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
 {
-	const UItemDragDropOperation* ItemDragDrop = Cast<UItemDragDropOperation>(InOperation);
+    const UItemDragDropOperation* ItemDragDrop = Cast<UItemDragDropOperation>(InOperation);
 
-	if (ItemDragDrop->SourceItem && InventoryReference)
-	{
-		return true;
-	}
+    if (!ItemDragDrop || !ItemDragDrop->SourceItem || !InventoryReference)
+    {
+        return false;
+    }
 
-	return false;
+    if (ItemDragDrop->bFromHotbar)
+    {
+        return InventoryReference->MoveItemFromHotbarToInventory(ItemDragDrop->SourceHotbarIndex);
+    }
+
+    return true;
 }

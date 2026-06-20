@@ -24,6 +24,10 @@ UItemDataBase* UInventoryComponent::FindMatchingItem(UItemDataBase* ItemIn) cons
 		{
 			return ItemIn;
 		}
+		if (HotBarContents.Contains(ItemIn))
+		{
+			return ItemIn;
+		}
 	}
 	return nullptr;
 }

@@ -204,28 +204,7 @@ void AArcher::Interaction()
 		AItemBase* HitItem = Cast<AItemBase>(HitResult.GetActor());
 		if (HitItem)
 		{
-
 			HitItem->TakePickUp(this);
-			/*UE_LOG(LogTemp, Warning, TEXT("ItemCategory: %s"),
-				*UEnum::GetValueAsString(HitItem->ItemData->ItemCategory));
-
-			switch (HitItem->ItemData->ItemCategory)
-			{
-			case EItemCategory::Weapon:
-			{
-				ASword* HitSword = Cast<ASword>(HitItem);
-				if (HitSword)
-				{
-					UE_LOG(LogTemp, Warning, TEXT("HitSword"));
-					SwordMesh->SetVisibility(true);
-					HitSword->PickItem();
-					bEquipWeapon = true;
-				}
-			}
-				break;
-			default:
-				break;
-			}*/
 		}
 
 		//DebugLine
@@ -258,11 +237,8 @@ void AArcher::CallAttackCollision()
 
 void AArcher::DropItem(UItemDataBase* ItemToDrop, const int32 QuantityToDrop)
 {
-	UE_LOG(LogTemp, Warning, TEXT("OwningInventory: %s"),
-		ItemToDrop->OwningInventory ? TEXT("Valid") : TEXT("Nullptr"));
 	if (PlayerInventory->FindMatchingItem(ItemToDrop))
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("Archer DropItem - QuantityToDrop %d"), QuantityToDrop);
 		FActorSpawnParameters SpawnParam;
 		SpawnParam.Owner = this;
 		SpawnParam.bNoFail = true;
@@ -272,7 +248,7 @@ void AArcher::DropItem(UItemDataBase* ItemToDrop, const int32 QuantityToDrop)
 		const FTransform SpawnTransform(GetActorRotation(), SpawnLocation);
 
 		const int32 RemovedQuantity = PlayerInventory->RemoveAmountOfItem(ItemToDrop, QuantityToDrop);
-		//UE_LOG(LogTemp, Warning, TEXT("Archer DropItem - RemovedQuantity %d"), RemovedQuantity);
+
 		AItemBase* PickUp = GetWorld()->SpawnActor<AItemBase>(AItemBase::StaticClass(), SpawnTransform, SpawnParam);
 
 		if (PickUp)
@@ -316,7 +292,6 @@ void AArcher::ServerCallAttackCollision_Implementation()
 				if (!HitActors.Contains(HitActor))
 				{
 					HitActors.Add(HitActor);
-					UE_LOG(LogTemp, Warning, TEXT("Hit Monster: %s"), *Monster->GetName());
 					float Damage;
 					if (bEquipWeapon)
 					{
@@ -373,7 +348,6 @@ void AArcher::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeP
 float AArcher::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	HP -= DamageAmount;
-	UE_LOG(LogTemp, Warning, TEXT("Archer HP: %f"), HP);
 
 	return DamageAmount;
 }

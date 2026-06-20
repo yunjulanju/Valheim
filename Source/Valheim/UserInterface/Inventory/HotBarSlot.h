@@ -14,9 +14,6 @@ class VALHEIM_API UHotBarSlot : public UInventoryItemSlot
 {
 	GENERATED_BODY()
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	int32 SlotIndex = 0;
-
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* HotKeyNumber;
 

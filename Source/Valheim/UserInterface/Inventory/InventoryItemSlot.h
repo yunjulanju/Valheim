@@ -24,7 +24,12 @@ public:
 	FORCEINLINE void SetItemReference(UItemDataBase* ItemIn) { ItemReference = ItemIn; }
 	FORCEINLINE UItemDataBase* GetItemReference() const { return ItemReference; }
 
+	void RefreshSlot();
+
 	bool bShowToolTip = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	int32 SlotIndex = 0;
 
 protected:
 

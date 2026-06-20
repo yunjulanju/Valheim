@@ -13,6 +13,7 @@ void UInventoryComponent::BeginPlay()
 {
 	Super::BeginPlay();
 	HotBarContents.SetNum(HotBarSlotsCapacity);
+	InventoryContents.SetNum(InventorySlotsCapacity);
 }
 
 UItemDataBase* UInventoryComponent::FindMatchingItem(UItemDataBase* ItemIn) const
@@ -41,11 +42,17 @@ UItemDataBase* UInventoryComponent::FindNextItemByID(UItemDataBase* ItemIn) cons
 
 UItemDataBase* UInventoryComponent::FindNextPartialStack(UItemDataBase* ItemIn) const
 {
+	if (!ItemIn)
+	{
+		UE_LOG(LogTemp, Error, TEXT("FindNextPartialStack: ItemIn is NULL"));
+		return nullptr;
+	}
+
 	const TArray<TObjectPtr<UItemDataBase>>::ElementType* Result = nullptr;
 
 	for (const TObjectPtr<UItemDataBase>& InventoryItem : InventoryContents)
 	{
-		if (InventoryItem->ItemID == ItemIn->ItemID && !InventoryItem->IsFullStack())
+		if (InventoryItem && InventoryItem->ItemID == ItemIn->ItemID && !InventoryItem->IsFullStack())
 		{
 			Result = &InventoryItem;
 			break;
@@ -56,16 +63,17 @@ UItemDataBase* UInventoryComponent::FindNextPartialStack(UItemDataBase* ItemIn) 
 	{
 		return *Result;
 	}
-	else
-	{
-		return nullptr;
-	}
+	return nullptr;
 	
 }
 
 void UInventoryComponent::RemoveSingleInstanceOfItem(UItemDataBase* ItemToRemove)
 {
-	InventoryContents.RemoveSingle(ItemToRemove);
+	int32 FoundIndex = InventoryContents.Find(ItemToRemove);
+	if (FoundIndex != INDEX_NONE)
+	{
+		InventoryContents[FoundIndex] = nullptr;
+	}
 	RemoveItemFromHotbarIfPresent(ItemToRemove);
 	OnInventoryUpdated.Broadcast();
 }
@@ -97,6 +105,26 @@ void UInventoryComponent::SetHotbarItem(int32 index, UItemDataBase* Item)
 	}
 }
 
+bool UInventoryComponent::MoveInventoryItem(int32 FromIndex, int32 ToIndex)
+{
+	if (!InventoryContents.IsValidIndex(FromIndex) || !InventoryContents.IsValidIndex(ToIndex))
+	{
+		return false;
+	}
+
+	if (FromIndex == ToIndex)
+	{
+		return true;
+	}
+
+	UItemDataBase* Item = InventoryContents[ToIndex];
+	InventoryContents[ToIndex] = InventoryContents[FromIndex];
+	InventoryContents[FromIndex] = Item;
+
+	OnInventoryUpdated.Broadcast();
+	return true;
+}
+
 int32 UInventoryComponent::CalculateNumberForFullStack(UItemDataBase* StackableItem, int32 InitialRequestedAddAmount)
 {
 	const int32 AddAmountToMakeFullStack = StackableItem->NumericData.MaxStackSize - StackableItem->Quantity;
@@ -105,7 +133,13 @@ int32 UInventoryComponent::CalculateNumberForFullStack(UItemDataBase* StackableI
 
 FItemAddResult UInventoryComponent::HandleNoneStackableItems(UItemDataBase* InputItem, int32 RequestedAddAmount)
 {
-	if (InventoryContents.Num() + 1 > InventorySlotsCapacity)
+	int32 NullCount = 0;
+	for (const auto& Item : InventoryContents)
+	{
+		if (Item == nullptr) NullCount++;
+	}
+
+	if (!InventoryContents.Contains(nullptr))
 	{
 		return FItemAddResult::AddedNone();
 	}
@@ -139,22 +173,38 @@ int32 UInventoryComponent::HandleStackableItems(UItemDataBase* InputItem, int32 
 	}
 
 	// 새 슬롯에 추가 (슬롯 여유가 있을 때)
-	while (AmountToDistribute > 0 && InventoryContents.Num() + 1 <= InventorySlotsCapacity)
+	int32 EmptyIndex = InventoryContents.Find(nullptr);
+	while (AmountToDistribute > 0 && EmptyIndex != INDEX_NONE)
 	{
 		const int32 AmountForNewStack = FMath::Min(AmountToDistribute, InputItem->NumericData.MaxStackSize);
 
 		UItemDataBase* NewStackItem = InputItem->CreateItemCopy();
 		NewStackItem->OwningInventory = this;
 		NewStackItem->SetQuantity(AmountForNewStack);
-		InventoryContents.Add(NewStackItem);
+
+		InventoryContents[EmptyIndex] = NewStackItem;   // ★ Add() → 인덱스 대입으로 변경
 
 		AmountToDistribute -= AmountForNewStack;
+		EmptyIndex = InventoryContents.Find(nullptr);   // 다음 빈 슬롯 다시 탐색
 	}
 
 	OnInventoryUpdated.Broadcast();
 
 	// 실제로 인벤토리에 들어간 양 = 요청한 양 - 못 들어간 양
 	return RequestedAddAmount - AmountToDistribute;
+}
+
+int32 UInventoryComponent::GetUsedSlotCount() const
+{
+	int32 Count = 0;
+	for (const TObjectPtr<UItemDataBase>& Item : InventoryContents)
+	{
+		if (Item != nullptr)
+		{
+			Count++;
+		}
+	}
+	return Count;
 }
 
 FItemAddResult UInventoryComponent::HandleAddItem(UItemDataBase* InputItem)
@@ -209,7 +259,11 @@ void UInventoryComponent::AddNewItem(UItemDataBase* Item, int32 AmountToAdd)
 	NewItem->OwningInventory = this;
 	NewItem->SetQuantity(AmountToAdd);
 
-	InventoryContents.Add(NewItem);
+	int32 EmptyIndex = InventoryContents.Find(nullptr);
+	if (EmptyIndex != INDEX_NONE)
+	{
+		InventoryContents[EmptyIndex] = NewItem;
+	}
 	OnInventoryUpdated.Broadcast();
 }
 
@@ -237,7 +291,8 @@ bool UInventoryComponent::MoveItemToHotbar(UItemDataBase* ItemIn, int32 HotbarIn
 		return false;
 	}
 
-	if (!InventoryContents.Contains(ItemIn))
+	int32 FoundIndex = InventoryContents.Find(ItemIn);
+	if (FoundIndex == INDEX_NONE)
 	{
 		return false;
 	}
@@ -245,33 +300,35 @@ bool UInventoryComponent::MoveItemToHotbar(UItemDataBase* ItemIn, int32 HotbarIn
 	RemoveItemFromHotbarIfPresent(ItemIn);
 
 	HotBarContents[HotbarIndex] = ItemIn;
-
-	InventoryContents.RemoveSingle(ItemIn);
+	InventoryContents[FoundIndex] = nullptr;
 
 	OnInventoryUpdated.Broadcast();
 	return true;
 }
 
-bool UInventoryComponent::MoveItemFromHotbarToInventory(int32 HotbarIndex)
+bool UInventoryComponent::MoveItemFromHotbarToInventorySlot(int32 HotbarIndex, int32 TargetInventoryIndex)
 {
-	if (!HotBarContents.IsValidIndex(HotbarIndex))
+	if (!HotBarContents.IsValidIndex(HotbarIndex) || !InventoryContents.IsValidIndex(TargetInventoryIndex))
 	{
 		return false;
 	}
 
-	UItemDataBase* Item = HotBarContents[HotbarIndex];
-	if (!Item)
+	UItemDataBase* HotbarItem = HotBarContents[HotbarIndex];
+	if (!HotbarItem)
 	{
 		return false;
 	}
 
-	if (InventoryContents.Num() + 1 > InventorySlotsCapacity)
-	{
-		return false;
-	}
+	// 목표 슬롯에 이미 아이템이 있으면 자리 교환, 비어있으면 그냥 채움
+	UItemDataBase* ExistingTarget = InventoryContents[TargetInventoryIndex];
 
 	HotBarContents[HotbarIndex] = nullptr;
-	InventoryContents.Add(Item);
+	InventoryContents[TargetInventoryIndex] = HotbarItem;
+
+	if (ExistingTarget)
+	{
+		HotBarContents[HotbarIndex] = ExistingTarget; // 원래 핫바 자리에 교환 대상 넣기
+	}
 
 	OnInventoryUpdated.Broadcast();
 	return true;

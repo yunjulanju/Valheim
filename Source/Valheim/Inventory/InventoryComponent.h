@@ -98,6 +98,12 @@ public:
 
 	UFUNCTION()
 	FORCEINLINE int32 GetSlotsCapacity() const {return InventorySlotsCapacity;};
+	
+	UFUNCTION()
+	bool MoveInventoryItem(int32 FromIndex, int32 ToIndex);
+
+	UFUNCTION()
+	FORCEINLINE UItemDataBase* GetInventoryItem(int32 index) const { return InventoryContents.IsValidIndex(index) ? InventoryContents[index] : nullptr; }
 
 	UFUNCTION()
 	FORCEINLINE TArray<UItemDataBase*> GetInventoryContents() const {return InventoryContents;};
@@ -113,7 +119,8 @@ public:
 
 	UFUNCTION()
 	int32 HandleStackableItems(UItemDataBase* InputItem, int32 RequestedAddAmount);
-
+	UFUNCTION()
+	int32 GetUsedSlotCount() const;
 
 	UFUNCTION()
 	int32 CalculateNumberForFullStack(UItemDataBase* StackableItem, int32 InitialRequestedAddAmount);
@@ -131,9 +138,7 @@ public:
 	bool MoveItemToHotbar(UItemDataBase* ItemIn, int32 HotbarIndex);
 
 	UFUNCTION()
-	bool MoveItemFromHotbarToInventory(int32 HotbarIndex);
-
-
+	bool MoveItemFromHotbarToInventorySlot(int32 HotbarIndex, int32 TargetInventoryIndex);
 
 protected:
 	// Property ///////////////////////////////////////////////

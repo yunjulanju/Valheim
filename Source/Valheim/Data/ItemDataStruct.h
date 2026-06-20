@@ -69,10 +69,10 @@ struct FItemNumericData : public FTableRowBase
     GENERATED_BODY()
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    int MaxStackSize;
+    int MaxStackSize = 1;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    bool bIsStackable;
+    bool bIsStackable = false;
 };
 
 USTRUCT(BlueprintType)

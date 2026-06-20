@@ -9,6 +9,7 @@
 #include "UserInterface/Inventory/DragItemVisual.h"
 #include "ItemDragDropOperation.h"
 #include "Character/Archer.h"
+#include "Inventory/InventoryComponent.h"
 
 
 void UInventoryItemSlot::NativeOnInitialized()
@@ -34,13 +35,21 @@ void UInventoryItemSlot::NativeConstruct()
 		SetToolTip(nullptr); // ºó ½½·ÔÀÌ¸é ÅøÆÁ Á¦°Å
 	}
 
+	RefreshSlot();
+}
+
+void UInventoryItemSlot::RefreshSlot()
+{
+
 	if (ItemReference)
 	{
 		ItemIcon->SetBrushFromTexture(ItemReference->AssetData.ItemImage);
+		ItemIcon->SetVisibility(ESlateVisibility::Visible);
 
 		if (ItemReference->NumericData.bIsStackable)
 		{
 			ItemQuantity->SetText(FText::AsNumber(ItemReference->Quantity));
+			ItemQuantity->SetVisibility(ESlateVisibility::Visible);
 		}
 		else
 		{
@@ -87,6 +96,11 @@ void UInventoryItemSlot::NativeOnDragDetected(const FGeometry& InGeometry, const
 {
 	Super::NativeOnDragDetected(InGeometry, InMouseEvent, OutOperation);
 
+	if (!ItemReference)
+	{
+		return;
+	}
+
 	if (DragItemVisualClass)
 	{
 		const TObjectPtr<UDragItemVisual> DragVisual = CreateWidget<UDragItemVisual>(this, DragItemVisualClass);
@@ -104,7 +118,8 @@ void UInventoryItemSlot::NativeOnDragDetected(const FGeometry& InGeometry, const
 		UItemDragDropOperation* DragItemOperation = NewObject<UItemDragDropOperation>();
 		DragItemOperation->SourceItem = ItemReference;
 		DragItemOperation->SourceInventory = ItemReference->OwningInventory;
-			DragItemOperation->bFromHotbar = false;
+		DragItemOperation->SourceInventoryIndex = SlotIndex;
+		DragItemOperation->bFromHotbar = false;
 		DragItemOperation->SourceHotbarIndex = -1;
 
 		DragItemOperation->DefaultDragVisual = DragVisual;
@@ -116,5 +131,19 @@ void UInventoryItemSlot::NativeOnDragDetected(const FGeometry& InGeometry, const
 
 bool UInventoryItemSlot::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
 {
-	return Super::NativeOnDrop(InGeometry, InDragDropEvent, InOperation);
+	UItemDragDropOperation* DragOp = Cast<UItemDragDropOperation>(InOperation);
+
+	if (!DragOp || !DragOp->SourceInventory)
+	{
+		return Super::NativeOnDrop(InGeometry, InDragDropEvent, InOperation);
+	}
+
+	if (DragOp->bFromHotbar)
+	{
+		return DragOp->SourceInventory->MoveItemFromHotbarToInventorySlot(DragOp->SourceHotbarIndex, SlotIndex);
+	}
+	else
+	{
+		return DragOp->SourceInventory->MoveInventoryItem(DragOp->SourceInventoryIndex, SlotIndex);
+	}
 }

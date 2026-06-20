@@ -28,4 +28,7 @@ public:
 
 	UPROPERTY(VisibleAnywhere)
 	int32 SourceHotbarIndex = -1;
+
+	UPROPERTY(VisibleAnywhere)
+	int32 SourceInventoryIndex = -1;
 };

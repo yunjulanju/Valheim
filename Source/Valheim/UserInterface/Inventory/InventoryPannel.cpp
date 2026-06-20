@@ -14,19 +14,19 @@
 
 void UInventoryPannel::NativeOnInitialized()
 {
-	Super::NativeOnInitialized();
+    Super::NativeOnInitialized();
+    PlayerCharacter = Cast<AArcher>(GetOwningPlayerPawn());
 
-	PlayerCharacter = Cast<AArcher>(GetOwningPlayerPawn());
-	if (PlayerCharacter)
-	{
-		InventoryReference = PlayerCharacter->GetInventory();
-		if (InventoryReference)
-		{
-			InventoryReference->OnInventoryUpdated.AddUObject(this, &UInventoryPannel::RefreshInventory);
-			SetInfoText();
-		}
-	}
+    if (PlayerCharacter)
+    {
+        InventoryReference = PlayerCharacter->GetInventory();
 
+        if (InventoryReference)
+        {
+            InventoryReference->OnInventoryUpdated.AddUObject(this, &UInventoryPannel::RefreshInventory);
+            SetInfoText();
+        }
+    }
 }
 
 void UInventoryPannel::NativeConstruct()
@@ -37,7 +37,7 @@ void UInventoryPannel::NativeConstruct()
 
 void UInventoryPannel::SetInfoText() const
 {
-	CapacityInfo->SetText(FText::Format(FText::FromString("{0}/{1}"), InventoryReference->GetInventoryContents().Num(), InventoryReference->GetSlotsCapacity()));
+    CapacityInfo->SetText(FText::Format(FText::FromString("{0}/{1}"), InventoryReference->GetUsedSlotCount(), InventoryReference->GetSlotsCapacity()));
 }
 
 void UInventoryPannel::RefreshInventory()
@@ -46,28 +46,21 @@ void UInventoryPannel::RefreshInventory()
     {
         InventoryPannel->ClearChildren();
 
-        int32 FilledCount = 0;
+        const int32 Capacity = InventoryReference->GetSlotsCapacity();
 
-        for (UItemDataBase* const& InventoryItem : InventoryReference->GetInventoryContents())
+        for (int32 i = 0; i < Capacity; i++)
         {
-            if (!InventoryItem || InventoryItem->Quantity <= 0) continue;
+            UItemDataBase* Item = InventoryReference->GetInventoryItem(i);
 
             UInventoryItemSlot* ItemSlot = CreateWidget<UInventoryItemSlot>(this, InventorySlotClass);
-            ItemSlot->SetItemReference(InventoryItem);
-            ItemSlot->bShowToolTip = true;
+            ItemSlot->SlotIndex = i;
+            ItemSlot->SetItemReference(Item);
+            ItemSlot->bShowToolTip = (Item != nullptr);
+            ItemSlot->RefreshSlot();
+
             InventoryPannel->AddChildToWrapBox(ItemSlot);
-            FilledCount++;
         }
 
-        // capacity¸¸Å­ ºó ½½·Ô Ã¤¿ì±â
-        const int32 EmptySlotCount = InventoryReference->GetSlotsCapacity() - FilledCount;
-        for (int32 i = 0; i < EmptySlotCount; i++)
-        {
-            UInventoryItemSlot* EmptySlot = CreateWidget<UInventoryItemSlot>(this, InventorySlotClass);
-            EmptySlot->SetItemReference(nullptr);
-            EmptySlot->bShowToolTip = false;
-            InventoryPannel->AddChildToWrapBox(EmptySlot);
-        }
         RefreshHotbar();
         SetInfoText();
     }
@@ -87,16 +80,9 @@ void UInventoryPannel::RefreshHotbar()
             HotBarSlot->HotKeyNumber->SetText(FText::AsNumber(i + 1));
 
             UItemDataBase* HotbarItem = InventoryReference->GetHotbarItem(i);
-
-            if (HotbarItem)
-            {
-                HotBarSlot->SetItemReference(HotbarItem);
-            }
-            else
-            {
-                HotBarSlot->SetItemReference(nullptr);
-            }
-           
+            HotBarSlot->SetItemReference(HotbarItem);
+            HotBarSlot->bShowToolTip = (HotbarItem != nullptr);     
+            HotBarSlot->RefreshSlot();
 
             HotbarBox->AddChildToHorizontalBox(HotBarSlot);
             HotbarSlots.Add(HotBarSlot);
@@ -106,17 +92,5 @@ void UInventoryPannel::RefreshHotbar()
 
 bool UInventoryPannel::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
 {
-    const UItemDragDropOperation* ItemDragDrop = Cast<UItemDragDropOperation>(InOperation);
-
-    if (!ItemDragDrop || !ItemDragDrop->SourceItem || !InventoryReference)
-    {
-        return false;
-    }
-
-    if (ItemDragDrop->bFromHotbar)
-    {
-        return InventoryReference->MoveItemFromHotbarToInventory(ItemDragDrop->SourceHotbarIndex);
-    }
-
-    return true;
+    return false;
 }

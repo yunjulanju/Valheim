@@ -273,7 +273,11 @@ void UInventoryComponent::AddNewItem(UItemDataBase* Item, int32 AmountToAdd)
 
 void UInventoryComponent::RemoveItemFromInventoryOnly(UItemDataBase* ItemToRemove)
 {
-	InventoryContents.RemoveSingle(ItemToRemove);
+	int32 FoundIndex = InventoryContents.Find(ItemToRemove);
+	if (FoundIndex != INDEX_NONE)
+	{
+		InventoryContents[FoundIndex] = nullptr;
+	}
 	OnInventoryUpdated.Broadcast();
 }
 

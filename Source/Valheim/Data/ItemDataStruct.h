@@ -19,7 +19,9 @@ enum class EItemType : uint8
 {
     Heal      UMETA(DisplayName = "Heal"),
     Damage  UMETA(DisplayName = "Damage"),
-    Defense       UMETA(DisplayName = "Defense")
+    Defense       UMETA(DisplayName = "Defense"),
+    Sword  UMETA(DisplayName = "Sword"),
+    Arrow  UMETA(DisplayName = "Arrow")
 };
 
 USTRUCT(BlueprintType)

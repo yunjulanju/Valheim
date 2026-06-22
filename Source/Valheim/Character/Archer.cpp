@@ -78,6 +78,8 @@ void AArcher::BeginPlay()
 		}
 		HUD = Cast<AArcherHUD>(PC->GetHUD());
 	}
+
+	SetActiveHotbarIndex(0);
 }
 
 // Called every frame
@@ -117,6 +119,25 @@ void AArcher::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 		EnhancedInputComponent->BindAction(MenuAction
 			, ETriggerEvent::Started, this, &AArcher::ToggleMenuWidget);
 		
+		// Hotbar Using
+		if (HotbarActions.IsValidIndex(0) && HotbarActions[0])
+			EnhancedInputComponent->BindAction(HotbarActions[0], ETriggerEvent::Started, this, &AArcher::SelectHotbar1);
+		if (HotbarActions.IsValidIndex(1) && HotbarActions[1])
+			EnhancedInputComponent->BindAction(HotbarActions[1], ETriggerEvent::Started, this, &AArcher::SelectHotbar2);
+		if (HotbarActions.IsValidIndex(2) && HotbarActions[2])
+			EnhancedInputComponent->BindAction(HotbarActions[2], ETriggerEvent::Started, this, &AArcher::SelectHotbar3);
+		if (HotbarActions.IsValidIndex(3) && HotbarActions[3])
+			EnhancedInputComponent->BindAction(HotbarActions[3], ETriggerEvent::Started, this, &AArcher::SelectHotbar4);
+		if (HotbarActions.IsValidIndex(4) && HotbarActions[4])
+			EnhancedInputComponent->BindAction(HotbarActions[4], ETriggerEvent::Started, this, &AArcher::SelectHotbar5);
+		if (HotbarActions.IsValidIndex(5) && HotbarActions[5])
+			EnhancedInputComponent->BindAction(HotbarActions[5], ETriggerEvent::Started, this, &AArcher::SelectHotbar6);
+		if (HotbarActions.IsValidIndex(6) && HotbarActions[6])
+			EnhancedInputComponent->BindAction(HotbarActions[6], ETriggerEvent::Started, this, &AArcher::SelectHotbar7);
+		if (HotbarActions.IsValidIndex(7) && HotbarActions[7])
+			EnhancedInputComponent->BindAction(HotbarActions[7], ETriggerEvent::Started, this, &AArcher::SelectHotbar8);
+		if (HotbarActions.IsValidIndex(8) && HotbarActions[8])
+			EnhancedInputComponent->BindAction(HotbarActions[8], ETriggerEvent::Started, this, &AArcher::SelectHotbar9);
 	}
 	else
 	{
@@ -212,22 +233,6 @@ void AArcher::Interaction()
 		DrawDebugLine(GetWorld(), Start, HitResult.ImpactPoint, FColor::Red, false, 1.f, 0, 1.f);
 	}
 
-}
-
-void AArcher::AttachWeapon(ASword* Sword)
-{
-	if (!Sword || !GetMesh())
-	{
-		return;
-	}
-
-	/*Sword->ItemMesh->SetSimulatePhysics(false);
-	Sword->ItemMesh->AttachToComponent(GetMesh(),
-		FAttachmentTransformRules::SnapToTargetNotIncludingScale,
-		FName("RightHandSocket"));*/
-
-
-	Sword->PickItem();
 }
 
 void AArcher::CallAttackCollision()
@@ -350,4 +355,41 @@ float AArcher::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, A
 	HP -= DamageAmount;
 
 	return DamageAmount;
+}
+
+void AArcher::SelectHotbar1() { SetActiveHotbarIndex(0); }
+void AArcher::SelectHotbar2() { SetActiveHotbarIndex(1); }
+void AArcher::SelectHotbar3() { SetActiveHotbarIndex(2); }
+void AArcher::SelectHotbar4() { SetActiveHotbarIndex(3); }
+void AArcher::SelectHotbar5() { SetActiveHotbarIndex(4); }
+void AArcher::SelectHotbar6() { SetActiveHotbarIndex(5); }
+void AArcher::SelectHotbar7() { SetActiveHotbarIndex(6); }
+void AArcher::SelectHotbar8() { SetActiveHotbarIndex(7); }
+void AArcher::SelectHotbar9() { SetActiveHotbarIndex(8); }
+
+void AArcher::SetActiveHotbarIndex(int32 NewIndex)
+{
+	if (!PlayerInventory)
+	{
+		return;
+	}
+
+	ActiveHotbarIndex = NewIndex;
+
+	UItemDataBase* Item = PlayerInventory->GetHotbarItem(ActiveHotbarIndex);
+
+	if (Item && Item->ItemCategory.ItemCategory == EItemCategory::Weapon)
+	{
+		if()
+		EquipWeapon(Item);
+	}
+	else
+	{
+		//UnequipWeapon();
+	}
+}
+
+void AArcher::EquipWeapon(UItemDataBase* Weapon)
+{
+
 }

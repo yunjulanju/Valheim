@@ -70,7 +70,7 @@ protected:
 
 	void Interaction();
 
-	void AttachWeapon(ASword* Sword);
+	void EquipWeapon(UItemDataBase* Weapon);
 
 public:
 	void CallAttackCollision();
@@ -78,6 +78,12 @@ public:
 protected:
 	UFUNCTION(Server, Reliable)
 	void ServerCallAttackCollision();
+
+	void SelectHotbar1(); void SelectHotbar2(); void SelectHotbar3();
+	void SelectHotbar4(); void SelectHotbar5(); void SelectHotbar6();
+	void SelectHotbar7(); void SelectHotbar8(); void SelectHotbar9();
+
+	void SetActiveHotbarIndex(int32 NewIndex);
 
 public:
 	FORCEINLINE bool IsAttacking() const { return bIsAttacking; }
@@ -99,6 +105,9 @@ public:
 	FOnHPChanged OnHPChanged;
 
 protected:
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Hotbar")
+	int32 ActiveHotbarIndex = 0;
 
 	float MaxHP = 100;
 	float HP;
@@ -148,4 +157,8 @@ protected:
 	/** Attack Input Action */
 	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* MenuAction;
+
+	/** Attack HotBar Action */
+	UPROPERTY(EditAnywhere, Category = "Input|Hotbar")
+	TArray<UInputAction*> HotbarActions;
 };

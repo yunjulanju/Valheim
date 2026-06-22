@@ -52,6 +52,10 @@ AArcher::AArcher()
 	SwordMesh->SetupAttachment(GetMesh(), FName("RightHandSocket"));
 	SwordMesh->SetVisibility(false);
 
+	BowMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BowMesh"));
+	BowMesh->SetupAttachment(GetMesh(), FName("RightHandSocket"));
+	BowMesh->SetVisibility(false);
+
 	HP = MaxHP;
 
 	PlayerInventory = CreateDefaultSubobject<UInventoryComponent>(TEXT("Inventory"));
@@ -83,6 +87,7 @@ void AArcher::BeginPlay()
 		PlayerInventory->OnInventoryUpdated.AddUObject(this, &AArcher::RefreshActiveHotbarEquip);
 	}
 	SetActiveHotbarIndex(0);
+	SetEquipType(EEquipType::None);
 }
 
 // Called every frame
@@ -193,11 +198,6 @@ void AArcher::ToggleMenuWidget()
 
 void AArcher::Interaction()
 {
-	if (bEquipWeapon)
-	{
-		return;
-	}
-
 	APlayerController* PC = Cast<APlayerController>(GetController());
 	if (!PC) return;
 
@@ -300,19 +300,11 @@ void AArcher::ServerCallAttackCollision_Implementation()
 				if (!HitActors.Contains(HitActor))
 				{
 					HitActors.Add(HitActor);
-					float Damage;
-					if (bEquipWeapon)
-					{
-						Damage = DefaultDamage * 2;
-					}
-					else
-					{
-						Damage = DefaultDamage;
-					}
-					//UE_LOG(LogTemp, Warning, TEXT("Hit Damage: %f"), Damage);
+					//float Damage;
+
 					UGameplayStatics::ApplyDamage(
 						Monster,
-						Damage,
+						DefaultDamage,
 						GetController(),
 						this,
 						UDamageType::StaticClass() // 데미지 타입
@@ -399,7 +391,12 @@ void AArcher::EquipWeapon(UItemDataBase* Weapon)
 {
 	if (Weapon->ItemCategory.ItemType == EItemType::Sword)
 	{
+		SetEquipType(EEquipType::Sword);
 		SwordMesh->SetVisibility(true);
+	}else if (Weapon->ItemCategory.ItemType == EItemType::Bow)
+	{
+		SetEquipType(EEquipType::Bow);
+		//SwordMesh->SetVisibility(true);
 	}
 }
 

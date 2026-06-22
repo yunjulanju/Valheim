@@ -21,6 +21,7 @@ enum class EItemType : uint8
     Damage  UMETA(DisplayName = "Damage"),
     Defense       UMETA(DisplayName = "Defense"),
     Sword  UMETA(DisplayName = "Sword"),
+    Bow  UMETA(DisplayName = "Bow"),
     Arrow  UMETA(DisplayName = "Arrow")
 };
 

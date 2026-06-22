@@ -6,6 +6,14 @@
 #include "GameFramework/Character.h"
 #include "Archer.generated.h"
 
+UENUM(BlueprintType)
+enum class EEquipType : uint8
+{
+	None    UMETA(DisplayName = "None"),
+	Sword   UMETA(DisplayName = "Sword"),
+	Bow     UMETA(DisplayName = "Bow")
+};
+
 class USpringArmComponent;
 class UCameraComponent;
 class UInputAction;
@@ -23,19 +31,6 @@ UCLASS()
 class VALHEIM_API AArcher : public ACharacter
 {
 	GENERATED_BODY()
-
-protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
-	USpringArmComponent* CameraBoom;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
-	UCameraComponent* FollowCamera;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	UStaticMeshComponent* SwordMesh;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	UInventoryComponent* PlayerInventory;
 
 public:
 	AArcher();
@@ -102,12 +97,31 @@ public:
 	FORCEINLINE float GetCurrentHP() { return HP; }
 	FORCEINLINE float GetCurrentPercentHP() { return HP/MaxHP; }
 
+	//Weapon
+	FORCEINLINE EEquipType GetEquipType() const { return CurrentEquipType; }
+	FORCEINLINE void SetEquipType(EEquipType NewEquipType) { CurrentEquipType = NewEquipType; }
+
+
 	//---------------Property
 
 	UPROPERTY(BlueprintAssignable)
 	FOnHPChanged OnHPChanged;
 
 protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
+	USpringArmComponent* CameraBoom;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
+	UCameraComponent* FollowCamera;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UStaticMeshComponent* SwordMesh;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UStaticMeshComponent* BowMesh;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UInventoryComponent* PlayerInventory;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Hotbar")
 	int32 ActiveHotbarIndex = 0;
@@ -116,7 +130,8 @@ protected:
 	float HP;
 	float DefaultDamage = 10.0f;
 
-	bool bEquipWeapon = false;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Equip")
+	EEquipType CurrentEquipType = EEquipType::None;
 
 	class AArcherPC* PlayerController;
 

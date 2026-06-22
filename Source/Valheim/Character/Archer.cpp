@@ -323,6 +323,18 @@ void AArcher::CallAttack()
 	{
 		return;
 	}
+
+	switch (GetEquipType())
+	{
+	case EEquipType::Bow:
+		break;
+	case EEquipType::Sword:
+		break;
+	case EEquipType::None:
+		break;
+	}
+
+	if()
 	ServerAttack();
 }
 

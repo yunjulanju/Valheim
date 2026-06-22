@@ -71,6 +71,7 @@ protected:
 	void Interaction();
 
 	void EquipWeapon(UItemDataBase* Weapon);
+	void UnequipAllWeapon();
 
 public:
 	void CallAttackCollision();
@@ -84,6 +85,8 @@ protected:
 	void SelectHotbar7(); void SelectHotbar8(); void SelectHotbar9();
 
 	void SetActiveHotbarIndex(int32 NewIndex);
+
+	void RefreshActiveHotbarEquip();
 
 public:
 	FORCEINLINE bool IsAttacking() const { return bIsAttacking; }

@@ -78,7 +78,10 @@ void AArcher::BeginPlay()
 		}
 		HUD = Cast<AArcherHUD>(PC->GetHUD());
 	}
-
+	if (PlayerInventory)
+	{
+		PlayerInventory->OnInventoryUpdated.AddUObject(this, &AArcher::RefreshActiveHotbarEquip);
+	}
 	SetActiveHotbarIndex(0);
 }
 
@@ -357,9 +360,9 @@ float AArcher::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, A
 	return DamageAmount;
 }
 
-void AArcher::SelectHotbar1() { SetActiveHotbarIndex(0); }
-void AArcher::SelectHotbar2() { SetActiveHotbarIndex(1); }
-void AArcher::SelectHotbar3() { SetActiveHotbarIndex(2); }
+void AArcher::SelectHotbar1() { SetActiveHotbarIndex(0);}
+void AArcher::SelectHotbar2() { SetActiveHotbarIndex(1);}
+void AArcher::SelectHotbar3() { SetActiveHotbarIndex(2);}
 void AArcher::SelectHotbar4() { SetActiveHotbarIndex(3); }
 void AArcher::SelectHotbar5() { SetActiveHotbarIndex(4); }
 void AArcher::SelectHotbar6() { SetActiveHotbarIndex(5); }
@@ -369,27 +372,38 @@ void AArcher::SelectHotbar9() { SetActiveHotbarIndex(8); }
 
 void AArcher::SetActiveHotbarIndex(int32 NewIndex)
 {
+	ActiveHotbarIndex = NewIndex;       // ① 여기서 멤버 변수에 저장
+	RefreshActiveHotbarEquip();         // ② 저장된 값을 바탕으로 재검사
+}
+
+void AArcher::RefreshActiveHotbarEquip()
+{
 	if (!PlayerInventory)
 	{
 		return;
 	}
 
-	ActiveHotbarIndex = NewIndex;
-
 	UItemDataBase* Item = PlayerInventory->GetHotbarItem(ActiveHotbarIndex);
 
 	if (Item && Item->ItemCategory.ItemCategory == EItemCategory::Weapon)
 	{
-		if()
 		EquipWeapon(Item);
 	}
 	else
 	{
-		//UnequipWeapon();
+		UnequipAllWeapon();
 	}
 }
 
 void AArcher::EquipWeapon(UItemDataBase* Weapon)
 {
+	if (Weapon->ItemCategory.ItemType == EItemType::Sword)
+	{
+		SwordMesh->SetVisibility(true);
+	}
+}
 
+void AArcher::UnequipAllWeapon()
+{
+	SwordMesh->SetVisibility(false);
 }

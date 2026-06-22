@@ -18,6 +18,7 @@ class USpringArmComponent;
 class UCameraComponent;
 class UInputAction;
 class UInputMappingContext;
+class USkeletalMeshComponent;
 struct FInputActionValue;
 class UAnimMontage;
 class ASword;
@@ -43,6 +44,9 @@ public:
 
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent,
 		AController* EventInstigator, AActor* DamageCauser) override;
+
+	void StartDrawBow();
+	void ReleaseDrawBow();
 
 protected:
 	virtual void BeginPlay() override;
@@ -101,6 +105,8 @@ public:
 	FORCEINLINE EEquipType GetEquipType() const { return CurrentEquipType; }
 	FORCEINLINE void SetEquipType(EEquipType NewEquipType) { CurrentEquipType = NewEquipType; }
 
+	FORCEINLINE bool GetIsDrawing() const { return bIsDrawingBow; }
+
 
 	//---------------Property
 
@@ -118,7 +124,7 @@ protected:
 	UStaticMeshComponent* SwordMesh;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	UStaticMeshComponent* BowMesh;
+	USkeletalMeshComponent* BowMesh;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	UInventoryComponent* PlayerInventory;
@@ -132,6 +138,8 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Equip")
 	EEquipType CurrentEquipType = EEquipType::None;
+
+	bool bIsDrawingBow = false;
 
 	class AArcherPC* PlayerController;
 

@@ -52,8 +52,8 @@ AArcher::AArcher()
 	SwordMesh->SetupAttachment(GetMesh(), FName("RightHandSocket"));
 	SwordMesh->SetVisibility(false);
 
-	BowMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BowMesh"));
-	BowMesh->SetupAttachment(GetMesh(), FName("RightHandSocket"));
+	BowMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("BowMesh"));
+	BowMesh->SetupAttachment(GetMesh(), FName("LeftHandSocket"));
 	BowMesh->SetVisibility(false);
 
 	HP = MaxHP;
@@ -352,6 +352,20 @@ float AArcher::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, A
 	return DamageAmount;
 }
 
+void AArcher::StartDrawBow()
+{
+	bIsDrawingBow = true;
+}
+
+void AArcher::ReleaseDrawBow()
+{
+	if (bIsDrawingBow)
+	{
+		
+	}
+	bIsDrawingBow = false;
+}
+
 void AArcher::SelectHotbar1() { SetActiveHotbarIndex(0);}
 void AArcher::SelectHotbar2() { SetActiveHotbarIndex(1);}
 void AArcher::SelectHotbar3() { SetActiveHotbarIndex(2);}
@@ -364,8 +378,8 @@ void AArcher::SelectHotbar9() { SetActiveHotbarIndex(8); }
 
 void AArcher::SetActiveHotbarIndex(int32 NewIndex)
 {
-	ActiveHotbarIndex = NewIndex;       // ① 여기서 멤버 변수에 저장
-	RefreshActiveHotbarEquip();         // ② 저장된 값을 바탕으로 재검사
+	ActiveHotbarIndex = NewIndex;
+	RefreshActiveHotbarEquip();
 }
 
 void AArcher::RefreshActiveHotbarEquip()
@@ -389,6 +403,7 @@ void AArcher::RefreshActiveHotbarEquip()
 
 void AArcher::EquipWeapon(UItemDataBase* Weapon)
 {
+	UnequipAllWeapon();
 	if (Weapon->ItemCategory.ItemType == EItemType::Sword)
 	{
 		SetEquipType(EEquipType::Sword);
@@ -396,11 +411,12 @@ void AArcher::EquipWeapon(UItemDataBase* Weapon)
 	}else if (Weapon->ItemCategory.ItemType == EItemType::Bow)
 	{
 		SetEquipType(EEquipType::Bow);
-		//SwordMesh->SetVisibility(true);
+		BowMesh->SetVisibility(true);
 	}
 }
 
 void AArcher::UnequipAllWeapon()
 {
 	SwordMesh->SetVisibility(false);
+	BowMesh->SetVisibility(false);
 }

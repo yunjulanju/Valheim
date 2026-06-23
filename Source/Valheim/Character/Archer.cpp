@@ -8,7 +8,6 @@
 #include "Net/UnrealNetwork.h" 
 
 #include "Camera/CameraComponent.h"
-#include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 
@@ -19,10 +18,10 @@
 #include "Kismet/GameplayStatics.h"
 #include <Monster/Monster.h>
 #include <Item/ItemBase.h>
-#include <Item/Sword.h>
 #include "Inventory/InventoryComponent.h"
 #include "UserInterface/ArcherHUD.h"
 #include "Item/ItemDataBase.h"
+#include <Item/Arrow.h>
 
 
 AArcher::AArcher()
@@ -53,6 +52,10 @@ AArcher::AArcher()
 	BowMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("BowMesh"));
 	BowMesh->SetupAttachment(GetMesh(), FName("LeftHandSocket"));
 	BowMesh->SetVisibility(false);
+
+	ArrowMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ArrowMesh"));
+	ArrowMesh->SetupAttachment(GetMesh(), FName("ArrowSocket"));
+	ArrowMesh->SetVisibility(false);
 
 	HP = MaxHP;
 
@@ -242,11 +245,6 @@ void AArcher::Interaction()
 
 }
 
-void AArcher::CallAttackCollision()
-{
-	ServerCallAttackCollision();
-}
-
 void AArcher::DropItem(UItemDataBase* ItemToDrop, const int32 QuantityToDrop)
 {
 	if (PlayerInventory->FindMatchingItem(ItemToDrop))
@@ -278,7 +276,12 @@ void AArcher::SetHP(float NewHP)
 	HP = FMath::Clamp((HP+NewHP), 0, MaxHP);
 	OnHPChanged.Broadcast();
 }
- 
+
+void AArcher::CallAttackCollision()
+{
+	ServerCallAttackCollision();
+}
+
 void AArcher::ServerCallAttackCollision_Implementation()
 {
 	TArray<AActor*> HitActors;
@@ -373,12 +376,26 @@ void AArcher::ReleaseDrawBow()
 	if (GetIsDrawing()) // 화살 여부를 여기서 체크해도 될 듯
 	{
 		ServerRecoil();
-	}
+	}	
 	SetIsDrawing(false);
 }
 
 void AArcher::ServerRecoil_Implementation()
 {
+	FVector SpawnLocation = GetMesh()->GetSocketLocation(FName("LeftHandSocket"));
+	FRotator SpawnRotation = GetControlRotation();
+
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.Owner = this;
+	SpawnParams.Instigator = this;
+
+	AArrow* Arrow = GetWorld()->SpawnActor<AArrow>(ArrowClass, SpawnLocation, SpawnRotation, SpawnParams);
+
+	if (Arrow)
+	{
+		Arrow->InitializeArrow(50, GetController(), this);
+	}
+
 	MultiRecoil();
 }
 

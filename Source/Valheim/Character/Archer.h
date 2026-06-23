@@ -21,10 +21,10 @@ class UInputMappingContext;
 class USkeletalMeshComponent;
 struct FInputActionValue;
 class UAnimMontage;
-class ASword;
 class UStaticMeshComponent;
 class UInventoryComponent;
 class UItemDataBase;
+class AArrow;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnHPChanged);
 
@@ -124,7 +124,7 @@ public:
 	FORCEINLINE void SetIsDrawing(bool Drawing) {bIsDrawingBow = Drawing; }
 
 	FORCEINLINE bool GetIsRecoiling() const { return bIsRecoiling; }
-	FORCEINLINE void SetIsRecoiling(bool Recoiling) { bIsRecoiling = Recoiling; }
+	FORCEINLINE void SetIsRecoiling(bool Recoiling) { bIsRecoiling = Recoiling; ArrowMesh->SetVisibility(Recoiling);}
 
 	//---------------Property
 
@@ -145,6 +145,9 @@ protected:
 	USkeletalMeshComponent* BowMesh;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UStaticMeshComponent* ArrowMesh;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	UInventoryComponent* PlayerInventory;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Hotbar")
@@ -163,6 +166,10 @@ protected:
 	class AArcherPC* PlayerController;
 
 	class AArcherHUD* HUD;
+
+	//Arrow Actor
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Arrow")
+	TSubclassOf<AArrow> ArrowClass;
 
 	//Animation
 	UPROPERTY(EditAnywhere, Category = "Anim")

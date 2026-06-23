@@ -370,11 +370,24 @@ void AArcher::StartDrawBow()
 
 void AArcher::ReleaseDrawBow()
 {
-	if (GetIsDrawing())
+	if (GetIsDrawing()) // 화살 여부를 여기서 체크해도 될 듯
 	{
-
+		ServerRecoil();
 	}
 	SetIsDrawing(false);
+}
+
+void AArcher::ServerRecoil_Implementation()
+{
+	MultiRecoil();
+}
+
+void AArcher::MultiRecoil_Implementation()
+{
+	if (RecoilMontage)
+	{
+		PlayAnimMontage(RecoilMontage);
+	}
 }
 
 void AArcher::EquipWeapon(UItemDataBase* Weapon)

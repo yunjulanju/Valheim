@@ -48,6 +48,8 @@ public:
 	void StartDrawBow();
 	void ReleaseDrawBow();
 
+	
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -71,6 +73,14 @@ protected:
 	void MultiAttack_Implementation();
 
 	void Interaction();
+
+	UFUNCTION(Server, Reliable)
+	void ServerRecoil();
+	void ServerRecoil_Implementation(); 
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MultiRecoil();
+	void MultiRecoil_Implementation();
 
 	void EquipWeapon(UItemDataBase* Weapon);
 	void UnequipAllWeapon();
@@ -157,6 +167,9 @@ protected:
 	//Animation
 	UPROPERTY(EditAnywhere, Category = "Anim")
 	TObjectPtr<UAnimMontage> AttackMontage;
+
+	UPROPERTY(EditAnywhere, Category = "Anim")
+	TObjectPtr<UAnimMontage> RecoilMontage;
 
 	//Input
 	UPROPERTY(EditAnywhere, Category = "Input")

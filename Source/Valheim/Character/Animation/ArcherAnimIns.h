@@ -29,6 +29,9 @@ public:
     UFUNCTION()
     void AnimNotify_Drawing();
 
+    UFUNCTION()
+    void AnimNotify_Recoil();
+
 //PROPERTY
 
     class AArcher* CharacterRef;

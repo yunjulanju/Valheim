@@ -74,6 +74,13 @@ void UArcherAnimIns::AnimNotify_Drawing()
 	if (CharacterRef)
 	{
 		CharacterRef->SetIsRecoiling(true);
-		UE_LOG(LogTemp, Warning, TEXT("UArcherAnimIns SetIsRecoiling"));
+	}
+}
+
+void UArcherAnimIns::AnimNotify_Recoil()
+{
+	if (CharacterRef)
+	{
+		CharacterRef->SetIsRecoiling(false);
 	}
 }

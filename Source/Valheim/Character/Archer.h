@@ -113,6 +113,9 @@ public:
 	FORCEINLINE bool GetIsDrawing() const { return bIsDrawingBow; }
 	FORCEINLINE void SetIsDrawing(bool Drawing) {bIsDrawingBow = Drawing; }
 
+	FORCEINLINE bool GetIsRecoiling() const { return bIsRecoiling; }
+	FORCEINLINE void SetIsRecoiling(bool Recoiling) { bIsRecoiling = Recoiling; }
+
 	//---------------Property
 
 	UPROPERTY(BlueprintAssignable)
@@ -145,6 +148,7 @@ protected:
 	EEquipType CurrentEquipType = EEquipType::None;
 
 	bool bIsDrawingBow = false;
+	bool bIsRecoiling = false;
 
 	class AArcherPC* PlayerController;
 

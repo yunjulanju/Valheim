@@ -26,6 +26,8 @@ public:
     void AnimNotify_AttackEnd();
     UFUNCTION()
     void AnimNotify_Attack();
+    UFUNCTION()
+    void AnimNotify_Drawing();
 
 //PROPERTY
 
@@ -47,6 +49,8 @@ public:
     bool bIsFalling;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
     bool bIsCrouching;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bow")
+    bool bIsDrawingBow;
 
 
 };

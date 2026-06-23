@@ -37,22 +37,28 @@ void UArcherAnimIns::NativeUpdateAnimation(float DeltaTimeX)
 	
 	FVector CurrentAcceleration = CharacterMovementRef->GetCurrentAcceleration();
 
-	bShoudMove = 
-		(Speed > 0.01) && !CurrentAcceleration.IsNearlyZero();
+	bShoudMove = (Speed > 0.01) && !CurrentAcceleration.IsNearlyZero();
 	
 	bIsFalling = CharacterMovementRef->IsFalling();
 	bIsCrouching = CharacterMovementRef->IsCrouching();
+	bIsDrawingBow = CharacterRef->GetIsDrawing();
 
 }
 
 void UArcherAnimIns::AnimNotify_AttackStart()
 {
-	CharacterRef->SetIsAttacking(true);
+	if (CharacterRef)
+	{
+		CharacterRef->SetIsAttacking(true);
+	}
 }
 
 void UArcherAnimIns::AnimNotify_AttackEnd()
 {
-	CharacterRef->SetIsAttacking(false);
+	if (CharacterRef)
+	{
+		CharacterRef->SetIsAttacking(false);
+	}
 }
 
 void UArcherAnimIns::AnimNotify_Attack()
@@ -60,5 +66,14 @@ void UArcherAnimIns::AnimNotify_Attack()
 	if (CharacterRef)
 	{
 		CharacterRef->CallAttackCollision();
+	}
+}
+
+void UArcherAnimIns::AnimNotify_Drawing()
+{
+	if (CharacterRef)
+	{
+		CharacterRef->SetIsRecoiling(true);
+		UE_LOG(LogTemp, Warning, TEXT("UArcherAnimIns SetIsRecoiling"));
 	}
 }

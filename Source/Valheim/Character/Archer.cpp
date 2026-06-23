@@ -90,6 +90,15 @@ void AArcher::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+    // 스프링암 길이 보간
+    const float TargetLength = bIsDrawingBow ? 200.0f : 400.0f;
+    CameraBoom->TargetArmLength = FMath::FInterpTo(
+        CameraBoom->TargetArmLength,
+        TargetLength,
+        DeltaTime,
+        0.5f
+    );
+
 }
 
 void AArcher::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)

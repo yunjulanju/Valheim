@@ -20,7 +20,7 @@ public:
     FVector DrawHandLocation;
 
     UPROPERTY(BlueprintReadOnly, Category = "Bow")
-    bool bIsDrawingBow = false;
+    bool bIsRecoiling = false;
 
 protected:
     virtual void NativeUpdateAnimation(float DeltaSeconds) override;

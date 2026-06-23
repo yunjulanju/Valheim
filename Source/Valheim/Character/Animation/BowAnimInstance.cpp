@@ -22,9 +22,9 @@ void UBowAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
         return;
     }
 
-    bIsDrawingBow = OwningArcher->GetIsDrawing();
+    bIsRecoiling = OwningArcher->GetIsRecoiling();
 
-    if (bIsDrawingBow)
+    if (bIsRecoiling)
     {
         DrawHandLocation = OwningArcher->GetMesh()->GetSocketLocation(FName("RightHandSocket"));
     }

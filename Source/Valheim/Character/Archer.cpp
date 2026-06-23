@@ -382,8 +382,13 @@ void AArcher::ReleaseDrawBow()
 
 void AArcher::ServerRecoil_Implementation()
 {
-	FVector SpawnLocation = GetMesh()->GetSocketLocation(FName("LeftHandSocket"));
-	FRotator SpawnRotation = GetControlRotation();
+	FTransform SocketTransform = BowMesh->GetSocketTransform(TEXT("LeftHandSocket"));
+
+	FVector SpawnLocation =
+		SocketTransform.GetLocation() +
+		SocketTransform.GetRotation().GetForwardVector() * 50.f;
+
+	FRotator SpawnRotation = SocketTransform.GetRotation().Rotator();
 
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.Owner = this;

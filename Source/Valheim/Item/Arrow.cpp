@@ -24,8 +24,8 @@ AArrow::AArrow()
 
 	ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovement"));
 	ProjectileMovement->UpdatedComponent = CollisionBox;
-	ProjectileMovement->InitialSpeed = 3000.f;
-	ProjectileMovement->MaxSpeed = 3000.f;
+	ProjectileMovement->InitialSpeed = 8000.f;
+	ProjectileMovement->MaxSpeed = 8000.f;
 	ProjectileMovement->bRotationFollowsVelocity = true;
 	ProjectileMovement->bShouldBounce = false;
 	ProjectileMovement->ProjectileGravityScale = 1.0f;
@@ -54,6 +54,8 @@ void AArrow::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimi
 	}
 
 	bHasHit = true;
+
+	UE_LOG(LogTemp, Warning, TEXT("Hit : %s"),*GetNameSafe(OtherActor));
 
 	if (AMonster* Monster = Cast<AMonster>(OtherActor))
 	{

@@ -25,10 +25,8 @@
 #include "Item/ItemDataBase.h"
 
 
-// Sets default values
 AArcher::AArcher()
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	bUseControllerRotationPitch = false;
@@ -63,7 +61,6 @@ AArcher::AArcher()
 
 }
 
-// Called when the game starts or when spawned
 void AArcher::BeginPlay()
 {
 	Super::BeginPlay();
@@ -74,7 +71,6 @@ void AArcher::BeginPlay()
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem =
 			ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer()))
 		{
-			// IMC null 체크 필수
 			if (Subsystem)
 			{
 				Subsystem->AddMappingContext(DefaultMappingContext, 0);
@@ -90,14 +86,12 @@ void AArcher::BeginPlay()
 	SetEquipType(EEquipType::None);
 }
 
-// Called every frame
 void AArcher::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
 }
 
-// Called to bind functionality to input
 void AArcher::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -119,6 +113,7 @@ void AArcher::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 		// Attacking
 		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Started, this, &AArcher::CallAttack);
+		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Completed, this, &AArcher::CallAttackRelease);
 
 		// Interacting
 		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &AArcher::Interaction);
@@ -327,15 +322,15 @@ void AArcher::CallAttack()
 	switch (GetEquipType())
 	{
 	case EEquipType::Bow:
+		StartDrawBow();
 		break;
 	case EEquipType::Sword:
+		ServerAttack();
 		break;
 	case EEquipType::None:
+		ServerAttack();
 		break;
-	}
-
-	if()
-	ServerAttack();
+	}	
 }
 
 void AArcher::ServerAttack_Implementation()
@@ -351,6 +346,50 @@ void AArcher::MultiAttack_Implementation()
 	}	
 }
 
+void AArcher::CallAttackRelease()
+{
+	if (GetEquipType() == EEquipType::Bow && GetIsDrawing())
+	{
+		ReleaseDrawBow();
+	}
+}
+
+void AArcher::StartDrawBow()
+{
+	SetIsDrawing(true);
+}
+
+void AArcher::ReleaseDrawBow()
+{
+	if (GetIsDrawing())
+	{
+
+	}
+	SetIsDrawing(false);
+}
+
+void AArcher::EquipWeapon(UItemDataBase* Weapon)
+{
+	UnequipAllWeapon();
+	if (Weapon->ItemCategory.ItemType == EItemType::Sword)
+	{
+		SetEquipType(EEquipType::Sword);
+		SwordMesh->SetVisibility(true);
+	}
+	else if (Weapon->ItemCategory.ItemType == EItemType::Bow)
+	{
+		SetEquipType(EEquipType::Bow);
+		BowMesh->SetVisibility(true);
+	}
+}
+
+void AArcher::UnequipAllWeapon()
+{
+	SwordMesh->SetVisibility(false);
+	BowMesh->SetVisibility(false);
+	SetEquipType(EEquipType::None);
+}
+
 
 void AArcher::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -362,20 +401,6 @@ float AArcher::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, A
 	HP -= DamageAmount;
 
 	return DamageAmount;
-}
-
-void AArcher::StartDrawBow()
-{
-	bIsDrawingBow = true;
-}
-
-void AArcher::ReleaseDrawBow()
-{
-	if (bIsDrawingBow)
-	{
-		
-	}
-	bIsDrawingBow = false;
 }
 
 void AArcher::SelectHotbar1() { SetActiveHotbarIndex(0);}
@@ -411,24 +436,4 @@ void AArcher::RefreshActiveHotbarEquip()
 	{
 		UnequipAllWeapon();
 	}
-}
-
-void AArcher::EquipWeapon(UItemDataBase* Weapon)
-{
-	UnequipAllWeapon();
-	if (Weapon->ItemCategory.ItemType == EItemType::Sword)
-	{
-		SetEquipType(EEquipType::Sword);
-		SwordMesh->SetVisibility(true);
-	}else if (Weapon->ItemCategory.ItemType == EItemType::Bow)
-	{
-		SetEquipType(EEquipType::Bow);
-		BowMesh->SetVisibility(true);
-	}
-}
-
-void AArcher::UnequipAllWeapon()
-{
-	SwordMesh->SetVisibility(false);
-	BowMesh->SetVisibility(false);
 }

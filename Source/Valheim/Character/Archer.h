@@ -62,15 +62,20 @@ protected:
 	void ToggleMenuWidget();
 
 	void CallAttack();
+
 	UFUNCTION(Server, Reliable)
 	void ServerAttack();
+	void ServerAttack_Implementation();
 	UFUNCTION(NetMulticast, Reliable)
 	void MultiAttack();
+	void MultiAttack_Implementation();
 
 	void Interaction();
 
 	void EquipWeapon(UItemDataBase* Weapon);
 	void UnequipAllWeapon();
+
+	void CallAttackRelease();
 
 public:
 	void CallAttackCollision();
@@ -106,7 +111,7 @@ public:
 	FORCEINLINE void SetEquipType(EEquipType NewEquipType) { CurrentEquipType = NewEquipType; }
 
 	FORCEINLINE bool GetIsDrawing() const { return bIsDrawingBow; }
-
+	FORCEINLINE void SetIsDrawing(bool Drawing) {bIsDrawingBow = Drawing; }
 
 	//---------------Property
 

@@ -6,7 +6,7 @@
 #include "GameFramework/Controller.h"
 #include "Valheim.h"
 #include "Net/UnrealNetwork.h" 
-
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -33,6 +33,7 @@ AArcher::AArcher()
 	bUseControllerRotationRoll = false;
 
 	GetCharacterMovement()->bOrientRotationToMovement = true;
+	GetCharacterMovement()->MaxWalkSpeed = DefaultWalkSpeed;
 
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
@@ -94,13 +95,13 @@ void AArcher::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
     // 스프링암 길이 보간
-    const float TargetLength = bIsDrawingBow ? 200.0f : 400.0f;
+    /*const float TargetLength = bIsDrawingBow ? 200.0f : 400.0f;
     CameraBoom->TargetArmLength = FMath::FInterpTo(
         CameraBoom->TargetArmLength,
         TargetLength,
         DeltaTime,
         0.5f
-    );
+    );*/
 
 }
 
@@ -205,13 +206,14 @@ void AArcher::ToggleMenuWidget()
 
 void AArcher::Interaction()
 {
-	APlayerController* PC = Cast<APlayerController>(GetController());
-	if (!PC) return;
+	if (!PlayerController) return;
 
 	float InteractDistance = 1000.0f;
+	float InteractRadius = 30.0f; // 원하는 만큼 조절
+
 	FVector CameraLocation;
 	FRotator CameraRotation;
-	PC->GetPlayerViewPoint(CameraLocation, CameraRotation);
+	PlayerController->GetPlayerViewPoint(CameraLocation, CameraRotation);
 
 	FVector Start = CameraLocation;
 	FVector End = Start + CameraRotation.Vector() * InteractDistance;
@@ -220,15 +222,19 @@ void AArcher::Interaction()
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(this); // 자기 자신 무시
 
-	bool bHit = GetWorld()->LineTraceSingleByChannel(
+	FCollisionShape SphereShape = FCollisionShape::MakeSphere(InteractRadius);
+
+	bool bHit = GetWorld()->SweepSingleByChannel(
 		HitResult,
 		Start,
 		End,
-		ECC_WorldDynamic
+		FQuat::Identity,
+		ECC_WorldDynamic,
+		SphereShape,
+		Params // 여기 빠져있던 Params 적용
 	);
 
-	DrawDebugLine(
-		GetWorld(),Start,End,FColor::Green,false,1.f,0,1.f);
+	DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 1.f, 0, 1.f);
 
 	if (bHit)
 	{
@@ -238,11 +244,10 @@ void AArcher::Interaction()
 			HitItem->TakePickUp(this);
 		}
 
-		//DebugLine
-		DrawDebugPoint(GetWorld(), HitResult.ImpactPoint, 10.f, FColor::Red, false, 1.f);
+		// DebugLine - 구 모양으로 그려서 실제 범위 확인
+		DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, InteractRadius, 12, FColor::Red, false, 1.f);
 		DrawDebugLine(GetWorld(), Start, HitResult.ImpactPoint, FColor::Red, false, 1.f, 0, 1.f);
 	}
-
 }
 
 void AArcher::DropItem(UItemDataBase* ItemToDrop, const int32 QuantityToDrop)
@@ -369,6 +374,9 @@ void AArcher::CallAttackRelease()
 void AArcher::StartDrawBow()
 {
 	SetIsDrawing(true);
+	GetCharacterMovement()->MaxWalkSpeed= DrawingWalkSpeed;
+	GetCharacterMovement()->bOrientRotationToMovement = false;
+	bUseControllerRotationYaw = true;
 }
 
 void AArcher::ReleaseDrawBow()
@@ -378,24 +386,43 @@ void AArcher::ReleaseDrawBow()
 		ServerRecoil();
 	}	
 	SetIsDrawing(false);
+	GetCharacterMovement()->MaxWalkSpeed = DefaultWalkSpeed;
+	GetCharacterMovement()->bOrientRotationToMovement = true;
+	bUseControllerRotationYaw = false;
 }
 
 void AArcher::ServerRecoil_Implementation()
 {
+	if (!PlayerController) return;
+
+	FVector CameraLocation;
+	FRotator CameraRotation;
+	PlayerController->GetPlayerViewPoint(CameraLocation, CameraRotation);
+
+	FVector TraceStart = CameraLocation;
+	FVector TraceEnd = TraceStart + CameraRotation.Vector() * 10000.f;
+
+	FHitResult HitResult;
+	FCollisionQueryParams TraceParams;
+	TraceParams.AddIgnoredActor(this);
+
+	FVector AimPoint = TraceEnd;
+	if (GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECC_Visibility, TraceParams))
+	{
+		AimPoint = HitResult.ImpactPoint;
+	}
+
 	FTransform SocketTransform = BowMesh->GetSocketTransform(TEXT("LeftHandSocket"));
+	FVector SocketLocation = SocketTransform.GetLocation();
 
-	FVector SpawnLocation =
-		SocketTransform.GetLocation() +
-		SocketTransform.GetRotation().GetForwardVector() * 50.f;
-
-	FRotator SpawnRotation = SocketTransform.GetRotation().Rotator();
+	FVector FireDirection = (AimPoint - SocketLocation).GetSafeNormal();
+	FRotator SpawnRotation = FireDirection.Rotation();
+	FVector SpawnLocation = SocketLocation + FireDirection * 50.f;
 
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.Owner = this;
 	SpawnParams.Instigator = this;
-
 	AArrow* Arrow = GetWorld()->SpawnActor<AArrow>(ArrowClass, SpawnLocation, SpawnRotation, SpawnParams);
-
 	if (Arrow)
 	{
 		Arrow->InitializeArrow(50, GetController(), this);

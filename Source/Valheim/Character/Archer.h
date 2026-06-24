@@ -163,6 +163,9 @@ protected:
 	bool bIsDrawingBow = false;
 	bool bIsRecoiling = false;
 
+	float DrawingWalkSpeed = 400;
+	float DefaultWalkSpeed = 600;
+
 	class AArcherPC* PlayerController;
 
 	class AArcherHUD* HUD;

@@ -24,8 +24,8 @@ AArrow::AArrow()
 
 	ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovement"));
 	ProjectileMovement->UpdatedComponent = CollisionBox;
-	ProjectileMovement->InitialSpeed = 8000.f;
-	ProjectileMovement->MaxSpeed = 8000.f;
+	ProjectileMovement->InitialSpeed = 6000;
+	ProjectileMovement->MaxSpeed = 6000;
 	ProjectileMovement->bRotationFollowsVelocity = true;
 	ProjectileMovement->bShouldBounce = false;
 	ProjectileMovement->ProjectileGravityScale = 1.0f;

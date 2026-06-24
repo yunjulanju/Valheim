@@ -12,12 +12,14 @@ AItemBase::AItemBase()
 {
 	PrimaryActorTick.bCanEverTick = false;
 
-	BoxCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxCollision"));
-	SetRootComponent(BoxCollision);
-
 	ItemMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ItemMesh"));
+	SetRootComponent(ItemMesh);
 	ItemMesh->SetSimulatePhysics(true);
-	ItemMesh->SetupAttachment(BoxCollision);
+	ItemMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+
+	BoxCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxCollision"));
+	BoxCollision->SetupAttachment(ItemMesh);
+	BoxCollision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 }
 
 void AItemBase::BeginPlay()

@@ -22,6 +22,9 @@ public:
     bool GetQuestData(FName QuestID, FQuestData& OutData) const;
 
     UFUNCTION(BlueprintCallable, Category = "Quest")
+    TArray<FName> GetQuestsByGiver(FName NPCID) const;
+
+    UFUNCTION(BlueprintCallable, Category = "Quest")
     bool DoesQuestExist(FName QuestID) const;
 
 protected:
@@ -30,6 +33,7 @@ protected:
 
 private:
     TMap<FName, FQuestData*> QuestDataCache;
+    TMap<FName, TArray<FName>> QuestsByGiverCache;
 
     void BuildQuestCache();
 };

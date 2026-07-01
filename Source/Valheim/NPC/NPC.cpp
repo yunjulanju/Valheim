@@ -2,33 +2,82 @@
 
 
 #include "NPC/NPC.h"
+#include "Quest/QuestSubsystem.h"
+#include "Character/ArcherPS.h"
 
-// Sets default values
 ANPC::ANPC()
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 }
 
-// Called when the game starts or when spawned
 void ANPC::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (GetGameInstance())
+	{
+		QuestSubsystem = GetGameInstance()->GetSubsystem<UQuestSubsystem>();
+	}
+
+	CachedQuestIDs = QuestSubsystem->GetQuestsByGiver(NPCID);
 	
 }
 
-// Called every frame
 void ANPC::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
 }
 
-// Called to bind functionality to input
 void ANPC::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 }
 
+void ANPC::Interact(APawn* Interactor)
+{
+	if (!Interactor)
+	{
+		return;
+	}
+
+	AArcherPS* QuestPlayerState = Interactor->GetPlayerState<AArcherPS>();
+	if (!QuestPlayerState)
+	{
+		return;
+	}
+
+	HandleQuestInteraction(QuestPlayerState);
+}
+
+void ANPC::HandleQuestInteraction(AArcherPS* QuestPlayerState)
+{
+
+	if (!QuestPlayerState)
+	{
+		return;
+	}
+
+	for (const FName& QuestID : CachedQuestIDs)
+	{
+		if (QuestPlayerState->IsQuestCompleted(QuestID))
+		{
+			continue;
+		}
+
+		FActiveQuest ActiveQuest;
+		if (QuestPlayerState->GetActiveQuest(QuestID, ActiveQuest))
+		{
+			if (ActiveQuest.Status == EQuestStatus::ReadyToComplete)
+			{
+				QuestPlayerState->CompleteQuest(QuestID);
+			}
+			continue;
+		}
+
+		QuestPlayerState->AcceptQuest(QuestID);
+		return;
+	}
+}

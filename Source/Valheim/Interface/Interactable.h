@@ -20,7 +20,5 @@ class VALHEIM_API IInteractable
 	GENERATED_BODY()
 
 public:
-
-	UFUNCTION(BlueprintNativeEvent, Category = "Interaction")
-	void Interact(APawn* Interactor);
+	virtual void Interact(APawn* Interactor);
 };

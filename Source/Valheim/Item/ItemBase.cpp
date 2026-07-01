@@ -138,3 +138,49 @@ void AItemBase::TakePickUp(const AArcher* Taker)
 		}
 	}	
 }
+
+void AItemBase::Interact(APawn* Interactor)
+{
+	if (!Interactor)
+	{
+		return;
+	}
+
+	AArcher* Taker = Cast<AArcher>(Interactor);
+	if (!Taker)
+	{
+		return;
+	}
+
+	if (!IsPendingKillPending())
+	{
+		if (ItemReference)
+		{
+			//인벤토리
+			if (UInventoryComponent* PlayerInventory = Taker->GetInventory())
+			{
+
+				ItemReference->bIsPickup = true;
+				const FItemAddResult AddResult = PlayerInventory->HandleAddItem(ItemReference);
+
+				switch (AddResult.OperationResult)
+				{
+				case EItemAddResult::NoItemAdded:
+					break;
+				case EItemAddResult::PartialItemAdded:
+					break;
+				case EItemAddResult::AllItemAdded:
+					Destroy();
+					break;
+				}
+			}
+			else {
+				UE_LOG(LogTemp, Warning, TEXT("PlayerInventory NO"))
+			}
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("ItemReference NO"))
+		}
+	}
+}

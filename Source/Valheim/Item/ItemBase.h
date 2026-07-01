@@ -5,13 +5,14 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Data/ItemDataStruct.h"
+#include "Interface/Interactable.h"
 #include "ItemBase.generated.h"
 
 
 class UItemDataBase;
 class AArcher;
 UCLASS()
-class VALHEIM_API AItemBase : public AActor
+class VALHEIM_API AItemBase : public AActor, public IInteractable
 {
 	GENERATED_BODY()
 
@@ -31,6 +32,8 @@ public:
 
     UFUNCTION()
     void TakePickUp(const AArcher* Taker);
+
+    virtual void Interact(APawn* Interactor) override;
 
 
 protected:

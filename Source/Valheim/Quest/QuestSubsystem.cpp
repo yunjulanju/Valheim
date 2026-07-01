@@ -28,6 +28,15 @@ bool UQuestSubsystem::GetQuestData(FName QuestID, FQuestData& OutData) const
 	return false;
 }
 
+TArray<FName> UQuestSubsystem::GetQuestsByGiver(FName NPCID) const
+{
+    if (const TArray<FName>* Found = QuestsByGiverCache.Find(NPCID))
+    {
+        return *Found;
+    }
+    return TArray<FName>();
+}
+
 bool UQuestSubsystem::DoesQuestExist(FName QuestID) const
 {
     return QuestDataCache.Contains(QuestID);
@@ -36,6 +45,7 @@ bool UQuestSubsystem::DoesQuestExist(FName QuestID) const
 void UQuestSubsystem::BuildQuestCache()
 {
     QuestDataCache.Empty();
+    QuestsByGiverCache.Empty();
 
     if (!QuestDataTable)
     {
@@ -50,6 +60,7 @@ void UQuestSubsystem::BuildQuestCache()
         if (FQuestData* Row = QuestDataTable->FindRow<FQuestData>(RowName, ContextString))
         {
             QuestDataCache.Add(RowName, Row);
+            QuestsByGiverCache.FindOrAdd(Row->NPCID).Add(RowName);
         }
     }
 

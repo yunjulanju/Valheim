@@ -3,27 +3,39 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Interface/Interactable.h"
 #include "GameFramework/Character.h"
 #include "NPC.generated.h"
 
+
+class UQuestSubsystem;
+class AArcherPS;
 UCLASS()
-class VALHEIM_API ANPC : public ACharacter
+class VALHEIM_API ANPC : public ACharacter, public IInteractable
 {
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this character's properties
 	ANPC();
 
+	UPROPERTY(EditAnywhere, Category = "Quest")
+	FName NPCID;
+
+	virtual void Interact(APawn* Interactor) override;
+
 protected:
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	UPROPERTY()
+	TArray<FName> CachedQuestIDs;
+
+	void HandleQuestInteraction(class AArcherPS* QuestPlayerState);
+
+	const UQuestSubsystem* QuestSubsystem;
+
 public:	
-	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 };

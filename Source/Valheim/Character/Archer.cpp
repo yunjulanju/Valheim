@@ -22,6 +22,7 @@
 #include "UserInterface/ArcherHUD.h"
 #include "Item/ItemDataBase.h"
 #include <Item/Arrow.h>
+#include "Interface/Interactable.h"
 
 
 AArcher::AArcher()
@@ -93,15 +94,6 @@ void AArcher::BeginPlay()
 void AArcher::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-    // 스프링암 길이 보간
-    /*const float TargetLength = bIsDrawingBow ? 200.0f : 400.0f;
-    CameraBoom->TargetArmLength = FMath::FInterpTo(
-        CameraBoom->TargetArmLength,
-        TargetLength,
-        DeltaTime,
-        0.5f
-    );*/
 
 }
 
@@ -231,19 +223,20 @@ void AArcher::Interaction()
 		FQuat::Identity,
 		ECC_WorldDynamic,
 		SphereShape,
-		Params // 여기 빠져있던 Params 적용
+		Params
 	);
-
 	DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 1.f, 0, 1.f);
 
 	if (bHit)
 	{
-		AItemBase* HitItem = Cast<AItemBase>(HitResult.GetActor());
-		if (HitItem)
+		IInteractable* HitObject = Cast<IInteractable>(HitResult.GetActor());
+		if (HitObject)
 		{
-			HitItem->TakePickUp(this);
+			HitObject->Interact(this);
+			UE_LOG(LogTemp, Warning, TEXT("Interaction HitObject->Interact(this)"));
 		}
-
+		
+		
 		// DebugLine - 구 모양으로 그려서 실제 범위 확인
 		DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, InteractRadius, 12, FColor::Red, false, 1.f);
 		DrawDebugLine(GetWorld(), Start, HitResult.ImpactPoint, FColor::Red, false, 1.f, 0, 1.f);

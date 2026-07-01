@@ -30,6 +30,9 @@ struct FQuestData : public FTableRowBase
     FName QuestID;
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly)
+    FName NPCID;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly)
     FText Title;
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly)

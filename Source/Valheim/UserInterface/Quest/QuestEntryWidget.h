@@ -26,4 +26,6 @@ public:
 
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* Amount;
+
+	void SetInfo(FText InTitle, FText InDescription, int32 InAmount);
 };

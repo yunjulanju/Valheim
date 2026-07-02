@@ -25,22 +25,27 @@ void AArcherPS::BeginPlay()
 
 bool AArcherPS::AcceptQuest(FName QuestID)
 {
+	UE_LOG(LogTemp, Warning, TEXT("AArcherPS::AcceptQuest(FName QuestID)"))
 	if (!HasAuthority())
 	{
+		UE_LOG(LogTemp, Warning, TEXT("AArcherPS::AcceptQuest(FName QuestID) !HasAuthority()"))
 		return false;
 	}
 	if (IsQuestCompleted(QuestID))
 	{
+		UE_LOG(LogTemp, Warning, TEXT("AArcherPS::AcceptQuest(FName QuestID) IsQuestCompleted(QuestID)"))
 		return false;
 	}
 	if (!QuestSubsystem || !QuestSubsystem->DoesQuestExist(QuestID))
 	{
+		UE_LOG(LogTemp, Warning, TEXT("AArcherPS::AcceptQuest(FName QuestID) !QuestSubsystem"))
 		return false;
 	}
 
 	FActiveQuest ExistingQuest;
 	if (GetActiveQuest(QuestID, ExistingQuest))
 	{
+		UE_LOG(LogTemp, Warning, TEXT("AArcherPS::AcceptQuest(FName QuestID) GetActiveQuest(QuestID, ExistingQuest)"))
 		return false;
 	}
 

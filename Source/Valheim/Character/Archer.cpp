@@ -233,7 +233,7 @@ void AArcher::Interaction()
 		if (HitObject)
 		{
 			HitObject->Interact(this);
-			UE_LOG(LogTemp, Warning, TEXT("Interaction HitObject->Interact(this)"));
+			//UE_LOG(LogTemp, Warning, TEXT("Interaction HitObject->Interact(this)"));
 		}
 		
 		

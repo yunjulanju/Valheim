@@ -4,6 +4,7 @@
 #include "NPC/NPC.h"
 #include "Quest/QuestSubsystem.h"
 #include "Character/ArcherPS.h"
+#include <Character/Archer.h>
 
 ANPC::ANPC()
 {
@@ -40,12 +41,21 @@ void ANPC::Interact(APawn* Interactor)
 {
 	if (!Interactor)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("ANPC::Interact !Interactor"))
 		return;
 	}
 
-	AArcherPS* QuestPlayerState = Interactor->GetPlayerState<AArcherPS>();
+	AArcher* Taker = Cast<AArcher>(Interactor);
+	if (!Taker)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("ANPC::Interact !Taker"))
+		return;
+	}
+
+	AArcherPS* QuestPlayerState = Taker->GetPlayerState<AArcherPS>();
 	if (!QuestPlayerState)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("ANPC::Interact !QuestPlayerState"))
 		return;
 	}
 
@@ -54,9 +64,10 @@ void ANPC::Interact(APawn* Interactor)
 
 void ANPC::HandleQuestInteraction(AArcherPS* QuestPlayerState)
 {
-
+	UE_LOG(LogTemp, Warning, TEXT("ANPC::HandleQuestInteraction"))
 	if (!QuestPlayerState)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("ANPC::HandleQuestInteraction !QuestPlayerState"))
 		return;
 	}
 

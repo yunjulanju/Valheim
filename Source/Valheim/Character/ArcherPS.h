@@ -28,7 +28,7 @@ public:
 	bool AbandonQuest(FName QuestID);
 
 	UFUNCTION(BlueprintCallable, Category = "Quest")
-	void UpdateQuestProgress(FName QuestID, int32 Amount);
+	void UpdateQuestProgressByEvent(EQuestType Type, FName TargetID, int32 Amount);
 
 	UFUNCTION(BlueprintCallable, Category = "Quest")
 	bool CompleteQuest(FName QuestID);
@@ -41,6 +41,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Quest")
 	const TArray<FActiveQuest>& GetActiveQuests() const { return ActiveQuests; }
+	
 
 	UPROPERTY(BlueprintAssignable, Category = "Quest")
 	FOnActiveQuestsChanged OnActiveQuestsChanged;

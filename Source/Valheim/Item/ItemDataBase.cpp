@@ -4,6 +4,7 @@
 #include "Item/ItemDataBase.h"
 #include "Inventory/InventoryComponent.h"
 #include "Character/Archer.h"
+#include <Character/ArcherPS.h>
 
 UItemDataBase::UItemDataBase() : bIsCopy(false), bIsPickup(false)
 {
@@ -26,6 +27,12 @@ void UItemDataBase::Use(AArcher* User)
 	{
 		return;
 	}
+	AArcherPS* ArcherPS = User->GetPlayerState<AArcherPS>();
+	if (!ArcherPS)
+	{
+		return;
+	}
+	ArcherPS->UpdateQuestProgressByEvent(EQuestType::UseItem, ItemID, 1);
 
 	switch (ItemCategory.ItemType)
 	{

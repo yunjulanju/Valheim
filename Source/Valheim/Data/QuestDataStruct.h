@@ -42,10 +42,10 @@ struct FQuestData : public FTableRowBase
     EQuestType Type;
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly)
-    int32 RequiredAmount = 1;
+    FName TargetID; //몬스터 이름, 아이템 이름으로
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly)
-    FVector TargetLocation = FVector::ZeroVector;
+    int32 RequiredAmount = 1;
 
     // 보상
     UPROPERTY(EditAnywhere, BlueprintReadOnly)

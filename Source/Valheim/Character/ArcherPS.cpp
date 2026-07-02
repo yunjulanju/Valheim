@@ -79,42 +79,6 @@ bool AArcherPS::AbandonQuest(FName QuestID)
 	return false;
 }
 
-void AArcherPS::UpdateQuestProgress(FName QuestID, int32 Amount)
-{
-	if (!HasAuthority())
-	{
-		return;
-	}
-
-	for (FActiveQuest& Quest : ActiveQuests)
-	{
-		if (Quest.QuestID == QuestID)
-		{
-			if (Quest.Status != EQuestStatus::InProgress)
-			{
-				return;
-			}
-
-			FQuestData QuestData;
-			if (!QuestSubsystem || !QuestSubsystem->GetQuestData(QuestID, QuestData))
-			{
-				return;
-			}
-
-			//여긴 아직 퀘스트 타입에 따라 다름
-			Quest.CurrentAmount = FMath::Clamp(Quest.CurrentAmount + Amount, 0, QuestData.RequiredAmount);
-
-			if (Quest.CurrentAmount >= QuestData.RequiredAmount)
-			{
-				Quest.Status = EQuestStatus::ReadyToComplete;
-			}
-
-			OnActiveQuestsChanged.Broadcast();
-			return;
-		}
-	}
-}
-
 bool AArcherPS::CompleteQuest(FName QuestID)
 {
 	if (!HasAuthority())
@@ -152,6 +116,48 @@ bool AArcherPS::GetActiveQuest(FName QuestID, FActiveQuest& OutActiveQuest) cons
 		}
 	}
 	return false;
+}
+
+void AArcherPS::UpdateQuestProgressByEvent(EQuestType Type, FName TargetID, int32 Amount)
+{
+	if (!HasAuthority())
+	{
+		return;
+	}
+
+	if (!QuestSubsystem)
+	{
+		return;
+	}
+
+	for (FActiveQuest& Quest : ActiveQuests)
+	{
+		if (Quest.Status != EQuestStatus::InProgress)
+		{
+			continue;
+		}
+
+		FQuestData QuestData;
+		if (!QuestSubsystem->GetQuestData(Quest.QuestID, QuestData))
+		{
+			continue;
+		}
+
+		if (QuestData.Type != Type || QuestData.TargetID != TargetID)
+		{
+			continue;
+		}
+
+		//여긴 아직 퀘스트 타입에 따라 다름
+		Quest.CurrentAmount = FMath::Clamp(Quest.CurrentAmount + Amount, 0, QuestData.RequiredAmount);
+
+		if (Quest.CurrentAmount >= QuestData.RequiredAmount)
+		{
+			Quest.Status = EQuestStatus::ReadyToComplete;
+		}
+
+		OnActiveQuestsChanged.Broadcast();
+	}
 }
 
 void AArcherPS::OnRep_ActiveQuests()

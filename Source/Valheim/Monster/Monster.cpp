@@ -5,6 +5,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Character/Archer.h"
 #include "Monster/MonsterAIController.h"
+#include <Character/ArcherPS.h>
 
 // Sets default values
 AMonster::AMonster()
@@ -47,12 +48,21 @@ float AMonster::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, 
 	UE_LOG(LogTemp, Warning, TEXT("Monster HP: %f"), HP);
 
 	if (HP <= 0)
-	{
+	{	
+		AArcher* Causer = Cast<AArcher>(DamageCauser);
+		if (Causer)
+		{
+			AArcherPS* ArcherPS = Causer->GetPlayerState<AArcherPS>();
+			if (ArcherPS)
+			{
+				ArcherPS->UpdateQuestProgressByEvent(EQuestType::Kill, MonsterID, 1);
+			}
+		}
+
 		if (!MonsterAIController)
 		{
 			return DamageAmount;
 		}
-		UE_LOG(LogTemp, Warning, TEXT("MonsterAIController"));
 		MonsterAIController->StopAI();
 		CallDeathAnimation();
 	}

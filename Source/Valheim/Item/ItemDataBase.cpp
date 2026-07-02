@@ -28,11 +28,10 @@ void UItemDataBase::Use(AArcher* User)
 		return;
 	}
 	AArcherPS* ArcherPS = User->GetPlayerState<AArcherPS>();
-	if (!ArcherPS)
+	if (ArcherPS)
 	{
-		return;
+		ArcherPS->UpdateQuestProgressByEvent(EQuestType::UseItem, ItemID, 1);
 	}
-	ArcherPS->UpdateQuestProgressByEvent(EQuestType::UseItem, ItemID, 1);
 
 	switch (ItemCategory.ItemType)
 	{

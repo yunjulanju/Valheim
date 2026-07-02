@@ -71,4 +71,6 @@ protected:
 
 	float HP;
 
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	FName MonsterID;
 };

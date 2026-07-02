@@ -25,8 +25,6 @@ public:
 	UFUNCTION()
 	void UpdateQuestList();
 
-
-
 	UPROPERTY(meta = (BindWidget))
 	UVerticalBox* QuestList;
 
@@ -34,6 +32,5 @@ public:
 	TSubclassOf<UQuestEntryWidget> QuestEntryWidgetClass;
 
 	AArcherPS* ArcherPS;
-
 	const UQuestSubsystem* QuestSubsystem;
 };

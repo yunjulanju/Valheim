@@ -462,8 +462,10 @@ void AArcher::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeP
 
 float AArcher::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	HP -= DamageAmount;
+	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
+	float InDamage = (- 1)* DamageAmount;
+	SetHP(InDamage);
 	return DamageAmount;
 }
 

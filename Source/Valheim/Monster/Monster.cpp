@@ -83,7 +83,7 @@ void AMonster::ServerCallAttackCollision_Implementation()
 {
 	TArray<AActor*> HitActors;
 	TArray<FHitResult> OutHits;
-	FVector SpawnLocation = GetActorLocation() + (GetActorForwardVector() * 140.f);
+	FVector SpawnLocation = GetActorLocation() + (GetActorForwardVector() * 150.f);
 	float SphereRadius = 60.0f;
 	FCollisionShape MySphere = FCollisionShape::MakeSphere(SphereRadius);
 	bool bIsHit = GetWorld()->SweepMultiByChannel(
@@ -104,7 +104,6 @@ void AMonster::ServerCallAttackCollision_Implementation()
 				if (!HitActors.Contains(HitActor))
 				{
 					HitActors.Add(HitActor);
-					UE_LOG(LogTemp, Warning, TEXT("Hit Archer: %s"), *Archer->GetName());
 					UGameplayStatics::ApplyDamage(
 						Archer,
 						10.f,

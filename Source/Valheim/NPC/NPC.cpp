@@ -85,7 +85,7 @@ void ANPC::HandleQuestInteraction(AArcherPS* QuestPlayerState)
 			{
 				QuestPlayerState->CompleteQuest(QuestID);
 			}
-			continue;
+			return;
 		}
 
 		QuestPlayerState->AcceptQuest(QuestID);

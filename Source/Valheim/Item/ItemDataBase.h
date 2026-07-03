@@ -19,8 +19,9 @@ class VALHEIM_API UItemDataBase : public UObject
 public:
     //------------------------------Function ////
     UItemDataBase();
+    virtual bool IsSupportedForNetworking() const override { return true; }
 
-    UItemDataBase* CreateItemCopy() const;
+    UItemDataBase* CreateItemCopy(UObject* Outer) const;
 
     UFUNCTION()
     FORCEINLINE bool IsStackable() const { return NumericData.bIsStackable; };

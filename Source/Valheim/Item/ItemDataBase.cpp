@@ -49,9 +49,9 @@ void UItemDataBase::Use(AArcher* User)
 	OwningInventory->RemoveAmountOfItem(this, 1);
 }
 
-UItemDataBase* UItemDataBase::CreateItemCopy() const
+UItemDataBase* UItemDataBase::CreateItemCopy(UObject* Outer) const
 {
-	UItemDataBase* ItemCopy = NewObject<UItemDataBase>();
+	UItemDataBase* ItemCopy = NewObject<UItemDataBase>(Outer);
 
 	ItemCopy->ItemID = this->ItemID;
 	ItemCopy->ItemCategory = this->ItemCategory;

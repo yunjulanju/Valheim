@@ -3,9 +3,12 @@
 
 #include "Inventory/InventoryComponent.h"
 #include "Item/ItemDataBase.h"
+#include "Net/UnrealNetwork.h" 
 
 UInventoryComponent::UInventoryComponent()
 {
+	SetIsReplicatedByDefault(true);
+	//bReplicateUsingRegisteredSubObjectList = true;
 	PrimaryComponentTick.bCanEverTick = false;
 }
 
@@ -77,6 +80,11 @@ void UInventoryComponent::RemoveSingleInstanceOfItem(UItemDataBase* ItemToRemove
 	if (FoundIndex != INDEX_NONE)
 	{
 		InventoryContents[FoundIndex] = nullptr;
+
+		if (GetOwner() && GetOwner()->HasAuthority())
+		{
+			RemoveReplicatedSubObject(ItemToRemove);
+		}
 	}
 	RemoveItemFromHotbarIfPresent(ItemToRemove);
 	OnInventoryUpdated.Broadcast();
@@ -182,11 +190,17 @@ int32 UInventoryComponent::HandleStackableItems(UItemDataBase* InputItem, int32 
 	{
 		const int32 AmountForNewStack = FMath::Min(AmountToDistribute, InputItem->NumericData.MaxStackSize);
 
-		UItemDataBase* NewStackItem = InputItem->CreateItemCopy();
+		UItemDataBase* NewStackItem = InputItem->CreateItemCopy(this);
 		NewStackItem->OwningInventory = this;
 		NewStackItem->SetQuantity(AmountForNewStack);
 
-		InventoryContents[EmptyIndex] = NewStackItem;   // ★ Add() → 인덱스 대입으로 변경
+		InventoryContents[EmptyIndex] = NewStackItem; 
+		
+		if (GetOwner() && GetOwner()->HasAuthority())
+		{
+			AddReplicatedSubObject(NewStackItem);
+			UE_LOG(LogTemp, Warning, TEXT("AddReplicatedSubObject called for %s"), *NewStackItem->GetName());
+		}
 
 		AmountToDistribute -= AmountForNewStack;
 		EmptyIndex = InventoryContents.Find(nullptr);   // 다음 빈 슬롯 다시 탐색
@@ -254,10 +268,11 @@ void UInventoryComponent::AddNewItem(UItemDataBase* Item, int32 AmountToAdd)
 	{ //땅에 있는 것을 줍는 거라 copy가 필요 없음.
 		NewItem = Item;
 		NewItem->ResetItemFlags();
+		NewItem->Rename(nullptr, this);
 	}
 	else
 	{
-		NewItem = Item->CreateItemCopy();
+		NewItem = Item->CreateItemCopy(this);
 	}
 
 	NewItem->OwningInventory = this;
@@ -267,6 +282,11 @@ void UInventoryComponent::AddNewItem(UItemDataBase* Item, int32 AmountToAdd)
 	if (EmptyIndex != INDEX_NONE)
 	{
 		InventoryContents[EmptyIndex] = NewItem;
+
+		if (GetOwner() && GetOwner()->HasAuthority())
+		{
+			AddReplicatedSubObject(NewItem);
+		}
 	}
 	OnInventoryUpdated.Broadcast();
 }
@@ -277,6 +297,11 @@ void UInventoryComponent::RemoveItemFromInventoryOnly(UItemDataBase* ItemToRemov
 	if (FoundIndex != INDEX_NONE)
 	{
 		InventoryContents[FoundIndex] = nullptr;
+
+		if (GetOwner() && GetOwner()->HasAuthority())
+		{
+			RemoveReplicatedSubObject(ItemToRemove);
+		}
 	}
 	OnInventoryUpdated.Broadcast();
 }
@@ -340,4 +365,15 @@ bool UInventoryComponent::MoveItemFromHotbarToInventorySlot(int32 HotbarIndex, i
 
 	OnInventoryUpdated.Broadcast();
 	return true;
+}
+
+void UInventoryComponent::OnRep_Items()
+{
+	OnInventoryUpdated.Broadcast();
+}
+
+void UInventoryComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(UInventoryComponent, InventoryContents);
 }

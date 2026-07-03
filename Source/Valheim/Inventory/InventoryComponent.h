@@ -62,7 +62,6 @@ class VALHEIM_API UInventoryComponent : public UActorComponent
 	GENERATED_BODY()
 
 public:	
-	// Sets default values for this component's properties
 	UInventoryComponent();
 
 	FOnInventoryUpdated OnInventoryUpdated;
@@ -140,12 +139,17 @@ public:
 	UFUNCTION()
 	bool MoveItemFromHotbarToInventorySlot(int32 HotbarIndex, int32 TargetInventoryIndex);
 
+	UFUNCTION()
+	void OnRep_Items();
+
 protected:
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
 	// Property ///////////////////////////////////////////////
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
 	int32 InventorySlotsCapacity;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(ReplicatedUsing = OnRep_Items)
 	TArray<TObjectPtr<UItemDataBase>> InventoryContents;
 
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite)

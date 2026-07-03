@@ -10,12 +10,15 @@
 // Sets default values
 AItemBase::AItemBase()
 {
+	bReplicates = true;
+	SetReplicateMovement(true);
 	PrimaryActorTick.bCanEverTick = false;
 
 	ItemMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ItemMesh"));
 	SetRootComponent(ItemMesh);
 	ItemMesh->SetSimulatePhysics(true);
 	ItemMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	ItemMesh->SetIsReplicated(true); //메시 동기화
 
 	BoxCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxCollision"));
 	BoxCollision->SetupAttachment(ItemMesh);
@@ -89,7 +92,7 @@ void AItemBase::InitializeItem(const int32 InQuantity)
 void AItemBase::InitiallizeDrop(UItemDataBase* ItemToDrop, const int32 InQuantity)
 {
 
-	ItemReference = ItemToDrop->CreateItemCopy();
+	ItemReference = ItemToDrop->CreateItemCopy(this);
 	ItemReference->bIsPickup = true;
 
 	if (InQuantity <= 0)
@@ -117,6 +120,8 @@ void AItemBase::TakePickUp(const AArcher* Taker)
 				ItemReference->bIsPickup = true;
 				const FItemAddResult AddResult = PlayerInventory->HandleAddItem(ItemReference);
 
+				UE_LOG(LogTemp, Warning, TEXT("AddResult: %d"), (int32)AddResult.OperationResult);
+
 				switch (AddResult.OperationResult)
 				{
 				case EItemAddResult::NoItemAdded:
@@ -143,9 +148,14 @@ void AItemBase::Interact(APawn* Interactor)
 {
 	if (!Interactor)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("AItemBase::Interact !Interactor"))
 		return;
 	}
-
+	if (!HasAuthority())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("AItemBase::Interact !HasAuthority()"))
+		return;
+	}
 	AArcher* Taker = Cast<AArcher>(Interactor);
 	if (!Taker)
 	{

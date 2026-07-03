@@ -8,7 +8,6 @@
 #include "Net/UnrealNetwork.h" 
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Camera/CameraComponent.h"
-#include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 
 #include "EnhancedInputComponent.h"
@@ -27,6 +26,9 @@
 
 AArcher::AArcher()
 {
+	bReplicates = true;
+	bReplicateUsingRegisteredSubObjectList = true;
+
 	PrimaryActorTick.bCanEverTick = true;
 
 	bUseControllerRotationPitch = false;
@@ -50,14 +52,17 @@ AArcher::AArcher()
 	SwordMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SwordMesh"));
 	SwordMesh->SetupAttachment(GetMesh(), FName("RightHandSocket"));
 	SwordMesh->SetVisibility(false);
+	SwordMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	BowMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("BowMesh"));
 	BowMesh->SetupAttachment(GetMesh(), FName("LeftHandSocket"));
 	BowMesh->SetVisibility(false);
+	BowMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	ArrowMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ArrowMesh"));
 	ArrowMesh->SetupAttachment(GetMesh(), FName("ArrowSocket"));
 	ArrowMesh->SetVisibility(false);
+	ArrowMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	HP = MaxHP;
 
@@ -259,16 +264,19 @@ void AArcher::ServerInteraction_Implementation()
 			//UE_LOG(LogTemp, Warning, TEXT("Interaction HitObject->Interact(this)"));
 		}
 
-
 		// DebugLine - 구 모양으로 그려서 실제 범위 확인
 		DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, InteractRadius, 12, FColor::Red, false, 1.f);
 		DrawDebugLine(GetWorld(), Start, HitResult.ImpactPoint, FColor::Red, false, 1.f, 0, 1.f);
 	}
-	UE_LOG(LogTemp, Warning, TEXT("AArcher::ServerInteraction() !bHit"));
 }
 
 void AArcher::DropItem(UItemDataBase* ItemToDrop, const int32 QuantityToDrop)
 {
+	if (!IsLocallyControlled())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("AArcher::Interaction() !IsLocallyControlled()"));
+		return;
+	}
 	ServerDropItem(ItemToDrop, QuantityToDrop);
 }
 
@@ -519,6 +527,7 @@ void AArcher::MultiSetVisiblityMesh_Implementation(EMeshType MeshType, bool OnOf
 
 void AArcher::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(AArcher, bIsAttacking);
 }
 

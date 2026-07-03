@@ -54,10 +54,6 @@ public:
 	UFUNCTION(Server, Reliable)
 	void Server_EndDeath();
 
-protected:
-	UFUNCTION(Server, Reliable)
-	void ServerCallAttackCollision();
-
 public:
 	FORCEINLINE EMonsterState GetCurrentState() const { return CurrentState; }
 	FORCEINLINE void SetCurrentState(EMonsterState NewState) { CurrentState = NewState; }

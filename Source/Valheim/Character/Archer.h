@@ -14,6 +14,14 @@ enum class EEquipType : uint8
 	Bow     UMETA(DisplayName = "Bow")
 };
 
+UENUM(BlueprintType)
+enum class EMeshType : uint8
+{
+	Arrow    UMETA(DisplayName = "Arrow"),
+	Sword   UMETA(DisplayName = "Sword"),
+	Bow     UMETA(DisplayName = "Bow")
+};
+
 class USpringArmComponent;
 class UCameraComponent;
 class UInputAction;
@@ -52,6 +60,7 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void PossessedBy(AController* NewController) override;
 
 	void Move(const FInputActionValue& Value);
 
@@ -73,6 +82,13 @@ protected:
 	void MultiAttack_Implementation();
 
 	void Interaction();
+	UFUNCTION(Server, Reliable)
+	void ServerInteraction();
+	void ServerInteraction_Implementation();
+
+	UFUNCTION(Server, Reliable)
+	void ServerDropItem(UItemDataBase* ItemToDrop, const int32 QuantityToDrop);
+	void ServerDropItem_Implementation(UItemDataBase* ItemToDrop, const int32 QuantityToDrop);
 
 	UFUNCTION(Server, Reliable)
 	void ServerRecoil();
@@ -108,13 +124,12 @@ public:
 
 	FORCEINLINE UInventoryComponent* GetInventory() const { return PlayerInventory; }
 
-	//Inventory
-	void DropItem(UItemDataBase* ItemToDrop, const int32 QuantityToDrop);
-
 	void SetHP(float NewHP);
 	FORCEINLINE void AddHP(float HealValue) { SetHP(HealValue); }
 	FORCEINLINE float GetCurrentHP() { return HP; }
 	FORCEINLINE float GetCurrentPercentHP() { return HP/MaxHP; }
+
+	void DropItem(UItemDataBase* ItemToDrop, const int32 QuantityToDrop);
 
 	//Weapon
 	FORCEINLINE EEquipType GetEquipType() const { return CurrentEquipType; }
@@ -124,7 +139,15 @@ public:
 	FORCEINLINE void SetIsDrawing(bool Drawing) {bIsDrawingBow = Drawing; }
 
 	FORCEINLINE bool GetIsRecoiling() const { return bIsRecoiling; }
-	FORCEINLINE void SetIsRecoiling(bool Recoiling) { bIsRecoiling = Recoiling; ArrowMesh->SetVisibility(Recoiling);}
+	FORCEINLINE void SetIsRecoiling(bool Recoiling) { bIsRecoiling = Recoiling; SetVisiblityMesh(EMeshType::Arrow, Recoiling);}
+
+	void SetVisiblityMesh(EMeshType MeshType, bool OnOff);
+	UFUNCTION(Server, Reliable)
+	void ServerSetVisiblityMesh(EMeshType MeshType, bool OnOff);
+	void ServerSetVisiblityMesh_Implementation(EMeshType MeshType, bool OnOff);
+	UFUNCTION(NetMulticast, Reliable)
+	void MultiSetVisiblityMesh(EMeshType MeshType, bool OnOff);
+	void MultiSetVisiblityMesh_Implementation(EMeshType MeshType, bool OnOff);
 
 	//---------------Property
 

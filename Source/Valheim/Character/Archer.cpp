@@ -66,6 +66,13 @@ AArcher::AArcher()
 
 }
 
+void AArcher::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+
+	
+}
+
 void AArcher::BeginPlay()
 {
 	Super::BeginPlay();
@@ -73,14 +80,12 @@ void AArcher::BeginPlay()
 	if (APlayerController* PC = Cast<APlayerController>(GetController()))
 	{
 		PlayerController = Cast<AArcherPC>(PC);
-		if (UEnhancedInputLocalPlayerSubsystem* Subsystem =
-			ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer()))
+
+		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer()))
 		{
-			if (Subsystem)
-			{
-				Subsystem->AddMappingContext(DefaultMappingContext, 0);
-			}
+			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
+
 		HUD = Cast<AArcherHUD>(PC->GetHUD());
 	}
 	if (PlayerInventory)
@@ -198,7 +203,25 @@ void AArcher::ToggleMenuWidget()
 
 void AArcher::Interaction()
 {
-	if (!PlayerController) return;
+	if (!IsLocallyControlled())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("AArcher::Interaction() !IsLocallyControlled()"));
+		return;
+	}
+	ServerInteraction();
+}
+
+void AArcher::ServerInteraction_Implementation()
+{
+	if (APlayerController* PC = Cast<APlayerController>(GetController()))
+	{
+		PlayerController = Cast<AArcherPC>(PC);
+	}
+	if (!PlayerController)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("AArcher::ServerInteraction() !PlayerController"));
+		return;
+	}
 
 	float InteractDistance = 1000.0f;
 	float InteractRadius = 30.0f; // 원하는 만큼 조절
@@ -235,15 +258,21 @@ void AArcher::Interaction()
 			HitObject->Interact(this);
 			//UE_LOG(LogTemp, Warning, TEXT("Interaction HitObject->Interact(this)"));
 		}
-		
-		
+
+
 		// DebugLine - 구 모양으로 그려서 실제 범위 확인
 		DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, InteractRadius, 12, FColor::Red, false, 1.f);
 		DrawDebugLine(GetWorld(), Start, HitResult.ImpactPoint, FColor::Red, false, 1.f, 0, 1.f);
 	}
+	UE_LOG(LogTemp, Warning, TEXT("AArcher::ServerInteraction() !bHit"));
 }
 
 void AArcher::DropItem(UItemDataBase* ItemToDrop, const int32 QuantityToDrop)
+{
+	ServerDropItem(ItemToDrop, QuantityToDrop);
+}
+
+void AArcher::ServerDropItem_Implementation(UItemDataBase* ItemToDrop, const int32 QuantityToDrop)
 {
 	if (PlayerInventory->FindMatchingItem(ItemToDrop))
 	{
@@ -277,6 +306,10 @@ void AArcher::SetHP(float NewHP)
 
 void AArcher::CallAttackCollision()
 {
+	if (!IsLocallyControlled())
+	{
+		return;
+	}
 	ServerCallAttackCollision();
 }
 
@@ -438,22 +471,51 @@ void AArcher::EquipWeapon(UItemDataBase* Weapon)
 	if (Weapon->ItemCategory.ItemType == EItemType::Sword)
 	{
 		SetEquipType(EEquipType::Sword);
-		SwordMesh->SetVisibility(true);
+		SetVisiblityMesh(EMeshType::Sword, true);
 	}
 	else if (Weapon->ItemCategory.ItemType == EItemType::Bow)
 	{
 		SetEquipType(EEquipType::Bow);
-		BowMesh->SetVisibility(true);
+		SetVisiblityMesh(EMeshType::Bow, true);
 	}
 }
 
 void AArcher::UnequipAllWeapon()
 {
-	SwordMesh->SetVisibility(false);
-	BowMesh->SetVisibility(false);
+	SetVisiblityMesh(EMeshType::Sword, false);
+	SetVisiblityMesh(EMeshType::Bow, false);
 	SetEquipType(EEquipType::None);
 }
 
+void AArcher::SetVisiblityMesh(EMeshType MeshType, bool OnOff)
+{
+	if (!IsLocallyControlled())
+	{
+		return;
+	}
+	ServerSetVisiblityMesh(MeshType, OnOff);
+}
+
+void AArcher::ServerSetVisiblityMesh_Implementation(EMeshType MeshType, bool OnOff)
+{
+	MultiSetVisiblityMesh(MeshType, OnOff);
+}
+
+void AArcher::MultiSetVisiblityMesh_Implementation(EMeshType MeshType, bool OnOff)
+{
+	switch (MeshType)
+	{
+	case EMeshType::Arrow:
+		ArrowMesh->SetVisibility(OnOff);
+		break;
+	case EMeshType::Sword:
+		SwordMesh->SetVisibility(OnOff);
+		break;
+	case EMeshType::Bow:
+		BowMesh->SetVisibility(OnOff);
+		break;
+	}
+}
 
 void AArcher::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {

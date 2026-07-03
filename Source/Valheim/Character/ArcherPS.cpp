@@ -26,29 +26,35 @@ void AArcherPS::BeginPlay()
 bool AArcherPS::AcceptQuest(FName QuestID)
 {
 	UE_LOG(LogTemp, Warning, TEXT("AArcherPS::AcceptQuest(FName QuestID)"))
-	if (!HasAuthority())
-	{
-		UE_LOG(LogTemp, Warning, TEXT("AArcherPS::AcceptQuest(FName QuestID) !HasAuthority()"))
-		return false;
-	}
+		if (!HasAuthority())
+		{
+			UE_LOG(LogTemp, Warning, TEXT("AArcherPS::AcceptQuest(FName QuestID) !HasAuthority()"))
+				return false;
+		}
 	if (IsQuestCompleted(QuestID))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("AArcherPS::AcceptQuest(FName QuestID) IsQuestCompleted(QuestID)"))
-		return false;
+			return false;
 	}
 	if (!QuestSubsystem || !QuestSubsystem->DoesQuestExist(QuestID))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("AArcherPS::AcceptQuest(FName QuestID) !QuestSubsystem"))
-		return false;
+			return false;
 	}
 
 	FActiveQuest ExistingQuest;
 	if (GetActiveQuest(QuestID, ExistingQuest))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("AArcherPS::AcceptQuest(FName QuestID) GetActiveQuest(QuestID, ExistingQuest)"))
-		return false;
+			return false;
 	}
+	
+	ServerAcceptQuest(QuestID);
+	return true;
+}
 
+void AArcherPS::ServerAcceptQuest_Implementation(FName QuestID)
+{
 	FActiveQuest NewQuest;
 	NewQuest.QuestID = QuestID;
 	NewQuest.CurrentAmount = 0;
@@ -56,7 +62,6 @@ bool AArcherPS::AcceptQuest(FName QuestID)
 	ActiveQuests.Add(NewQuest);
 
 	OnActiveQuestsChanged.Broadcast();
-	return true;
 }
 
 bool AArcherPS::AbandonQuest(FName QuestID)
@@ -70,13 +75,18 @@ bool AArcherPS::AbandonQuest(FName QuestID)
 	{
 		if (ActiveQuests[i].QuestID == QuestID)
 		{
-			ActiveQuests.RemoveAt(i);
-			OnActiveQuestsChanged.Broadcast();
+			ServerAbandonQuest(i);
 			return true;
 		}
 	}
 
 	return false;
+}
+
+void AArcherPS::ServerAbandonQuest_Implementation(int Index)
+{
+	ActiveQuests.RemoveAt(Index);
+	OnActiveQuestsChanged.Broadcast();
 }
 
 bool AArcherPS::CompleteQuest(FName QuestID)
@@ -95,14 +105,19 @@ bool AArcherPS::CompleteQuest(FName QuestID)
 				return false;
 			}
 
-			CompletedQuestIDs.Add(QuestID);
-			ActiveQuests.RemoveAt(i);
-
-			OnActiveQuestsChanged.Broadcast();
+			ServerCompleteQuest(QuestID, i);
 			return true;
 		}
 	}
 	return false;
+}
+
+void AArcherPS::ServerCompleteQuest_Implementation(FName QuestID, int Index)
+{
+	CompletedQuestIDs.Add(QuestID);
+	ActiveQuests.RemoveAt(Index);
+
+	OnActiveQuestsChanged.Broadcast();
 }
 
 bool AArcherPS::GetActiveQuest(FName QuestID, FActiveQuest& OutActiveQuest) const
@@ -158,6 +173,10 @@ void AArcherPS::UpdateQuestProgressByEvent(EQuestType Type, FName TargetID, int3
 
 		OnActiveQuestsChanged.Broadcast();
 	}
+}
+
+void AArcherPS::ServerUpdateQuestProgressByEvent_Implementation(EQuestType Type, FName TargetID, int32 Amount)
+{
 }
 
 void AArcherPS::OnRep_ActiveQuests()

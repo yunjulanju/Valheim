@@ -24,14 +24,28 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Quest")
 	bool AcceptQuest(FName QuestID);
 
+	UFUNCTION(Server, Reliable)
+	void ServerAcceptQuest(FName QuestID);
+	void ServerAcceptQuest_Implementation(FName QuestID);
+
 	UFUNCTION(BlueprintCallable, Category = "Quest")
 	bool AbandonQuest(FName QuestID);
+	UFUNCTION(Server, Reliable)
+	void ServerAbandonQuest(int Index);
+	void ServerAbandonQuest_Implementation(int Index);
+
 
 	UFUNCTION(BlueprintCallable, Category = "Quest")
 	void UpdateQuestProgressByEvent(EQuestType Type, FName TargetID, int32 Amount);
+	UFUNCTION(Server, Reliable)
+	void ServerUpdateQuestProgressByEvent(EQuestType Type, FName TargetID, int32 Amount);
+	void ServerUpdateQuestProgressByEvent_Implementation(EQuestType Type, FName TargetID, int32 Amount);
 
 	UFUNCTION(BlueprintCallable, Category = "Quest")
 	bool CompleteQuest(FName QuestID);
+	UFUNCTION(Server, Reliable)
+	void ServerCompleteQuest(FName QuestID, int Index);
+	void ServerCompleteQuest_Implementation(FName QuestID, int Index);
 
 	UFUNCTION(BlueprintCallable, Category = "Quest")
 	bool IsQuestCompleted(FName QuestID) const { return CompletedQuestIDs.Contains(QuestID); }

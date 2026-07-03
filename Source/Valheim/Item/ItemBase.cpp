@@ -4,8 +4,9 @@
 #include "Item/ItemBase.h"
 #include "Components/BoxComponent.h"
 #include "ItemDataBase.h"
-#include <Character/Archer.h>
+#include "Character/Archer.h"
 #include "Inventory/InventoryComponent.h"
+#include "Data/ItemPrimaryDataAsset.h"
 
 // Sets default values
 AItemBase::AItemBase()
@@ -34,27 +35,27 @@ void AItemBase::BeginPlay()
 }
 
 //에디터에서 값을 바꿀 때 바로 적용할 수 있도록 하는 함수 (없어도 될듯)
-void AItemBase::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
-{
-	Super::PostEditChangeProperty(PropertyChangedEvent);
-
-	if (PropertyChangedEvent.Property)
-	{
-		FString ChangedProPertyStr = PropertyChangedEvent.Property->GetName();
-		const FName ChangedPropertyName = FName(ChangedProPertyStr);
-		
-		if (ChangedPropertyName == GET_MEMBER_NAME_CHECKED(AItemBase, DesiredItemID))
-		{
-			if (ItemDataTable)
-			{
-				if (const FItemBaseRow* ItemData = ItemDataTable->FindRow<FItemBaseRow>(DesiredItemID, DesiredItemID.ToString()))
-				{
-					ItemMesh->SetStaticMesh(ItemData->AssetData.ItemMesh);
-				}
-			}
-		}
-	}
-}
+//void AItemBase::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
+//{
+//	Super::PostEditChangeProperty(PropertyChangedEvent);
+//
+//	if (PropertyChangedEvent.Property)
+//	{
+//		FString ChangedProPertyStr = PropertyChangedEvent.Property->GetName();
+//		const FName ChangedPropertyName = FName(ChangedProPertyStr);
+//		
+//		if (ChangedPropertyName == GET_MEMBER_NAME_CHECKED(AItemBase, DesiredItemID))
+//		{
+//			if (ItemDataTable)
+//			{
+//				if (const FItemBaseRow* ItemData = ItemDataTable->FindRow<FItemBaseRow>(DesiredItemID, DesiredItemID.ToString()))
+//				{
+//					ItemMesh->SetStaticMesh(ItemData->AssetData.ItemMesh);
+//				}
+//			}
+//		}
+//	}
+//}
 
 void AItemBase::Tick(float DeltaTime)
 {
@@ -64,17 +65,20 @@ void AItemBase::Tick(float DeltaTime)
 
 void AItemBase::InitializeItem(const int32 InQuantity)
 {
-	if (ItemDataTable && !DesiredItemID.IsNone())
+	//if (ItemDataTable && !DesiredItemID.IsNone())
+	if (DesiredItemAsset)
 	{
-		const FItemBaseRow* ItemData = ItemDataTable->FindRow<FItemBaseRow>(DesiredItemID, DesiredItemID.ToString());
+		//const FItemBaseRow* ItemData = ItemDataTable->FindRow<FItemBaseRow>(DesiredItemID, DesiredItemID.ToString());
+
+		//ItemReference = NewObject<UItemDataBase>(this, UItemDataBase::StaticClass());
 
 		ItemReference = NewObject<UItemDataBase>(this, UItemDataBase::StaticClass());
 
-		ItemReference->ItemID = ItemData->ItemID;
-		ItemReference->ItemCategory = ItemData->ItemCategory;
-		ItemReference->AssetData = ItemData->AssetData;
-		ItemReference->NumericData = ItemData->NumericData;
-		ItemReference->TextData = ItemData->TextData;
+		ItemReference->ItemID = DesiredItemAsset->ItemID;
+		ItemReference->ItemCategory = DesiredItemAsset->ItemCategory;
+		ItemReference->AssetData = DesiredItemAsset->AssetData;
+		ItemReference->NumericData = DesiredItemAsset->NumericData;
+		ItemReference->TextData = DesiredItemAsset->TextData;
 
 		if (InQuantity <= 0)
 		{
@@ -85,7 +89,7 @@ void AItemBase::InitializeItem(const int32 InQuantity)
 			ItemReference->SetQuantity(InQuantity);
 		}
 
-		ItemMesh->SetStaticMesh(ItemData->AssetData.ItemMesh);
+		ItemMesh->SetStaticMesh(DesiredItemAsset->AssetData.ItemMesh);
 	}
 }
 

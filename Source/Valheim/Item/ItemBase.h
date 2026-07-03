@@ -40,20 +40,16 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-#if WITH_EDITOR
-    virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
-#endif #if WITH_EDITOR
+//#if WITH_EDITOR
+//    virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+//#endif #if WITH_EDITOR
 
     //------------------------------Property ////
 
 protected:
 
-    //Data
-    UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
-    UDataTable* ItemDataTable;
-
-    UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
-    FName DesiredItemID;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    class UItemPrimaryDataAsset* DesiredItemAsset;
 
     UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
     class UItemDataBase* ItemReference;

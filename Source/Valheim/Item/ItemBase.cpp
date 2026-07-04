@@ -3,10 +3,12 @@
 
 #include "Item/ItemBase.h"
 #include "Components/BoxComponent.h"
-#include "ItemDataBase.h"
 #include "Character/Archer.h"
 #include "Inventory/InventoryComponent.h"
+#include "Item/ItemSubsystem.h"
 #include "Data/ItemPrimaryDataAsset.h"
+#include "Engine/GameInstance.h"
+#include "Net/UnrealNetwork.h"
 
 // Sets default values
 AItemBase::AItemBase()
@@ -30,134 +32,119 @@ void AItemBase::BeginPlay()
 {
 	Super::BeginPlay();
 
-	//초기화
-	InitializeItem(Quantity);
+	if (HasAuthority() && DesiredItemAsset)
+	{
+		InitializeItem(Quantity);
+	}
 }
-
-//에디터에서 값을 바꿀 때 바로 적용할 수 있도록 하는 함수 (없어도 될듯)
-//void AItemBase::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
-//{
-//	Super::PostEditChangeProperty(PropertyChangedEvent);
-//
-//	if (PropertyChangedEvent.Property)
-//	{
-//		FString ChangedProPertyStr = PropertyChangedEvent.Property->GetName();
-//		const FName ChangedPropertyName = FName(ChangedProPertyStr);
-//		
-//		if (ChangedPropertyName == GET_MEMBER_NAME_CHECKED(AItemBase, DesiredItemID))
-//		{
-//			if (ItemDataTable)
-//			{
-//				if (const FItemBaseRow* ItemData = ItemDataTable->FindRow<FItemBaseRow>(DesiredItemID, DesiredItemID.ToString()))
-//				{
-//					ItemMesh->SetStaticMesh(ItemData->AssetData.ItemMesh);
-//				}
-//			}
-//		}
-//	}
-//}
 
 void AItemBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 void AItemBase::InitializeItem(const int32 InQuantity)
 {
-	//if (ItemDataTable && !DesiredItemID.IsNone())
-	if (DesiredItemAsset)
+	if (!DesiredItemAsset)
 	{
-		//const FItemBaseRow* ItemData = ItemDataTable->FindRow<FItemBaseRow>(DesiredItemID, DesiredItemID.ToString());
-
-		//ItemReference = NewObject<UItemDataBase>(this, UItemDataBase::StaticClass());
-
-		ItemReference = NewObject<UItemDataBase>(this, UItemDataBase::StaticClass());
-
-		ItemReference->ItemID = DesiredItemAsset->ItemID;
-		ItemReference->ItemCategory = DesiredItemAsset->ItemCategory;
-		ItemReference->AssetData = DesiredItemAsset->AssetData;
-		ItemReference->NumericData = DesiredItemAsset->NumericData;
-		ItemReference->TextData = DesiredItemAsset->TextData;
-
-		if (InQuantity <= 0)
-		{
-			ItemReference->SetQuantity(0);
-		}
-		else
-		{
-			ItemReference->SetQuantity(InQuantity);
-		}
-
-		ItemMesh->SetStaticMesh(DesiredItemAsset->AssetData.ItemMesh);
+		return;
 	}
+
+	ItemID = DesiredItemAsset->ItemID;
+	Quantity = FMath::Max(InQuantity, 0);
+	CurrentMeshAsset = DesiredItemAsset->AssetData.ItemMesh;
+
+	// 서버(리슨서버 포함)는 OnRep이 호출되지 않으므로 직접 적용
+	ItemMesh->SetStaticMesh(CurrentMeshAsset);
 }
 
-void AItemBase::InitiallizeDrop(UItemDataBase* ItemToDrop, const int32 InQuantity)
+void AItemBase::InitiallizeDrop(FName InItemID, const int32 InQuantity)
 {
+	ItemID = InItemID;
+	Quantity = FMath::Max(InQuantity, 0);
 
-	ItemReference = ItemToDrop->CreateItemCopy(this);
-	ItemReference->bIsPickup = true;
+	UItemPrimaryDataAsset* ItemData = nullptr;
+	if (const UWorld* World = GetWorld())
+	{
+		if (const UGameInstance* GI = World->GetGameInstance())
+		{
+			if (const UItemSubsystem* ItemSubsystem = GI->GetSubsystem<UItemSubsystem>())
+			{
+				ItemSubsystem->GetItemData(InItemID, ItemData);
+			}
+		}
+	}
 
-	if (InQuantity <= 0)
-	{ 
-		ItemReference->SetQuantity(0);
+	if (ItemData)
+	{
+		CurrentMeshAsset = ItemData->AssetData.ItemMesh;
+		ItemMesh->SetStaticMesh(CurrentMeshAsset);
 	}
 	else
 	{
-		ItemReference->SetQuantity(InQuantity);
+		UE_LOG(LogTemp, Warning, TEXT("InitiallizeDrop: ItemID %s not found in ItemSubsystem"), *InItemID.ToString());
 	}
-	ItemReference->OwningInventory = nullptr;
-	ItemMesh->SetStaticMesh(ItemToDrop->AssetData.ItemMesh);
+}
+
+void AItemBase::OnRep_CurrentMeshAsset()
+{
+	ItemMesh->SetStaticMesh(CurrentMeshAsset);
+}
+
+bool AItemBase::TryAddToInventory(AArcher* Taker)
+{
+	if (!Taker || ItemID == NAME_None)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("AItemBase::TryAddToInventory: invalid Taker or ItemID"));
+		return false;
+	}
+
+	UInventoryComponent* PlayerInventory = Taker->GetInventory();
+	if (!PlayerInventory)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("AItemBase::TryAddToInventory: PlayerInventory NULL"));
+		return false;
+	}
+
+	const FItemAddResult AddResult = PlayerInventory->HandleAddItem(ItemID, Quantity);
+
+	switch (AddResult.OperationResult)
+	{
+	case EItemAddResult::NoItemAdded:
+		return false;
+	case EItemAddResult::PartialItemAdded:
+		// 일부만 들어간 경우: 남은 수량만 픽업에 남겨두고 파괴하지 않음
+		Quantity -= AddResult.ActualAmountAdded;
+		return false;
+	case EItemAddResult::AllItemAdded:
+		return true;
+	}
+	return false;
 }
 
 void AItemBase::TakePickUp(const AArcher* Taker)
 {
-	if (!IsPendingKillPending())
+	if (IsPendingKillPending())
 	{
-		if (ItemReference)
-		{
-			//인벤토리
-			if(UInventoryComponent* PlayerInventory = Taker->GetInventory())
-			{
+		return;
+	}
 
-				ItemReference->bIsPickup = true;
-				const FItemAddResult AddResult = PlayerInventory->HandleAddItem(ItemReference);
-
-				UE_LOG(LogTemp, Warning, TEXT("AddResult: %d"), (int32)AddResult.OperationResult);
-
-				switch (AddResult.OperationResult)
-				{
-				case EItemAddResult::NoItemAdded:
-					break;
-				case EItemAddResult::PartialItemAdded:
-					break;
-				case EItemAddResult::AllItemAdded:
-					Destroy();
-					break;
-				}
-			}
-			else {
-				UE_LOG(LogTemp, Warning, TEXT("PlayerInventory NO"))
-			}
-		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("ItemReference NO"))
-		}
-	}	
+	if (TryAddToInventory(const_cast<AArcher*>(Taker)))
+	{
+		Destroy();
+	}
 }
 
 void AItemBase::Interact(APawn* Interactor)
 {
 	if (!Interactor)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("AItemBase::Interact !Interactor"))
+		UE_LOG(LogTemp, Warning, TEXT("AItemBase::Interact !Interactor"));
 		return;
 	}
 	if (!HasAuthority())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("AItemBase::Interact !HasAuthority()"))
+		UE_LOG(LogTemp, Warning, TEXT("AItemBase::Interact !HasAuthority()"));
 		return;
 	}
 	AArcher* Taker = Cast<AArcher>(Interactor);
@@ -166,35 +153,21 @@ void AItemBase::Interact(APawn* Interactor)
 		return;
 	}
 
-	if (!IsPendingKillPending())
+	if (IsPendingKillPending())
 	{
-		if (ItemReference)
-		{
-			//인벤토리
-			if (UInventoryComponent* PlayerInventory = Taker->GetInventory())
-			{
-
-				ItemReference->bIsPickup = true;
-				const FItemAddResult AddResult = PlayerInventory->HandleAddItem(ItemReference);
-
-				switch (AddResult.OperationResult)
-				{
-				case EItemAddResult::NoItemAdded:
-					break;
-				case EItemAddResult::PartialItemAdded:
-					break;
-				case EItemAddResult::AllItemAdded:
-					Destroy();
-					break;
-				}
-			}
-			else {
-				UE_LOG(LogTemp, Warning, TEXT("PlayerInventory NO"))
-			}
-		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("ItemReference NO"))
-		}
+		return;
 	}
+
+	if (TryAddToInventory(Taker))
+	{
+		Destroy();
+	}
+}
+
+void AItemBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(AItemBase, ItemID);
+	DOREPLIFETIME(AItemBase, Quantity);
+	DOREPLIFETIME(AItemBase, CurrentMeshAsset);
 }

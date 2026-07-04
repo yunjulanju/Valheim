@@ -56,7 +56,7 @@ public:
 	void StartDrawBow();
 	void ReleaseDrawBow();
 
-	
+
 
 protected:
 	virtual void BeginPlay() override;
@@ -87,18 +87,22 @@ protected:
 	void ServerInteraction_Implementation();
 
 	UFUNCTION(Server, Reliable)
-	void ServerDropItem(UItemDataBase* ItemToDrop, const int32 QuantityToDrop);
-	void ServerDropItem_Implementation(UItemDataBase* ItemToDrop, const int32 QuantityToDrop);
+	void ServerDropItem(int32 InventoryIndex, const int32 QuantityToDrop);
+	void ServerDropItem_Implementation(int32 InventoryIndex, const int32 QuantityToDrop);
+
+	UFUNCTION(Server, Reliable)
+	void ServerUseItem(int32 InventoryIndex);
+	void ServerUseItem_Implementation(int32 InventoryIndex);
 
 	UFUNCTION(Server, Reliable)
 	void ServerRecoil();
-	void ServerRecoil_Implementation(); 
+	void ServerRecoil_Implementation();
 
 	UFUNCTION(NetMulticast, Reliable)
 	void MultiRecoil();
 	void MultiRecoil_Implementation();
 
-	void EquipWeapon(UItemDataBase* Weapon);
+	void EquipWeapon(FName WeaponItemID);
 	void UnequipAllWeapon();
 
 	void CallAttackRelease();
@@ -127,19 +131,21 @@ public:
 	void SetHP(float NewHP);
 	FORCEINLINE void AddHP(float HealValue) { SetHP(HealValue); }
 	FORCEINLINE float GetCurrentHP() { return HP; }
-	FORCEINLINE float GetCurrentPercentHP() { return HP/MaxHP; }
+	FORCEINLINE float GetCurrentPercentHP() { return HP / MaxHP; }
 
-	void DropItem(UItemDataBase* ItemToDrop, const int32 QuantityToDrop);
+	void DropItem(int32 InventoryIndex, const int32 QuantityToDrop);
+
+	void UseItem(int32 InventoryIndex);
 
 	//Weapon
 	FORCEINLINE EEquipType GetEquipType() const { return CurrentEquipType; }
 	FORCEINLINE void SetEquipType(EEquipType NewEquipType) { CurrentEquipType = NewEquipType; }
 
 	FORCEINLINE bool GetIsDrawing() const { return bIsDrawingBow; }
-	FORCEINLINE void SetIsDrawing(bool Drawing) {bIsDrawingBow = Drawing; }
+	FORCEINLINE void SetIsDrawing(bool Drawing) { bIsDrawingBow = Drawing; }
 
 	FORCEINLINE bool GetIsRecoiling() const { return bIsRecoiling; }
-	FORCEINLINE void SetIsRecoiling(bool Recoiling) { bIsRecoiling = Recoiling; SetVisiblityMesh(EMeshType::Arrow, Recoiling);}
+	FORCEINLINE void SetIsRecoiling(bool Recoiling) { bIsRecoiling = Recoiling; SetVisiblityMesh(EMeshType::Arrow, Recoiling); }
 
 	void SetVisiblityMesh(EMeshType MeshType, bool OnOff);
 	UFUNCTION(Server, Reliable)

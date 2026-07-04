@@ -24,7 +24,7 @@ void UItemSubsystem::BuildItemCache()
 
 	if (!ItemRegistry)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("UItemSubsystem: ItemRegistry가 설정되지 않았습니다."));
+		UE_LOG(LogTemp, Warning, TEXT("UItemSubsystem: ItemRegistry Null"));
 		return;
 	}
 

@@ -4,12 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "Data/ItemDataStruct.h"
 #include "InventoryItemSlot.generated.h"
 
 /**
- * 
+ *
  */
-class UItemDataBase;
+class UItemPrimaryDataAsset;
+class UInventoryComponent;
 class UDragItemVisual;
 class UInventoryToolTip;
 class UBorder;
@@ -21,10 +23,18 @@ class VALHEIM_API UInventoryItemSlot : public UUserWidget
 	GENERATED_BODY()
 
 public:
-	FORCEINLINE void SetItemReference(UItemDataBase* ItemIn) { ItemReference = ItemIn; }
-	FORCEINLINE UItemDataBase* GetItemReference() const { return ItemReference; }
+
+	FORCEINLINE void SetItem(const FInventoryItemInstance& InItem) { CurrentItem = InItem; }
+	FORCEINLINE const FInventoryItemInstance& GetItem() const { return CurrentItem; }
+
+	FORCEINLINE void SetOwningInventory(UInventoryComponent* InInventory) { OwningInventory = InInventory; }
+	FORCEINLINE UInventoryComponent* GetOwningInventory() const { return OwningInventory; }
+	FORCEINLINE void SetOwningInventoryIndex(int32 InIndex) { OwningInventoryIndex = InIndex; }
+	FORCEINLINE int32 GetOwningInventoryIndex() const { return OwningInventoryIndex; }
 
 	void RefreshSlot();
+
+	UItemPrimaryDataAsset* GetDisplayItemData() const;
 
 	bool bShowToolTip = true;
 
@@ -47,7 +57,12 @@ protected:
 	TSubclassOf<UInventoryToolTip> ToolTipClass;
 
 	UPROPERTY(VisibleAnywhere)
-	UItemDataBase* ItemReference;
+	FInventoryItemInstance CurrentItem;
+
+	UPROPERTY()
+	UInventoryComponent* OwningInventory = nullptr;
+
+	int32 OwningInventoryIndex = -1;
 
 	UPROPERTY(meta = (BindWidget))
 	UBorder* ItemBorder;

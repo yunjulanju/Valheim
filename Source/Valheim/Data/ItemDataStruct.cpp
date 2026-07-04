@@ -28,12 +28,14 @@ void FInventoryItemInstance::PostReplicatedAdd(const FInventoryList& InArraySeri
 		if (const UItemSubsystem* ItemSubsystem = GI->GetSubsystem<UItemSubsystem>())
 		{
 			UItemPrimaryDataAsset* Found = nullptr;
-			/*if (ItemSubsystem->GetItemData(ItemID, Found))
+			if (ItemSubsystem->GetItemData(ItemID, Found))
 			{
 				CachedItemData = Found;
-			}*/
+			}
 		}
 	}
+
+	InArraySerializer.OwningComponent->OnInventoryUpdated.Broadcast();
 }
 
 void FInventoryItemInstance::PostReplicatedChange(const FInventoryList& InArraySerializer)
@@ -43,5 +45,8 @@ void FInventoryItemInstance::PostReplicatedChange(const FInventoryList& InArrayS
 
 void FInventoryItemInstance::PreReplicatedRemove(const FInventoryList& InArraySerializer)
 {
-	
+	if (InArraySerializer.OwningComponent)
+	{
+		InArraySerializer.OwningComponent->OnInventoryUpdated.Broadcast();
+	}
 }

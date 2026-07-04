@@ -7,7 +7,7 @@
 #include "HotBarSlot.generated.h"
 
 /**
- * 
+ *
  */
 UCLASS()
 class VALHEIM_API UHotBarSlot : public UInventoryItemSlot
@@ -21,5 +21,5 @@ protected:
 	virtual void NativeConstruct() override;
 	virtual void NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation) override;
 	virtual bool NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override;
-	
+
 };

@@ -3,7 +3,7 @@
 
 #include "UserInterface/Inventory/InventoryToolTip.h"
 #include "Components/TextBlock.h"
-#include "Item/ItemDataBase.h"
+#include "Data/ItemPrimaryDataAsset.h"
 #include "UserInterface/Inventory/InventoryItemSlot.h"
 
 void UInventoryToolTip::NativeConstruct()
@@ -16,19 +16,20 @@ void UInventoryToolTip::NativeConstruct()
 		return;
 	}
 
+	const FInventoryItemInstance& ItemBeingHovered = InventorySlotBeingHovered->GetItem();
+	UItemPrimaryDataAsset* ItemData = InventorySlotBeingHovered->GetDisplayItemData();
 
-	UItemDataBase* ItemBeingHovered = InventorySlotBeingHovered->GetItemReference();
-	if (ItemBeingHovered)
+	if (ItemData)
 	{
 		//TextAsset
-		ItemName->SetText(ItemBeingHovered->TextData.Name);
-		ItemCategory->SetText(FText::AsNumber(ItemBeingHovered->Quantity));
-		ItemDescription->SetText(ItemBeingHovered->TextData.Description);
+		ItemName->SetText(ItemData->TextData.Name);
+		ItemCategory->SetText(FText::AsNumber(ItemBeingHovered.Quantity));
+		ItemDescription->SetText(ItemData->TextData.Description);
 
 		//NumericAsset
-		if (ItemBeingHovered->NumericData.bIsStackable)
+		if (ItemData->NumericData.bIsStackable)
 		{
-			MaxStackSize->SetText(FText::AsNumber(ItemBeingHovered->NumericData.MaxStackSize));
+			MaxStackSize->SetText(FText::AsNumber(ItemData->NumericData.MaxStackSize));
 		}
 		else
 		{

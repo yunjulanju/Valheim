@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Character/Archer.h"
@@ -18,10 +18,13 @@
 #include <Monster/Monster.h>
 #include <Item/ItemBase.h>
 #include "Inventory/InventoryComponent.h"
+#include "Item/ItemSubsystem.h"
+#include "Data/ItemPrimaryDataAsset.h"
 #include "UserInterface/ArcherHUD.h"
 #include "Item/ItemDataBase.h"
 #include <Item/Arrow.h>
 #include "Interface/Interactable.h"
+#include "Character/ArcherPS.h"
 
 
 AArcher::AArcher()
@@ -41,7 +44,7 @@ AArcher::AArcher()
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
 	CameraBoom->TargetArmLength = 400.0f;
-	CameraBoom->SocketOffset = FVector(0,0,100);
+	CameraBoom->SocketOffset = FVector(0, 0, 100);
 	CameraBoom->bUsePawnControlRotation = true;
 	CameraBoom->bDoCollisionTest = false;
 
@@ -75,13 +78,13 @@ void AArcher::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
 
-	
+
 }
 
 void AArcher::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	if (APlayerController* PC = Cast<APlayerController>(GetController()))
 	{
 		PlayerController = Cast<AArcherPC>(PC);
@@ -136,7 +139,7 @@ void AArcher::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 		// MenuToggle
 		EnhancedInputComponent->BindAction(MenuAction
 			, ETriggerEvent::Started, this, &AArcher::ToggleMenuWidget);
-		
+
 		// Hotbar Using
 		if (HotbarActions.IsValidIndex(0) && HotbarActions[0])
 			EnhancedInputComponent->BindAction(HotbarActions[0], ETriggerEvent::Started, this, &AArcher::SelectHotbar1);
@@ -229,7 +232,7 @@ void AArcher::ServerInteraction_Implementation()
 	}
 
 	float InteractDistance = 1000.0f;
-	float InteractRadius = 30.0f; // ¿øÇÏ´Â ¸¸Å­ Á¶Àý
+	float InteractRadius = 30.0f;
 
 	FVector CameraLocation;
 	FRotator CameraRotation;
@@ -240,7 +243,7 @@ void AArcher::ServerInteraction_Implementation()
 
 	FHitResult HitResult;
 	FCollisionQueryParams Params;
-	Params.AddIgnoredActor(this); // ÀÚ±â ÀÚ½Å ¹«½Ã
+	Params.AddIgnoredActor(this);
 
 	FCollisionShape SphereShape = FCollisionShape::MakeSphere(InteractRadius);
 
@@ -264,51 +267,123 @@ void AArcher::ServerInteraction_Implementation()
 			//UE_LOG(LogTemp, Warning, TEXT("Interaction HitObject->Interact(this)"));
 		}
 
-		// DebugLine - ±¸ ¸ð¾çÀ¸·Î ±×·Á¼­ ½ÇÁ¦ ¹üÀ§ È®ÀÎ
 		DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, InteractRadius, 12, FColor::Red, false, 1.f);
 		DrawDebugLine(GetWorld(), Start, HitResult.ImpactPoint, FColor::Red, false, 1.f, 0, 1.f);
 	}
 }
 
-void AArcher::DropItem(UItemDataBase* ItemToDrop, const int32 QuantityToDrop)
+void AArcher::DropItem(int32 InventoryIndex, const int32 QuantityToDrop)
 {
 	if (!IsLocallyControlled())
 	{
 		UE_LOG(LogTemp, Warning, TEXT("AArcher::Interaction() !IsLocallyControlled()"));
 		return;
 	}
-	ServerDropItem(ItemToDrop, QuantityToDrop);
+	ServerDropItem(InventoryIndex, QuantityToDrop);
 }
 
-void AArcher::ServerDropItem_Implementation(UItemDataBase* ItemToDrop, const int32 QuantityToDrop)
+void AArcher::ServerDropItem_Implementation(int32 InventoryIndex, const int32 QuantityToDrop)
 {
-	if (PlayerInventory->FindMatchingItem(ItemToDrop))
+	if (!PlayerInventory)
 	{
-		FActorSpawnParameters SpawnParam;
-		SpawnParam.Owner = this;
-		SpawnParam.bNoFail = true;
-		SpawnParam.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+		return;
+	}
 
-		const FVector SpawnLocation{ GetActorLocation() + (GetActorForwardVector() * 50) };
-		const FTransform SpawnTransform(GetActorRotation(), SpawnLocation);
+	// ì œê±°í•˜ê¸° ì „ì— ItemIDë¥¼ ë¨¼ì € ì±™ê²¨ë‘  (RemoveAmountOfItemì´ ìŠ¬ë¡¯ì„ ì™„ì „ížˆ ë¹„ìš°ë©´ ItemIDë„ ê°™ì´ ë‚ ì•„ê°€ê¸° ë•Œë¬¸)
+	const FInventoryItemInstance ItemToDrop = PlayerInventory->GetInventoryItem(InventoryIndex);
+	if (!ItemToDrop.IsValidItem())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("ServerDropItem_Implementation: InventoryIndex %d is empty"), InventoryIndex);
+		return;
+	}
 
-		const int32 RemovedQuantity = PlayerInventory->RemoveAmountOfItem(ItemToDrop, QuantityToDrop);
+	const int32 RemovedQuantity = PlayerInventory->RemoveAmountOfItem(InventoryIndex, QuantityToDrop);
+	if (RemovedQuantity <= 0)
+	{
+		return;
+	}
 
-		AItemBase* PickUp = GetWorld()->SpawnActor<AItemBase>(AItemBase::StaticClass(), SpawnTransform, SpawnParam);
+	FActorSpawnParameters SpawnParam;
+	SpawnParam.Owner = this;
+	SpawnParam.bNoFail = true;
+	SpawnParam.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 
-		if (PickUp)
+	const FVector SpawnLocation{ GetActorLocation() + (GetActorForwardVector() * 50) };
+	const FTransform SpawnTransform(GetActorRotation(), SpawnLocation);
+
+	AItemBase* PickUp = GetWorld()->SpawnActor<AItemBase>(AItemBase::StaticClass(), SpawnTransform, SpawnParam);
+
+	if (PickUp)
+	{
+		PickUp->InitiallizeDrop(ItemToDrop.ItemID, RemovedQuantity);
+	}
+}
+
+void AArcher::UseItem(int32 InventoryIndex)
+{
+	if (!IsLocallyControlled())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("AArcher::UseItem() !IsLocallyControlled()"));
+		return;
+	}
+	ServerUseItem(InventoryIndex);
+}
+
+void AArcher::ServerUseItem_Implementation(int32 InventoryIndex)
+{
+	if (!PlayerInventory)
+	{
+		return;
+	}
+
+	const FInventoryItemInstance ItemToUse = PlayerInventory->GetInventoryItem(InventoryIndex);
+	if (!ItemToUse.IsValidItem())
+	{
+		return;
+	}
+
+	UItemPrimaryDataAsset* ItemData = nullptr;
+	if (UGameInstance* GI = GetGameInstance())
+	{
+		if (UItemSubsystem* Subsystem = GI->GetSubsystem<UItemSubsystem>())
 		{
-			PickUp->InitiallizeDrop(ItemToDrop, RemovedQuantity);
+			Subsystem->GetItemData(ItemToUse.ItemID, ItemData);
 		}
 	}
-	else {
-		UE_LOG(LogTemp, Warning, TEXT("Item to drop was FindMatchingItem Null"));
+
+	if (!ItemData || ItemData->ItemCategory.ItemCategory != EItemCategory::Consumable)
+	{
+		return;
 	}
+
+	if (GetCurrentHP() <= 0)
+	{
+		return;
+	}
+
+	if (AArcherPS* ArcherPS = GetPlayerState<AArcherPS>())
+	{
+		ArcherPS->UpdateQuestProgressByEvent(EQuestType::UseItem, ItemToUse.ItemID, 1);
+	}
+
+	switch (ItemData->ItemCategory.ItemType)
+	{
+	case EItemType::Heal:
+		AddHP(ItemData->ItemCategory.Value);
+		break;
+	case EItemType::Damage:
+		AddHP(-1 * ItemData->ItemCategory.Value);
+		break;
+	default:
+		break;
+	}
+
+	PlayerInventory->RemoveAmountOfItem(InventoryIndex, 1);
 }
 
 void AArcher::SetHP(float NewHP)
 {
-	HP = FMath::Clamp((HP+NewHP), 0, MaxHP);
+	HP = FMath::Clamp((HP + NewHP), 0, MaxHP);
 	OnHPChanged.Broadcast();
 }
 
@@ -353,7 +428,7 @@ void AArcher::ServerCallAttackCollision_Implementation()
 						DefaultDamage,
 						GetController(),
 						this,
-						UDamageType::StaticClass() // µ¥¹ÌÁö Å¸ÀÔ
+						UDamageType::StaticClass()
 					);
 				}
 			}
@@ -381,7 +456,7 @@ void AArcher::CallAttack()
 	case EEquipType::None:
 		ServerAttack();
 		break;
-	}	
+	}
 }
 
 void AArcher::ServerAttack_Implementation()
@@ -394,7 +469,7 @@ void AArcher::MultiAttack_Implementation()
 	if (AttackMontage)
 	{
 		PlayAnimMontage(AttackMontage);
-	}	
+	}
 }
 
 void AArcher::CallAttackRelease()
@@ -408,17 +483,17 @@ void AArcher::CallAttackRelease()
 void AArcher::StartDrawBow()
 {
 	SetIsDrawing(true);
-	GetCharacterMovement()->MaxWalkSpeed= DrawingWalkSpeed;
+	GetCharacterMovement()->MaxWalkSpeed = DrawingWalkSpeed;
 	GetCharacterMovement()->bOrientRotationToMovement = false;
 	bUseControllerRotationYaw = true;
 }
 
 void AArcher::ReleaseDrawBow()
 {
-	if (GetIsDrawing()) // È­»ì ¿©ºÎ¸¦ ¿©±â¼­ Ã¼Å©ÇØµµ µÉ µí
+	if (GetIsDrawing())
 	{
 		ServerRecoil();
-	}	
+	}
 	SetIsDrawing(false);
 	GetCharacterMovement()->MaxWalkSpeed = DefaultWalkSpeed;
 	GetCharacterMovement()->bOrientRotationToMovement = true;
@@ -473,15 +548,29 @@ void AArcher::MultiRecoil_Implementation()
 	}
 }
 
-void AArcher::EquipWeapon(UItemDataBase* Weapon)
+void AArcher::EquipWeapon(FName WeaponItemID)
 {
 	UnequipAllWeapon();
-	if (Weapon->ItemCategory.ItemType == EItemType::Sword)
+
+	UItemPrimaryDataAsset* ItemData = nullptr;
+	if (const UGameInstance* GI = GetGameInstance())
+	{
+		if (const UItemSubsystem* ItemSubsystem = GI->GetSubsystem<UItemSubsystem>())
+		{
+			ItemSubsystem->GetItemData(WeaponItemID, ItemData);
+		}
+	}
+	if (!ItemData)
+	{
+		return;
+	}
+
+	if (ItemData->ItemCategory.ItemType == EItemType::Sword)
 	{
 		SetEquipType(EEquipType::Sword);
 		SetVisiblityMesh(EMeshType::Sword, true);
 	}
-	else if (Weapon->ItemCategory.ItemType == EItemType::Bow)
+	else if (ItemData->ItemCategory.ItemType == EItemType::Bow)
 	{
 		SetEquipType(EEquipType::Bow);
 		SetVisiblityMesh(EMeshType::Bow, true);
@@ -535,14 +624,14 @@ float AArcher::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, A
 {
 	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
-	float InDamage = (- 1)* DamageAmount;
+	float InDamage = (-1) * DamageAmount;
 	SetHP(InDamage);
 	return DamageAmount;
 }
 
-void AArcher::SelectHotbar1() { SetActiveHotbarIndex(0);}
-void AArcher::SelectHotbar2() { SetActiveHotbarIndex(1);}
-void AArcher::SelectHotbar3() { SetActiveHotbarIndex(2);}
+void AArcher::SelectHotbar1() { SetActiveHotbarIndex(0); }
+void AArcher::SelectHotbar2() { SetActiveHotbarIndex(1); }
+void AArcher::SelectHotbar3() { SetActiveHotbarIndex(2); }
 void AArcher::SelectHotbar4() { SetActiveHotbarIndex(3); }
 void AArcher::SelectHotbar5() { SetActiveHotbarIndex(4); }
 void AArcher::SelectHotbar6() { SetActiveHotbarIndex(5); }
@@ -563,11 +652,25 @@ void AArcher::RefreshActiveHotbarEquip()
 		return;
 	}
 
-	UItemDataBase* Item = PlayerInventory->GetHotbarItem(ActiveHotbarIndex);
-
-	if (Item && Item->ItemCategory.ItemCategory == EItemCategory::Weapon)
+	const FInventoryItemInstance Item = PlayerInventory->GetHotbarItem(ActiveHotbarIndex);
+	if (!Item.IsValidItem())
 	{
-		EquipWeapon(Item);
+		UnequipAllWeapon();
+		return;
+	}
+
+	UItemPrimaryDataAsset* ItemData = nullptr;
+	if (const UGameInstance* GI = GetGameInstance())
+	{
+		if (const UItemSubsystem* ItemSubsystem = GI->GetSubsystem<UItemSubsystem>())
+		{
+			ItemSubsystem->GetItemData(Item.ItemID, ItemData);
+		}
+	}
+
+	if (ItemData && ItemData->ItemCategory.ItemCategory == EItemCategory::Weapon)
+	{
+		EquipWeapon(Item.ItemID);
 	}
 	else
 	{

@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+癤�// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Item/ItemDataBase.h"
@@ -39,14 +39,16 @@ void UItemDataBase::Use(AArcher* User)
 		User->AddHP(ItemCategory.Value);
 		break;
 	case EItemType::Damage:
-		//우선 데미지 입는 거로 햇는데, 공격량 증가하는 것도 괜찮을 수도
 		User->AddHP(-1 * ItemCategory.Value);
 		break;
 	case EItemType::Defense:
-		//데미지 방어 등
 		break;
 	}
-	OwningInventory->RemoveAmountOfItem(this, 1);
+
+	// TODO(3 step, UI refactor): UInventoryComponent no longer accepts a raw UObject item pointer
+	// (RemoveAmountOfItem is now int32 InventoryIndex based). Once callers (InventoryItemSlot etc.)
+	// move to FInventoryItemInstance/index, this should call
+	// UInventoryComponent::RemoveAmountOfItem(int32 InventoryIndex, N) directly instead.
 }
 
 UItemDataBase* UItemDataBase::CreateItemCopy(UObject* Outer) const
@@ -71,14 +73,9 @@ void UItemDataBase::SetQuantity(const int32 NewQuantity)
 	{
 		Quantity = FMath::Clamp(NewQuantity, 0, NumericData.MaxStackSize);
 
-		if (OwningInventory)
-		{
-			if (Quantity <= 0)
-			{
-				OwningInventory->RemoveSingleInstanceOfItem(this);
-			}
-		}
+		// TODO(3 step, UI refactor): RemoveSingleInstanceOfItem no longer exists on UInventoryComponent.
+		// This UObject-based item no longer knows its own inventory index, so it cannot clear itself.
+		// Once UI moves off UItemDataBase, quantity-hits-zero cleanup should happen in
+		// UInventoryComponent::RemoveAmountOfItem itself (it already does this).
 	}
 }
-
-

@@ -7,7 +7,7 @@
 #include "InventoryPannel.generated.h"
 
 /**
- * 
+ *
  */
 class UWrapBox;
 class UTextBlock;
@@ -21,7 +21,7 @@ UCLASS()
 class VALHEIM_API UInventoryPannel : public UUserWidget
 {
 	GENERATED_BODY()
-	
+
 public:
 	UFUNCTION()
 	void RefreshInventory();

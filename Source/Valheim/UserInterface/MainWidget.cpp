@@ -5,6 +5,7 @@
 #include "Character/Archer.h"
 #include "UserInterface/Inventory/ItemDragDropOperation.h"
 #include "Item/ItemDataBase.h"
+#include "Inventory/InventoryComponent.h"
 
 void UMainWidget::NativeOnInitialized()
 {
@@ -22,9 +23,13 @@ bool UMainWidget::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent
 {
 	const UItemDragDropOperation* ItemDragDrop = Cast<UItemDragDropOperation>(InOperation);
 
-	if (PlayerCharacter && ItemDragDrop && ItemDragDrop->SourceItem)
+	if (PlayerCharacter && ItemDragDrop && ItemDragDrop->SourceInventoryIndex != INDEX_NONE)
 	{
-		PlayerCharacter->DropItem(ItemDragDrop->SourceItem, ItemDragDrop->SourceItem->Quantity);
+		const FInventoryItemInstance DroppedItem = PlayerCharacter->GetInventory()
+			? PlayerCharacter->GetInventory()->GetInventoryItem(ItemDragDrop->SourceInventoryIndex)
+			: FInventoryItemInstance();
+
+		PlayerCharacter->DropItem(ItemDragDrop->SourceInventoryIndex, DroppedItem.Quantity);
 		return true;
 	}
 	return false;

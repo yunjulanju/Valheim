@@ -6,7 +6,6 @@
 #include "Inventory/InventoryComponent.h"
 #include "Components/TextBlock.h"
 #include "Components/WrapBox.h"
-#include "Item/ItemDataBase.h"
 #include "UserInterface/Inventory/InventoryItemSlot.h"
 #include "ItemDragDropOperation.h"
 #include "Components/HorizontalBox.h"
@@ -50,12 +49,14 @@ void UInventoryPannel::RefreshInventory()
 
         for (int32 i = 0; i < Capacity; i++)
         {
-            UItemDataBase* Item = InventoryReference->GetInventoryItem(i);
+            const FInventoryItemInstance Item = InventoryReference->GetInventoryItem(i);
 
             UInventoryItemSlot* ItemSlot = CreateWidget<UInventoryItemSlot>(this, InventorySlotClass);
             ItemSlot->SlotIndex = i;
-            ItemSlot->SetItemReference(Item);
-            ItemSlot->bShowToolTip = (Item != nullptr);
+            ItemSlot->SetOwningInventory(InventoryReference);
+            ItemSlot->SetOwningInventoryIndex(i);
+            ItemSlot->SetItem(Item);
+            ItemSlot->bShowToolTip = Item.IsValidItem();
             ItemSlot->RefreshSlot();
 
             InventoryPannel->AddChildToWrapBox(ItemSlot);
@@ -79,9 +80,13 @@ void UInventoryPannel::RefreshHotbar()
             HotBarSlot->SlotIndex = i;
             HotBarSlot->HotKeyNumber->SetText(FText::AsNumber(i + 1));
 
-            UItemDataBase* HotbarItem = InventoryReference->GetHotbarItem(i);
-            HotBarSlot->SetItemReference(HotbarItem);
-            HotBarSlot->bShowToolTip = (HotbarItem != nullptr);     
+            const int32 InvIndex = InventoryReference->GetHotbarSlotInventoryIndex(i);
+            const FInventoryItemInstance HotbarItem = InventoryReference->GetHotbarItem(i);
+
+            HotBarSlot->SetOwningInventory(InventoryReference);
+            HotBarSlot->SetOwningInventoryIndex(InvIndex);
+            HotBarSlot->SetItem(HotbarItem);
+            HotBarSlot->bShowToolTip = HotbarItem.IsValidItem();
             HotBarSlot->RefreshSlot();
 
             HotbarBox->AddChildToHorizontalBox(HotBarSlot);

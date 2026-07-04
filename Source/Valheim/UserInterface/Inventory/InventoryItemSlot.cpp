@@ -5,11 +5,13 @@
 #include "UserInterface/Inventory/InventoryToolTip.h"
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
-#include "Item/ItemDataBase.h"
+#include "Data/ItemPrimaryDataAsset.h"
+#include "Item/ItemSubsystem.h"
 #include "UserInterface/Inventory/DragItemVisual.h"
 #include "ItemDragDropOperation.h"
 #include "Character/Archer.h"
 #include "Inventory/InventoryComponent.h"
+#include "Engine/GameInstance.h"
 
 
 void UInventoryItemSlot::NativeOnInitialized()
@@ -29,26 +31,53 @@ void UInventoryItemSlot::NativeConstruct()
 			ToolTip->InventorySlotBeingHovered = this;
 			SetToolTip(ToolTip);
 		}
-	}		
+	}
 	else
 	{
-		SetToolTip(nullptr); // ºó ½½·ÔÀÌ¸é ÅøÆÁ Á¦°Å
+		SetToolTip(nullptr);
 	}
 
 	RefreshSlot();
 }
 
+UItemPrimaryDataAsset* UInventoryItemSlot::GetDisplayItemData() const
+{
+	if (!CurrentItem.IsValidItem())
+	{
+		return nullptr;
+	}
+
+	if (CurrentItem.CachedItemData)
+	{
+		return CurrentItem.CachedItemData;
+	}
+
+	if (const UWorld* World = GetWorld())
+	{
+		if (const UGameInstance* GI = World->GetGameInstance())
+		{
+			if (UItemSubsystem* Subsystem = GI->GetSubsystem<UItemSubsystem>())
+			{
+				UItemPrimaryDataAsset* Found = nullptr;
+				Subsystem->GetItemData(CurrentItem.ItemID, Found);
+				return Found;
+			}
+		}
+	}
+
+	return nullptr;
+}
+
 void UInventoryItemSlot::RefreshSlot()
 {
-
-	if (ItemReference)
+	if (UItemPrimaryDataAsset* ItemData = GetDisplayItemData())
 	{
-		ItemIcon->SetBrushFromTexture(ItemReference->AssetData.ItemImage);
+		ItemIcon->SetBrushFromTexture(ItemData->AssetData.ItemImage);
 		ItemIcon->SetVisibility(ESlateVisibility::Visible);
 
-		if (ItemReference->NumericData.bIsStackable)
+		if (ItemData->NumericData.bIsStackable)
 		{
-			ItemQuantity->SetText(FText::AsNumber(ItemReference->Quantity));
+			ItemQuantity->SetText(FText::AsNumber(CurrentItem.Quantity));
 			ItemQuantity->SetVisibility(ESlateVisibility::Visible);
 		}
 		else
@@ -69,7 +98,7 @@ FReply UInventoryItemSlot::NativeOnMouseButtonDown(const FGeometry& InGeometry, 
 
 	if (InMouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
 	{
-		if(bShowToolTip)
+		if (bShowToolTip)
 			return Reply.Handled().DetectDrag(TakeWidget(), EKeys::LeftMouseButton);
 		else
 			return Reply.Unhandled();
@@ -79,7 +108,7 @@ FReply UInventoryItemSlot::NativeOnMouseButtonDown(const FGeometry& InGeometry, 
 	{
 		if (AArcher* Player = Cast<AArcher>(GetOwningPlayerPawn()))
 		{
-			ItemReference->Use(Player);
+			Player->UseItem(OwningInventoryIndex);
 		}
 		return Reply.Handled();
 	}
@@ -96,29 +125,32 @@ void UInventoryItemSlot::NativeOnDragDetected(const FGeometry& InGeometry, const
 {
 	Super::NativeOnDragDetected(InGeometry, InMouseEvent, OutOperation);
 
-	if (!ItemReference)
+	if (!CurrentItem.IsValidItem() || !OwningInventory)
 	{
 		return;
 	}
 
 	if (DragItemVisualClass)
 	{
-		const TObjectPtr<UDragItemVisual> DragVisual = CreateWidget<UDragItemVisual>(this, DragItemVisualClass);
-		DragVisual->ItemIcon->SetBrushFromTexture(ItemReference->AssetData.ItemImage);
-		
-		if (ItemReference->NumericData.bIsStackable)
+		UDragItemVisual* DragVisual = CreateWidget<UDragItemVisual>(this, DragItemVisualClass);
+
+		if (UItemPrimaryDataAsset* ItemData = GetDisplayItemData())
 		{
-			DragVisual->ItemQuantity->SetText(FText::AsNumber(ItemReference->Quantity));
-		}
-		else
-		{
-			DragVisual->ItemQuantity->SetVisibility(ESlateVisibility::Collapsed);
+			DragVisual->ItemIcon->SetBrushFromTexture(ItemData->AssetData.ItemImage);
+
+			if (ItemData->NumericData.bIsStackable)
+			{
+				DragVisual->ItemQuantity->SetText(FText::AsNumber(CurrentItem.Quantity));
+			}
+			else
+			{
+				DragVisual->ItemQuantity->SetVisibility(ESlateVisibility::Collapsed);
+			}
 		}
 
 		UItemDragDropOperation* DragItemOperation = NewObject<UItemDragDropOperation>();
-		DragItemOperation->SourceItem = ItemReference;
-		DragItemOperation->SourceInventory = ItemReference->OwningInventory;
-		DragItemOperation->SourceInventoryIndex = SlotIndex;
+		DragItemOperation->SourceInventory = OwningInventory;
+		DragItemOperation->SourceInventoryIndex = OwningInventoryIndex;
 		DragItemOperation->bFromHotbar = false;
 		DragItemOperation->SourceHotbarIndex = -1;
 

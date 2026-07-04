@@ -9,6 +9,8 @@
 /**
  * 
  */
+
+class UItemRegistry;
 UCLASS()
 class VALHEIM_API UValheimGI : public UGameInstance
 {
@@ -18,5 +20,8 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Quest")
 	UDataTable* QuestDataTable;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Item")
+	UItemRegistry* ItemRegistry;
 	
 };

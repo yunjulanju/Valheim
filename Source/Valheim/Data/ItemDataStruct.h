@@ -113,15 +113,15 @@ struct FInventoryItemInstance : public FFastArraySerializerItem
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     int32 Quantity = 0;
 
-    // 위젯이 그릴 아이콘/이름/스택가능여부 등은 전부 이걸로 조회
     UPROPERTY(Transient, NotReplicated)
     TObjectPtr<UItemPrimaryDataAsset> CachedItemData = nullptr;
 
     bool IsValidItem() const { return ItemID != NAME_None; }
-    bool IsStackable() const { return CachedItemData && CachedItemData->NumericData.bIsStackable; }
-    bool IsFullStack() const { return CachedItemData && Quantity >= CachedItemData->NumericData.MaxStackSize; }
 
-    // FastArraySerializer가 요구하는 콜백 (클라에서 항목이 바뀔 때 실행됨)
+    // 선언만 (구현은 .cpp로 이동)
+    bool IsStackable() const;
+    bool IsFullStack() const;
+
     void PostReplicatedAdd(const struct FInventoryList& InArraySerializer);
     void PostReplicatedChange(const struct FInventoryList& InArraySerializer);
     void PreReplicatedRemove(const struct FInventoryList& InArraySerializer);
@@ -135,6 +135,7 @@ struct FInventoryList : public FFastArraySerializer
     UPROPERTY()
     TArray<FInventoryItemInstance> Items;
 
+    // 리플리케이트 안 되는 로컬 전용 포인터. 콜백 안에서 GetWorld() 등에 접근하려고 둠.
     class UInventoryComponent* OwningComponent = nullptr;
 
     bool NetDeltaSerialize(FNetDeltaSerializeInfo& DeltaParms)

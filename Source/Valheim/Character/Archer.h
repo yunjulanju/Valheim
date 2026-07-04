@@ -60,7 +60,6 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
-	virtual void PossessedBy(AController* NewController) override;
 
 	void Move(const FInputActionValue& Value);
 
@@ -155,6 +154,9 @@ public:
 	void MultiSetVisiblityMesh(EMeshType MeshType, bool OnOff);
 	void MultiSetVisiblityMesh_Implementation(EMeshType MeshType, bool OnOff);
 
+	UFUNCTION()
+	void OnRep_HP();
+
 	//---------------Property
 
 	UPROPERTY(BlueprintAssignable)
@@ -183,6 +185,7 @@ protected:
 	int32 ActiveHotbarIndex = 0;
 
 	float MaxHP = 100;
+	UPROPERTY(ReplicatedUsing = OnRep_HP)
 	float HP;
 	float DefaultDamage = 10.0f;
 

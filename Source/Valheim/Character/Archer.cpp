@@ -74,13 +74,6 @@ AArcher::AArcher()
 
 }
 
-void AArcher::PossessedBy(AController* NewController)
-{
-	Super::PossessedBy(NewController);
-
-
-}
-
 void AArcher::BeginPlay()
 {
 	Super::BeginPlay();
@@ -614,10 +607,16 @@ void AArcher::MultiSetVisiblityMesh_Implementation(EMeshType MeshType, bool OnOf
 	}
 }
 
+void AArcher::OnRep_HP()
+{
+	OnHPChanged.Broadcast();
+}
+
 void AArcher::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(AArcher, bIsAttacking);
+	DOREPLIFETIME(AArcher, HP);
 }
 
 float AArcher::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)

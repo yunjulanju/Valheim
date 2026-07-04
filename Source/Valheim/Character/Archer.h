@@ -157,6 +157,8 @@ public:
 	UFUNCTION()
 	void OnRep_HP();
 
+	float GetDamageValue();
+
 	//---------------Property
 
 	UPROPERTY(BlueprintAssignable)
@@ -188,8 +190,8 @@ protected:
 	UPROPERTY(ReplicatedUsing = OnRep_HP)
 	float HP;
 	float DefaultDamage = 10.0f;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Equip")
+	
+	UPROPERTY(VisibleAnywhere, Replicated, Category = "Equip")
 	EEquipType CurrentEquipType = EEquipType::None;
 
 	bool bIsDrawingBow = false;

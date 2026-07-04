@@ -418,7 +418,7 @@ void AArcher::ServerCallAttackCollision_Implementation()
 
 					UGameplayStatics::ApplyDamage(
 						Monster,
-						DefaultDamage,
+						GetDamageValue(),
 						GetController(),
 						this,
 						UDamageType::StaticClass()
@@ -497,6 +497,11 @@ void AArcher::ServerRecoil_Implementation()
 {
 	if (!PlayerController) return;
 
+	UE_LOG(LogTemp, Warning,
+		TEXT("Server EquipType = %d"), (int32)CurrentEquipType);
+	UE_LOG(LogTemp, Warning,
+		TEXT("ServerRecoil Authority=%d"), HasAuthority());
+
 	FVector CameraLocation;
 	FRotator CameraRotation;
 	PlayerController->GetPlayerViewPoint(CameraLocation, CameraRotation);
@@ -525,9 +530,15 @@ void AArcher::ServerRecoil_Implementation()
 	SpawnParams.Owner = this;
 	SpawnParams.Instigator = this;
 	AArrow* Arrow = GetWorld()->SpawnActor<AArrow>(ArrowClass, SpawnLocation, SpawnRotation, SpawnParams);
+
+	UE_LOG(LogTemp, Warning,
+		TEXT("Spawned %s Damage=%f"),
+		*Arrow->GetName(),
+		GetDamageValue());
+
 	if (Arrow)
 	{
-		Arrow->InitializeArrow(50, GetController(), this);
+		Arrow->InitializeArrow(GetDamageValue(), GetController(), this);
 	}
 
 	MultiRecoil();
@@ -612,11 +623,31 @@ void AArcher::OnRep_HP()
 	OnHPChanged.Broadcast();
 }
 
+float AArcher::GetDamageValue()
+{
+	switch (CurrentEquipType)
+	{
+	case EEquipType::None:
+		return 5;
+		break;
+	case EEquipType::Sword:
+		return 10;
+		break;
+	case EEquipType::Bow:
+		return 15;
+		break;
+	default:
+		return 5;
+		break;
+	}
+}
+
 void AArcher::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(AArcher, bIsAttacking);
 	DOREPLIFETIME(AArcher, HP);
+	DOREPLIFETIME(AArcher, CurrentEquipType);
 }
 
 float AArcher::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)

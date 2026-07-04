@@ -38,7 +38,7 @@ protected:
 	UBoxComponent* CollisionBox;
 
 	UPROPERTY(EditAnywhere, Category = "Arrow")
-	float Damage = 25.0f;
+	float Damage = 15.0f;
 
 	UPROPERTY(EditAnywhere, Category = "Arrow")
 	float LifeSpanAfterHit = 5.0f;

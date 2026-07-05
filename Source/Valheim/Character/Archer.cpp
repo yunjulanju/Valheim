@@ -335,8 +335,19 @@ void AArcher::UseHotbarItem(int32 HotbarIndex)
 	ServerUseHotbarItem(HotbarIndex);
 }
 
+void AArcher::SetEquipType(EEquipType NewEquipType)
+{
+	if (!HasAuthority() && !IsLocallyControlled())
+	{
+		return;
+	}
+	ServerSetEquipType(NewEquipType);
+}
+
 void AArcher::ServerSetEquipType_Implementation(EEquipType NewEquipType)
 {
+	UE_LOG(LogTemp, Warning, TEXT("ServerSetEquipType_Implementation: %d -> %d"),
+		(int32)CurrentEquipType, (int32)NewEquipType);
 	CurrentEquipType = NewEquipType;
 }
 
@@ -624,29 +635,16 @@ void AArcher::MultiRecoil_Implementation()
 	}
 }
 
-void AArcher::EquipWeapon(FName WeaponItemID)
+void AArcher::EquipWeapon(EItemType WeaponType)
 {
 	UnequipAllWeapon();
 
-	UItemPrimaryDataAsset* ItemData = nullptr;
-	if (const UGameInstance* GI = GetGameInstance())
-	{
-		if (const UItemSubsystem* ItemSubsystem = GI->GetSubsystem<UItemSubsystem>())
-		{
-			ItemSubsystem->GetItemData(WeaponItemID, ItemData);
-		}
-	}
-	if (!ItemData)
-	{
-		return;
-	}
-
-	if (ItemData->ItemCategory.ItemType == EItemType::Sword)
+	if (WeaponType == EItemType::Sword)
 	{
 		SetEquipType(EEquipType::Sword);
 		SetVisiblityMesh(EMeshType::Sword, true);
 	}
-	else if (ItemData->ItemCategory.ItemType == EItemType::Bow)
+	else if (WeaponType == EItemType::Bow)
 	{
 		SetEquipType(EEquipType::Bow);
 		SetVisiblityMesh(EMeshType::Bow, true);
@@ -761,11 +759,28 @@ void AArcher::SetActiveHotbarIndex(int32 NewIndex)
 {
 	ActiveHotbarIndex = NewIndex;
 	RefreshActiveHotbarEquip();
+	OnActiveHotbarChanged.Broadcast();
+
+	if (!HasAuthority() && IsLocallyControlled())
+	{
+		ServerSetActiveHotbarIndex(NewIndex);
+	}
+}
+
+void AArcher::ServerSetActiveHotbarIndex_Implementation(int32 NewIndex)
+{
+	ActiveHotbarIndex = NewIndex;
+	RefreshActiveHotbarEquip();
 }
 
 void AArcher::RefreshActiveHotbarEquip()
 {
 	if (!PlayerInventory)
+	{
+		return;
+	}
+
+	if (!HasAuthority() && !IsLocallyControlled())
 	{
 		return;
 	}
@@ -777,7 +792,15 @@ void AArcher::RefreshActiveHotbarEquip()
 		return;
 	}
 
+	UE_LOG(LogTemp, Warning, TEXT("[%s] RefreshActiveHotbarEquip: ActiveIdx=%d ItemID=%s Authority=%d LocallyControlled=%d"),
+		HasAuthority() ? TEXT("Server") : TEXT("Client"),
+		ActiveHotbarIndex,
+		*Item.ItemID.ToString(),
+		HasAuthority(),
+		IsLocallyControlled());
+
 	UItemPrimaryDataAsset* ItemData = nullptr;
+
 	if (const UGameInstance* GI = GetGameInstance())
 	{
 		if (const UItemSubsystem* ItemSubsystem = GI->GetSubsystem<UItemSubsystem>())
@@ -788,10 +811,14 @@ void AArcher::RefreshActiveHotbarEquip()
 
 	if (ItemData && ItemData->ItemCategory.ItemCategory == EItemCategory::Weapon)
 	{
-		EquipWeapon(Item.ItemID);
+		UE_LOG(LogTemp, Warning, TEXT("EquipWeapon branch: ItemType=%d"), (int32)ItemData->ItemCategory.ItemType);
+		EquipWeapon(ItemData->ItemCategory.ItemType);
 	}
 	else
 	{
+		UE_LOG(LogTemp, Warning, TEXT("UnequipAllWeapon branch: HasItemData=%d, Category=%d"),
+			ItemData != nullptr,
+			ItemData ? (int32)ItemData->ItemCategory.ItemCategory : -1);
 		UnequipAllWeapon();
 	}
 }

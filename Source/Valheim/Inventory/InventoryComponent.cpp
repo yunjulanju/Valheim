@@ -601,6 +601,11 @@ bool UInventoryComponent::MoveItemToHotbar_Internal(int32 InventoryIndex, int32 
 	InventoryContents.MarkItemDirty(InvSlot);
 	HotbarContents.MarkItemDirty(HotbarSlot);
 
+	if (AArcher* ArcherCharacter = Cast<AArcher>(GetOwner()))
+	{
+		ArcherCharacter->RefreshActiveHotbarEquip();
+	}
+
 	OnInventoryUpdated.Broadcast();
 	return true;
 }

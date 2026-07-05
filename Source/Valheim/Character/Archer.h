@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include <Data/ItemDataStruct.h>
 #include "GameFramework/Character.h"
 #include "Archer.generated.h"
 
@@ -11,7 +12,7 @@ enum class EEquipType : uint8
 {
 	None    UMETA(DisplayName = "None"),
 	Sword   UMETA(DisplayName = "Sword"),
-	Bow     UMETA(DisplayName = "Bow")
+	Bow     UMETA(DisplayName = "Bow") 
 };
 
 UENUM(BlueprintType)
@@ -35,6 +36,7 @@ class UItemDataBase;
 class AArrow;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnHPChanged);
+DECLARE_MULTICAST_DELEGATE(FOnActiveHotbarChanged);
 
 UCLASS()
 class VALHEIM_API AArcher : public ACharacter
@@ -105,7 +107,7 @@ protected:
 	void MultiRecoil();
 	void MultiRecoil_Implementation();
 
-	void EquipWeapon(FName WeaponItemID);
+	void EquipWeapon(EItemType WeaponType);
 	void UnequipAllWeapon();
 
 	void CallAttackRelease();
@@ -124,6 +126,9 @@ protected:
 	void ScrollHotbar(const FInputActionValue& Value);
 
 	void SetActiveHotbarIndex(int32 NewIndex);
+	UFUNCTION(Server, Reliable)
+	void ServerSetActiveHotbarIndex(int32 NewIndex);
+	void ServerSetActiveHotbarIndex_Implementation(int32 NewIndex);
 
 public:
 	void RefreshActiveHotbarEquip();
@@ -145,7 +150,7 @@ public:
 
 	//Weapon
 	FORCEINLINE EEquipType GetEquipType() const { return CurrentEquipType; }
-	FORCEINLINE void SetEquipType(EEquipType NewEquipType) { ServerSetEquipType(NewEquipType); }
+	void SetEquipType(EEquipType NewEquipType);
 
 	UFUNCTION(Server, Reliable)
 	void ServerSetEquipType(EEquipType NewEquipType);
@@ -170,10 +175,13 @@ public:
 
 	float GetDamageValue();
 
+	FORCEINLINE int32 GetActiveHotbarIndex() const { return ActiveHotbarIndex; }
+
 	//---------------Property
 
-	UPROPERTY(BlueprintAssignable)
 	FOnHPChanged OnHPChanged;
+
+	FOnActiveHotbarChanged OnActiveHotbarChanged;
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
@@ -265,7 +273,7 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Input|Hotbar")
 	TArray<UInputAction*> HotbarActions;
 
-	/** Hotbar Scroll (Mouse Wheel) Input Action. Axis1D(float) 값으�?매핑??�?*/
+	/** Hotbar Scroll Input Action*/
 	UPROPERTY(EditAnywhere, Category = "Input|Hotbar")
 	UInputAction* HotbarScrollAction;
 };

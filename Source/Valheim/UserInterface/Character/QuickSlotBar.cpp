@@ -16,14 +16,10 @@ void UQuickSlotBar::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	// 컴파일러 에러 방지를 위해 로그 내부 한글 및 제어 문자 제거
-	FString NetModeStr = (GetWorld() && GetWorld()->GetNetMode() == NM_Client) ? TEXT("Client") : TEXT("Server_Host");
-	UE_LOG(LogTemp, Warning, TEXT("[QuickSlotBar] NativeConstruct Called on [%s]"), *NetModeStr);
-
 	APawn* OwningPawn = GetOwningPlayerPawn();
 	if (!OwningPawn)
 	{
-		UE_LOG(LogTemp, Error, TEXT("[QuickSlotBar] [%s] GetOwningPlayerPawn() returned NULL! Init Failed"), *NetModeStr);
+		UE_LOG(LogTemp, Error, TEXT("[QuickSlotBar]GetOwningPlayerPawn() returned NULL! Init Failed"));
 	}
 
 	PlayerCharacter = Cast<AArcher>(OwningPawn);
@@ -34,16 +30,15 @@ void UQuickSlotBar::NativeConstruct()
 		{
 			InventoryReference->OnInventoryUpdated.RemoveAll(this);
 			InventoryReference->OnInventoryUpdated.AddUObject(this, &UQuickSlotBar::RefreshQuickSlots);
-			UE_LOG(LogTemp, Log, TEXT("[QuickSlotBar] [%s] InventoryComponent Binding Success!"), *NetModeStr);
+			UE_LOG(LogTemp, Log, TEXT("[QuickSlotBar]InventoryComponent Binding Success!"));
 		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("[QuickSlotBar] [%s] Character exists but InventoryComponent is NULL!"), *NetModeStr);
-		}
+
+		PlayerCharacter->OnActiveHotbarChanged.RemoveAll(this);
+		PlayerCharacter->OnActiveHotbarChanged.AddUObject(this, &UQuickSlotBar::UpdateHighlight);
 	}
 	else if (OwningPawn)
 	{
-		UE_LOG(LogTemp, Error, TEXT("[QuickSlotBar] [%s] Pawn exists but Cast to AArcher failed! (Pawn Name: %s)"), *NetModeStr, *OwningPawn->GetName());
+		UE_LOG(LogTemp, Error, TEXT("[QuickSlotBar] Pawn exists but Cast to AArcher failed! (Pawn Name: %s)"),  *OwningPawn->GetName());
 	}
 
 	RefreshQuickSlots();
@@ -55,6 +50,10 @@ void UQuickSlotBar::NativeDestruct()
 	{
 		InventoryReference->OnInventoryUpdated.RemoveAll(this);
 		InventoryReference = nullptr;
+	}
+	if (PlayerCharacter)
+	{
+		PlayerCharacter->OnActiveHotbarChanged.RemoveAll(this);
 	}
 	Super::NativeDestruct();
 }
@@ -109,4 +108,22 @@ void UQuickSlotBar::RefreshQuickSlots()
 		CreatedCount++;
 	}
 
+	UpdateHighlight();
+}
+
+void UQuickSlotBar::UpdateHighlight()
+{
+	if (!PlayerCharacter)
+	{
+		return;
+	}
+
+	const int32 ActiveIndex = PlayerCharacter->GetActiveHotbarIndex();
+	for (int32 i = 0; i < QuickSlots.Num(); i++)
+	{
+		if (QuickSlots[i])
+		{
+			QuickSlots[i]->SetHighlighted(i == ActiveIndex);
+		}
+	}
 }

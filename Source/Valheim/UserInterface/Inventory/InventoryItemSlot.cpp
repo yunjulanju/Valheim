@@ -5,6 +5,7 @@
 #include "UserInterface/Inventory/InventoryToolTip.h"
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
+#include "Components/Border.h"
 #include "Data/ItemPrimaryDataAsset.h"
 #include "Item/ItemSubsystem.h"
 #include "UserInterface/Inventory/DragItemVisual.h"
@@ -90,6 +91,15 @@ void UInventoryItemSlot::RefreshSlot()
 		ItemIcon->SetVisibility(ESlateVisibility::Collapsed);
 		ItemQuantity->SetVisibility(ESlateVisibility::Collapsed);
 	}
+}
+
+void UInventoryItemSlot::SetHighlighted(bool bHighlighted)
+{
+	if (!ItemBorder)
+	{
+		return;
+	}
+	ItemBorder->SetBrushColor(bHighlighted ? HighlightedBorderColor : NormalBorderColor);
 }
 
 FReply UInventoryItemSlot::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)

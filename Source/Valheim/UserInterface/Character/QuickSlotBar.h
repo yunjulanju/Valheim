@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -12,10 +12,10 @@ class UHorizontalBox;
 class UHotBarSlot;
 
 /**
- * ÇÖ¹Ù(HotbarContents)¿Í µ¿ÀÏÇÑ ³»¿ëÀ» Ç×»ó È­¸é¿¡ º¸¿©ÁÖ´Â Äü½½·Ô ¹Ù.
- * MainWidget(ÀÎº¥Åä¸®, TabÀ¸·Î Åä±Û)ÀÌ ¾Æ´Ï¶ó CharacterWidget(»ó½Ã Ç¥½Ã)¿¡ ³Ö´Â´Ù.
- * InventoryPannelÀÇ RefreshHotbar()¿Í ¿ÏÀüÈ÷ °°Àº µ¥ÀÌÅÍ(InventoryComponent::HotbarContents)¸¦
- * ±×´ë·Î ´Ù½Ã ±×·Á¼­ º¸¿©ÁÙ »ÓÀÌ¶ó, ÀÎº¥Åä¸® Ã¢À» ¿­µç ´Ýµç Ç×»ó ¼­¹ö »óÅÂ¿Í µ¿±âÈ­µÈ´Ù.
+ * ï¿½Ö¹ï¿½(HotbarContents)ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½×»ï¿½ È­ï¿½é¿¡ ï¿½ï¿½ï¿½ï¿½ï¿½Ö´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½.
+ * MainWidget(ï¿½Îºï¿½ï¿½ä¸®, Tabï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½)ï¿½ï¿½ ï¿½Æ´Ï¶ï¿½ CharacterWidget(ï¿½ï¿½ï¿½ Ç¥ï¿½ï¿½)ï¿½ï¿½ ï¿½Ö´Â´ï¿½.
+ * InventoryPannelï¿½ï¿½ RefreshHotbar()ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½(InventoryComponent::HotbarContents)ï¿½ï¿½
+ * ï¿½×´ï¿½ï¿½ ï¿½Ù½ï¿½ ï¿½×·ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ì¶ï¿½, ï¿½Îºï¿½ï¿½ä¸® Ã¢ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ýµï¿½ ï¿½×»ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Â¿ï¿½ ï¿½ï¿½ï¿½ï¿½È­ï¿½È´ï¿½.
  */
 UCLASS()
 class VALHEIM_API UQuickSlotBar : public UUserWidget
@@ -30,15 +30,14 @@ public:
 	UFUNCTION()
 	void RefreshQuickSlots();
 
-	// Äü½½·Ô Ä­À» ´ãÀ» ÄÁÅ×ÀÌ³Ê. WBP¿¡¼­ ÀÌ¸§À» QuickSlotBox·Î ¸ÂÃç¼­ ¹ÙÀÎµù.
+	void UpdateHighlight();
+
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UHorizontalBox> QuickSlotBox;
 
-	// InventoryPannel¿¡¼­ ¾²´Â °Í°ú °°Àº UHotBarSlot À§Á¬(WBP_HotBarSlot)À» ±×´ë·Î ÁöÁ¤.
 	UPROPERTY(EditDefaultsOnly, Category = "QuickSlot")
 	TSubclassOf<UHotBarSlot> HotbarSlotClass;
 
-	// InventoryComponent::HotBarSlotsCapacity ¿Í µ¿ÀÏÇÏ°Ô ¸ÂÃçÁÙ °Í.
 	UPROPERTY(EditDefaultsOnly, Category = "QuickSlot")
 	int32 QuickSlotCount = 9;
 

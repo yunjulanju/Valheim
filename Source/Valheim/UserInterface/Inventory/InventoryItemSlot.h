@@ -34,6 +34,8 @@ public:
 
 	void RefreshSlot();
 
+	void SetHighlighted(bool bHighlighted);
+
 	UItemPrimaryDataAsset* GetDisplayItemData() const;
 
 	bool bShowToolTip = true;
@@ -66,6 +68,12 @@ protected:
 
 	UPROPERTY(meta = (BindWidget))
 	UBorder* ItemBorder;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Slot|Highlight")
+	FLinearColor NormalBorderColor = FLinearColor(1.f, 1.f, 1.f, 1.f);
+
+	UPROPERTY(EditDefaultsOnly, Category = "Slot|Highlight")
+	FLinearColor HighlightedBorderColor = FLinearColor(1.f, 0.85f, 0.2f, 1.f);
 	UPROPERTY(meta = (BindWidget))
 	UImage* ItemIcon;
 	UPROPERTY(meta = (BindWidget))

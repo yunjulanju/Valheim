@@ -580,11 +580,6 @@ void AArcher::ServerRecoil_Implementation()
 {
 	if (!PlayerController) return;
 
-	UE_LOG(LogTemp, Warning,
-		TEXT("Server EquipType = %d"), (int32)CurrentEquipType);
-	UE_LOG(LogTemp, Warning,
-		TEXT("ServerRecoil Authority=%d"), HasAuthority());
-
 	FVector CameraLocation;
 	FRotator CameraRotation;
 	PlayerController->GetPlayerViewPoint(CameraLocation, CameraRotation);
@@ -613,11 +608,6 @@ void AArcher::ServerRecoil_Implementation()
 	SpawnParams.Owner = this;
 	SpawnParams.Instigator = this;
 	AArrow* Arrow = GetWorld()->SpawnActor<AArrow>(ArrowClass, SpawnLocation, SpawnRotation, SpawnParams);
-
-	UE_LOG(LogTemp, Warning,
-		TEXT("Spawned %s Damage=%f"),
-		*Arrow->GetName(),
-		GetDamageValue());
 
 	if (Arrow)
 	{
@@ -792,13 +782,6 @@ void AArcher::RefreshActiveHotbarEquip()
 		return;
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("[%s] RefreshActiveHotbarEquip: ActiveIdx=%d ItemID=%s Authority=%d LocallyControlled=%d"),
-		HasAuthority() ? TEXT("Server") : TEXT("Client"),
-		ActiveHotbarIndex,
-		*Item.ItemID.ToString(),
-		HasAuthority(),
-		IsLocallyControlled());
-
 	UItemPrimaryDataAsset* ItemData = nullptr;
 
 	if (const UGameInstance* GI = GetGameInstance())
@@ -811,14 +794,10 @@ void AArcher::RefreshActiveHotbarEquip()
 
 	if (ItemData && ItemData->ItemCategory.ItemCategory == EItemCategory::Weapon)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("EquipWeapon branch: ItemType=%d"), (int32)ItemData->ItemCategory.ItemType);
 		EquipWeapon(ItemData->ItemCategory.ItemType);
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("UnequipAllWeapon branch: HasItemData=%d, Category=%d"),
-			ItemData != nullptr,
-			ItemData ? (int32)ItemData->ItemCategory.ItemCategory : -1);
 		UnequipAllWeapon();
 	}
 }

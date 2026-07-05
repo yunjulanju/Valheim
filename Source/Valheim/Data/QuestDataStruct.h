@@ -48,8 +48,12 @@ struct FQuestData : public FTableRowBase
     int32 RequiredAmount = 1;
 
     // º¸»ó
+
     UPROPERTY(EditAnywhere, BlueprintReadOnly)
-    int32 RewardExp = 0;
+    FName RewardItemID;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly)
+    int32 RewardItemAmount = 0;
 };
 
 USTRUCT(BlueprintType)

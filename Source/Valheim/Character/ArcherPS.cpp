@@ -5,6 +5,9 @@
 #include "Net/UnrealNetwork.h"
 #include "Quest/QuestSubsystem.h"
 #include "Engine/GameInstance.h"
+#include "Archer.h"
+#include <Inventory/InventoryComponent.h>
+#include "Item/ItemSubsystem.h"
 
 
 
@@ -25,7 +28,7 @@ void AArcherPS::BeginPlay()
 
 bool AArcherPS::AcceptQuest(FName QuestID)
 {
-	UE_LOG(LogTemp, Warning, TEXT("AArcherPS::AcceptQuest(FName QuestID)"))
+	//UE_LOG(LogTemp, Warning, TEXT("AArcherPS::AcceptQuest(FName QuestID)"))
 	if (!HasAuthority())
 	{
 		UE_LOG(LogTemp, Warning, TEXT("AArcherPS::AcceptQuest(FName QuestID) !HasAuthority()"))
@@ -55,7 +58,7 @@ bool AArcherPS::AcceptQuest(FName QuestID)
 
 void AArcherPS::ServerAcceptQuest_Implementation(FName QuestID)
 {
-	UE_LOG(LogTemp, Warning, TEXT("[SERVER] ServerAcceptQuest_Implementation QuestID=%s, ActiveQuests.Num()=%d"), *QuestID.ToString(), ActiveQuests.Num());
+	//UE_LOG(LogTemp, Warning, TEXT("[SERVER] ServerAcceptQuest_Implementation QuestID=%s, ActiveQuests.Num()=%d"), *QuestID.ToString(), ActiveQuests.Num());
 	FActiveQuest NewQuest;
 	NewQuest.QuestID = QuestID;
 	NewQuest.CurrentAmount = 0;
@@ -115,6 +118,34 @@ bool AArcherPS::CompleteQuest(FName QuestID)
 
 void AArcherPS::ServerCompleteQuest_Implementation(FName QuestID, int Index)
 {
+
+	if (QuestSubsystem)
+	{
+		FQuestData QuestData;
+		if (QuestSubsystem->GetQuestData(QuestID, QuestData) && !QuestData.RewardItemID.IsNone())
+		{
+			if (AArcher* Archer = Cast<AArcher>(GetPawn()))
+			{
+				if (UInventoryComponent* Inv = Archer->GetInventory())
+				{
+					if (UItemSubsystem* ItemSub = GetGameInstance()->GetSubsystem<UItemSubsystem>())
+					{
+						if (!ItemSub->DoesItemExist(QuestData.RewardItemID))
+						{
+							UE_LOG(LogTemp, Warning, TEXT("Quest reward ItemID '%s' not registered in ItemRegistry"), *QuestData.RewardItemID.ToString());
+						}
+					}
+
+					FItemAddResult Result = Inv->HandleAddItem(QuestData.RewardItemID, QuestData.RewardItemAmount);
+					if (Result.OperationResult == EItemAddResult::NoItemAdded)
+					{
+						UE_LOG(LogTemp, Warning, TEXT("Quest reward item could not be added, inventory full"));
+					}
+				}
+			}
+		}
+	}
+
 	CompletedQuestIDs.Add(QuestID);
 	ActiveQuests.RemoveAt(Index);
 
@@ -182,7 +213,7 @@ void AArcherPS::ServerUpdateQuestProgressByEvent_Implementation(EQuestType Type,
 
 void AArcherPS::OnRep_ActiveQuests()
 {
-	UE_LOG(LogTemp, Warning, TEXT("[%s] OnRep_ActiveQuests fired, ActiveQuests.Num()=%d"), HasAuthority() ? TEXT("SERVER") : TEXT("CLIENT"), ActiveQuests.Num());
+	//UE_LOG(LogTemp, Warning, TEXT("[%s] OnRep_ActiveQuests fired, ActiveQuests.Num()=%d"), HasAuthority() ? TEXT("SERVER") : TEXT("CLIENT"), ActiveQuests.Num());
 	OnActiveQuestsChanged.Broadcast();
 }
 

@@ -121,14 +121,13 @@ protected:
 	void SelectHotbar4(); void SelectHotbar5(); void SelectHotbar6();
 	void SelectHotbar7(); void SelectHotbar8(); void SelectHotbar9();
 
-	// ë§ˆìš°?????…ë ¥. ?„ë¡œ ?¬ë¦¬ë©?ActiveHotbarIndex ì¦ê?, ?„ë˜ë¡??´ë¦¬ë©?ê°ì†Œ (???ì? ?œë¡œ ?œí™˜)
 	void ScrollHotbar(const FInputActionValue& Value);
 
 	void SetActiveHotbarIndex(int32 NewIndex);
 
+public:
 	void RefreshActiveHotbarEquip();
 
-public:
 	FORCEINLINE bool IsAttacking() const { return bIsAttacking; }
 	FORCEINLINE void SetIsAttacking(bool bNewAttacking) { bIsAttacking = bNewAttacking; }
 

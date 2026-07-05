@@ -1,10 +1,11 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Inventory/InventoryComponent.h"
 #include "Item/ItemSubsystem.h"
 #include "Data/ItemPrimaryDataAsset.h"
 #include "Engine/GameInstance.h"
 #include "Net/UnrealNetwork.h"
+#include <Character/Archer.h>
 
 UInventoryComponent::UInventoryComponent()
 {
@@ -26,6 +27,7 @@ void UInventoryComponent::BeginPlay()
 
 		HotbarContents.Items.SetNum(HotBarSlotsCapacity);
 		HotbarContents.MarkArrayDirty();
+		OnInventoryUpdated.Broadcast();
 	}
 }
 
@@ -125,8 +127,6 @@ int32 UInventoryComponent::FindNextPartialStackIndex(FName ItemID) const
 }
 
 // ===================== Add / Remove (Mutation) =====================
-// CalculateAmountForFullStack, AddNewItemAtIndex,
-// HandleNoneStackableItems, HandleStackableItems ´Â Authority(¼­¹ö)¿¡¼­¸¸ È£ÃâµÇ´Â °ÍÀ» ÀüÁ¦·Î ÇÕ´Ï´Ù.
 
 int32 UInventoryComponent::CalculateAmountForFullStack(int32 CurrentQuantity, int32 MaxStackSize, int32 InitialRequestedAmount) const
 {
@@ -146,6 +146,18 @@ void UInventoryComponent::AddNewItemAtIndex(int32 SlotIndex, FName ItemID, int32
 	Slot.Quantity = AmountToAdd;
 
 	InventoryContents.MarkItemDirty(Slot);
+}
+
+void UInventoryComponent::SwapItemContents(FInventoryItemInstance& A, FInventoryItemInstance& B)
+{
+	FName TempID = A.ItemID;
+	int32 TempQty = A.Quantity;
+
+	A.ItemID = B.ItemID;
+	A.Quantity = B.Quantity;
+
+	B.ItemID = TempID;
+	B.Quantity = TempQty;
 }
 
 FItemAddResult UInventoryComponent::HandleNoneStackableItems(FName ItemID, int32 RequestedAddAmount)
@@ -493,7 +505,7 @@ void UInventoryComponent::ServerSplitExistingStack_Implementation(int32 Inventor
 
 // ===================== Move =====================
 
-// ---- MoveInventoryItem ----
+// ---- MoveInventoryItem (Inventory â†” Inventory) ----
 bool UInventoryComponent::MoveInventoryItem(int32 FromIndex, int32 ToIndex)
 {
 	if (!GetOwner())
@@ -532,7 +544,7 @@ bool UInventoryComponent::MoveInventoryItem_Internal(int32 FromIndex, int32 ToIn
 		return true;
 	}
 
-	Swap(InventoryContents.Items[FromIndex], InventoryContents.Items[ToIndex]);
+	SwapItemContents(InventoryContents.Items[FromIndex], InventoryContents.Items[ToIndex]);
 
 	InventoryContents.MarkItemDirty(InventoryContents.Items[FromIndex]);
 	InventoryContents.MarkItemDirty(InventoryContents.Items[ToIndex]);
@@ -546,7 +558,7 @@ void UInventoryComponent::ServerMoveInventoryItem_Implementation(int32 FromIndex
 	MoveInventoryItem_Internal(FromIndex, ToIndex);
 }
 
-// ---- MoveItemToHotbar ----
+// ---- MoveItemToHotbar (Inventory â†” Hotbar) ----
 bool UInventoryComponent::MoveItemToHotbar(int32 InventoryIndex, int32 HotbarIndex)
 {
 	if (!GetOwner())
@@ -582,14 +594,9 @@ bool UInventoryComponent::MoveItemToHotbar_Internal(int32 InventoryIndex, int32 
 	}
 
 	FInventoryItemInstance& InvSlot = InventoryContents.Items[InventoryIndex];
-	if (!InvSlot.IsValidItem())
-	{
-		return false;
-	}
-
 	FInventoryItemInstance& HotbarSlot = HotbarContents.Items[HotbarIndex];
 
-	Swap(InvSlot, HotbarSlot);
+	SwapItemContents(InvSlot, HotbarSlot);
 
 	InventoryContents.MarkItemDirty(InvSlot);
 	HotbarContents.MarkItemDirty(HotbarSlot);
@@ -603,7 +610,7 @@ void UInventoryComponent::ServerMoveItemToHotbar_Implementation(int32 InventoryI
 	MoveItemToHotbar_Internal(InventoryIndex, HotbarIndex);
 }
 
-// ---- MoveItemFromHotbarToInventorySlot ----
+// ---- MoveItemFromHotbarToInventorySlot (Hotbar â†” Inventory) ----
 bool UInventoryComponent::MoveItemFromHotbarToInventorySlot(int32 HotbarIndex, int32 TargetInventoryIndex)
 {
 	if (!GetOwner())
@@ -639,17 +646,17 @@ bool UInventoryComponent::MoveItemFromHotbarToInventorySlot_Internal(int32 Hotba
 	}
 
 	FInventoryItemInstance& HotbarSlot = HotbarContents.Items[HotbarIndex];
-	if (!HotbarSlot.IsValidItem())
-	{
-		return false;
-	}
-
 	FInventoryItemInstance& InvSlot = InventoryContents.Items[TargetInventoryIndex];
 
-	Swap(HotbarSlot, InvSlot);
+	SwapItemContents(HotbarSlot, InvSlot);
 
 	HotbarContents.MarkItemDirty(HotbarSlot);
 	InventoryContents.MarkItemDirty(InvSlot);
+
+	if (AArcher* ArcherCharacter = Cast<AArcher>(GetOwner()))
+	{
+		ArcherCharacter->RefreshActiveHotbarEquip();
+	}
 
 	OnInventoryUpdated.Broadcast();
 	return true;
@@ -660,7 +667,7 @@ void UInventoryComponent::ServerMoveItemFromHotbarToInventorySlot_Implementation
 	MoveItemFromHotbarToInventorySlot_Internal(HotbarIndex, TargetInventoryIndex);
 }
 
-// ---- SwapHotbarSlots ----
+// ---- SwapHotbarSlots (Hotbar â†” Hotbar) ----
 void UInventoryComponent::SwapHotbarSlots(int32 HotbarIndexA, int32 HotbarIndexB)
 {
 	if (!GetOwner())
@@ -689,10 +696,15 @@ void UInventoryComponent::SwapHotbarSlots_Internal(int32 HotbarIndexA, int32 Hot
 		return;
 	}
 
-	Swap(HotbarContents.Items[HotbarIndexA], HotbarContents.Items[HotbarIndexB]);
+	SwapItemContents(HotbarContents.Items[HotbarIndexA], HotbarContents.Items[HotbarIndexB]);
 
 	HotbarContents.MarkItemDirty(HotbarContents.Items[HotbarIndexA]);
 	HotbarContents.MarkItemDirty(HotbarContents.Items[HotbarIndexB]);
+
+	if (AArcher* ArcherCharacter = Cast<AArcher>(GetOwner()))
+	{
+		ArcherCharacter->RefreshActiveHotbarEquip();
+	}
 
 	OnInventoryUpdated.Broadcast();
 }

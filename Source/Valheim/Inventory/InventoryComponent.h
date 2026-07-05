@@ -204,6 +204,9 @@ protected:
 	// 빈 슬롯에 새 스택 생성
 	void AddNewItemAtIndex(int32 SlotIndex, FName ItemID, int32 AmountToAdd);
 
+	// FFastArraySerializerItem의 ReplicationID 등은 건드리지 않고 ItemID/Quantity만 교환
+	static void SwapItemContents(FInventoryItemInstance& A, FInventoryItemInstance& B);
+
 	// ---- Internal 실제 처리 함수들 ----
 	FItemAddResult HandleAddItem_Internal(FName ItemID, int32 RequestedAmount);
 	int32 RemoveAmountOfItem_Internal(int32 InventoryIndex, int32 DesiredAmountToRemove);

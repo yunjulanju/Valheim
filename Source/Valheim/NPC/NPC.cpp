@@ -64,7 +64,6 @@ void ANPC::Interact(APawn* Interactor)
 
 void ANPC::HandleQuestInteraction(AArcherPS* QuestPlayerState)
 {
-	UE_LOG(LogTemp, Warning, TEXT("ANPC::HandleQuestInteraction Owner=%s"), *QuestPlayerState->GetPlayerName());
 	if (!QuestPlayerState)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("ANPC::HandleQuestInteraction !QuestPlayerState"))

@@ -22,11 +22,7 @@ void UQuestBoxWidget::NativeConstruct()
 		QuestSubsystem = GetGameInstance()->GetSubsystem<UQuestSubsystem>();
 	}
 
-	ArcherPS = GetOwningPlayerState<AArcherPS>();
-	if (ArcherPS)
-	{
-		ArcherPS->OnActiveQuestsChanged.AddDynamic(this, &UQuestBoxWidget::UpdateQuestList);
-	}
+	TryBindArcherPS();
 
 	UpdateQuestList();
 }
@@ -39,6 +35,24 @@ void UQuestBoxWidget::NativeDestruct()
 	}
 
 	Super::NativeDestruct();
+}
+
+void UQuestBoxWidget::TryBindArcherPS()
+{
+	ArcherPS = GetOwningPlayerState<AArcherPS>();
+	if (ArcherPS)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[WIDGET] Binding success, ArcherPS=%s"), *ArcherPS->GetName());
+		ArcherPS->OnActiveQuestsChanged.AddDynamic(this, &UQuestBoxWidget::UpdateQuestList);
+		UpdateQuestList();
+		return;
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("[WIDGET] ArcherPS not ready, retrying next tick"));
+	if (UWorld* World = GetWorld())
+	{
+		World->GetTimerManager().SetTimerForNextTick(this, &UQuestBoxWidget::TryBindArcherPS);
+	}
 }
 
 void UQuestBoxWidget::UpdateQuestList()

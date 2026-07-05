@@ -130,8 +130,7 @@ void AArcher::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &AArcher::Interaction);
 
 		// MenuToggle
-		EnhancedInputComponent->BindAction(MenuAction
-			, ETriggerEvent::Started, this, &AArcher::ToggleMenuWidget);
+		EnhancedInputComponent->BindAction(MenuAction, ETriggerEvent::Started, this, &AArcher::ToggleMenuWidget);
 
 		// Hotbar Using
 		if (HotbarActions.IsValidIndex(0) && HotbarActions[0])
@@ -152,6 +151,10 @@ void AArcher::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 			EnhancedInputComponent->BindAction(HotbarActions[7], ETriggerEvent::Started, this, &AArcher::SelectHotbar8);
 		if (HotbarActions.IsValidIndex(8) && HotbarActions[8])
 			EnhancedInputComponent->BindAction(HotbarActions[8], ETriggerEvent::Started, this, &AArcher::SelectHotbar9);
+
+		// Hotbar Scroll (Mouse Wheel)
+		if (HotbarScrollAction)
+			EnhancedInputComponent->BindAction(HotbarScrollAction, ETriggerEvent::Triggered, this, &AArcher::ScrollHotbar);
 	}
 	else
 	{
@@ -322,6 +325,21 @@ void AArcher::UseItem(int32 InventoryIndex)
 	ServerUseItem(InventoryIndex);
 }
 
+void AArcher::UseHotbarItem(int32 HotbarIndex)
+{
+	if (!IsLocallyControlled())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("AArcher::UseHotbarItem() !IsLocallyControlled()"));
+		return;
+	}
+	ServerUseHotbarItem(HotbarIndex);
+}
+
+void AArcher::ServerSetEquipType_Implementation(EEquipType NewEquipType)
+{
+	CurrentEquipType = NewEquipType;
+}
+
 void AArcher::ServerUseItem_Implementation(int32 InventoryIndex)
 {
 	if (!PlayerInventory)
@@ -372,6 +390,60 @@ void AArcher::ServerUseItem_Implementation(int32 InventoryIndex)
 	}
 
 	PlayerInventory->RemoveAmountOfItem(InventoryIndex, 1);
+}
+
+void AArcher::ServerUseHotbarItem_Implementation(int32 HotbarIndex)
+{
+	if (!PlayerInventory)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("AArcher::ServerUseHotbarItem !PlayerInventory"));
+		return;
+	}
+
+	const FInventoryItemInstance ItemToUse = PlayerInventory->GetHotbarItem(HotbarIndex);
+	if (!ItemToUse.IsValidItem())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("AArcher::ServerUseHotbarItem !ItemToUse.IsValidItem()"));
+		return;
+	}
+
+	UItemPrimaryDataAsset* ItemData = nullptr;
+	if (UGameInstance* GI = GetGameInstance())
+	{
+		if (UItemSubsystem* Subsystem = GI->GetSubsystem<UItemSubsystem>())
+		{
+			Subsystem->GetItemData(ItemToUse.ItemID, ItemData);
+		}
+	}
+
+	if (!ItemData || ItemData->ItemCategory.ItemCategory != EItemCategory::Consumable)
+	{
+		return;
+	}
+
+	if (GetCurrentHP() <= 0)
+	{
+		return;
+	}
+
+	if (AArcherPS* ArcherPS = GetPlayerState<AArcherPS>())
+	{
+		ArcherPS->UpdateQuestProgressByEvent(EQuestType::UseItem, ItemToUse.ItemID, 1);
+	}
+
+	switch (ItemData->ItemCategory.ItemType)
+	{
+	case EItemType::Heal:
+		AddHP(ItemData->ItemCategory.Value);
+		break;
+	case EItemType::Damage:
+		AddHP(-1 * ItemData->ItemCategory.Value);
+		break;
+	default:
+		break;
+	}
+
+	PlayerInventory->RemoveAmountOfHotbarItem(HotbarIndex, 1);
 }
 
 void AArcher::SetHP(float NewHP)
@@ -668,6 +740,22 @@ void AArcher::SelectHotbar6() { SetActiveHotbarIndex(5); }
 void AArcher::SelectHotbar7() { SetActiveHotbarIndex(6); }
 void AArcher::SelectHotbar8() { SetActiveHotbarIndex(7); }
 void AArcher::SelectHotbar9() { SetActiveHotbarIndex(8); }
+
+void AArcher::ScrollHotbar(const FInputActionValue& Value)
+{
+	const float ScrollAxis = Value.Get<float>();
+	if (FMath::IsNearlyZero(ScrollAxis))
+	{
+		return;
+	}
+
+	constexpr int32 SlotCount = 9;
+
+	const int32 Direction = ScrollAxis > 0.f ? 1 : -1;
+	const int32 NewIndex = (ActiveHotbarIndex + Direction + SlotCount) % SlotCount;
+
+	SetActiveHotbarIndex(NewIndex);
+}
 
 void AArcher::SetActiveHotbarIndex(int32 NewIndex)
 {

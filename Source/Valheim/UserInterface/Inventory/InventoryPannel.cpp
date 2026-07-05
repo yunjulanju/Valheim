@@ -80,11 +80,9 @@ void UInventoryPannel::RefreshHotbar()
             HotBarSlot->SlotIndex = i;
             HotBarSlot->HotKeyNumber->SetText(FText::AsNumber(i + 1));
 
-            const int32 InvIndex = InventoryReference->GetHotbarSlotInventoryIndex(i);
             const FInventoryItemInstance HotbarItem = InventoryReference->GetHotbarItem(i);
 
             HotBarSlot->SetOwningInventory(InventoryReference);
-            HotBarSlot->SetOwningInventoryIndex(InvIndex);
             HotBarSlot->SetItem(HotbarItem);
             HotBarSlot->bShowToolTip = HotbarItem.IsValidItem();
             HotBarSlot->RefreshSlot();

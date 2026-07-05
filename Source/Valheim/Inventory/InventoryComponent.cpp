@@ -17,13 +17,15 @@ void UInventoryComponent::BeginPlay()
 	Super::BeginPlay();
 
 	InventoryContents.OwningComponent = this;
+	HotbarContents.OwningComponent = this;
 
 	if (GetOwner() && GetOwner()->HasAuthority())
 	{
 		InventoryContents.Items.SetNum(InventorySlotsCapacity);
 		InventoryContents.MarkArrayDirty();
 
-		HotbarToInventoryIndex.Init(INDEX_NONE, HotBarSlotsCapacity);
+		HotbarContents.Items.SetNum(HotBarSlotsCapacity);
+		HotbarContents.MarkArrayDirty();
 	}
 }
 
@@ -39,7 +41,7 @@ UItemSubsystem* UInventoryComponent::GetItemSubsystem() const
 	return nullptr;
 }
 
-// ===================== 조회 (Query) =====================
+// ===================== Query =====================
 
 FInventoryItemInstance UInventoryComponent::GetInventoryItem(int32 InventoryIndex) const
 {
@@ -52,16 +54,11 @@ FInventoryItemInstance UInventoryComponent::GetInventoryItem(int32 InventoryInde
 
 FInventoryItemInstance UInventoryComponent::GetHotbarItem(int32 HotbarIndex) const
 {
-	return GetInventoryItem(GetHotbarSlotInventoryIndex(HotbarIndex));
-}
-
-int32 UInventoryComponent::GetHotbarSlotInventoryIndex(int32 HotbarIndex) const
-{
-	if (HotbarToInventoryIndex.IsValidIndex(HotbarIndex))
+	if (HotbarContents.Items.IsValidIndex(HotbarIndex))
 	{
-		return HotbarToInventoryIndex[HotbarIndex];
+		return HotbarContents.Items[HotbarIndex];
 	}
-	return INDEX_NONE;
+	return FInventoryItemInstance();
 }
 
 TArray<FInventoryItemInstance> UInventoryComponent::GetInventoryContents() const
@@ -127,7 +124,9 @@ int32 UInventoryComponent::FindNextPartialStackIndex(FName ItemID) const
 	return INDEX_NONE;
 }
 
-// ===================== 추가 / 제거 (Mutation) =====================
+// ===================== Add / Remove (Mutation) =====================
+// CalculateAmountForFullStack, AddNewItemAtIndex,
+// HandleNoneStackableItems, HandleStackableItems 는 Authority(서버)에서만 호출되는 것을 전제로 합니다.
 
 int32 UInventoryComponent::CalculateAmountForFullStack(int32 CurrentQuantity, int32 MaxStackSize, int32 InitialRequestedAmount) const
 {
@@ -146,10 +145,7 @@ void UInventoryComponent::AddNewItemAtIndex(int32 SlotIndex, FName ItemID, int32
 	Slot.ItemID = ItemID;
 	Slot.Quantity = AmountToAdd;
 
-	if (GetOwner() && GetOwner()->HasAuthority())
-	{
-		InventoryContents.MarkItemDirty(Slot);
-	}
+	InventoryContents.MarkItemDirty(Slot);
 }
 
 FItemAddResult UInventoryComponent::HandleNoneStackableItems(FName ItemID, int32 RequestedAddAmount)
@@ -193,10 +189,7 @@ int32 UInventoryComponent::HandleStackableItems(FName ItemID, int32 RequestedAdd
 		Slot.Quantity += AmountToMakeFullStack;
 		AmountToDistribute -= AmountToMakeFullStack;
 
-		if (GetOwner() && GetOwner()->HasAuthority())
-		{
-			InventoryContents.MarkItemDirty(Slot);
-		}
+		InventoryContents.MarkItemDirty(Slot);
 
 		if (AmountToDistribute <= 0)
 		{
@@ -230,6 +223,7 @@ int32 UInventoryComponent::HandleStackableItems(FName ItemID, int32 RequestedAdd
 	return RequestedAddAmount - AmountToDistribute;
 }
 
+// ---- HandleAddItem ----
 FItemAddResult UInventoryComponent::HandleAddItem(FName ItemID, int32 RequestedAmount)
 {
 	if (!GetOwner() || ItemID == NAME_None || RequestedAmount <= 0)
@@ -237,6 +231,17 @@ FItemAddResult UInventoryComponent::HandleAddItem(FName ItemID, int32 RequestedA
 		return FItemAddResult::AddedNone();
 	}
 
+	if (GetOwner()->HasAuthority())
+	{
+		return HandleAddItem_Internal(ItemID, RequestedAmount);
+	}
+
+	Server_HandleAddItem(ItemID, RequestedAmount);
+	return FItemAddResult::AddedNone();
+}
+
+FItemAddResult UInventoryComponent::HandleAddItem_Internal(FName ItemID, int32 RequestedAmount)
+{
 	UItemPrimaryDataAsset* ItemData = nullptr;
 	if (const UItemSubsystem* Subsystem = GetItemSubsystem())
 	{
@@ -244,7 +249,7 @@ FItemAddResult UInventoryComponent::HandleAddItem(FName ItemID, int32 RequestedA
 	}
 	if (!ItemData)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("HandleAddItem: ItemID %s not found in ItemSubsystem"), *ItemID.ToString());
+		UE_LOG(LogTemp, Warning, TEXT("HandleAddItem_Internal: ItemID %s not found in ItemSubsystem"), *ItemID.ToString());
 		return FItemAddResult::AddedNone();
 	}
 
@@ -266,7 +271,34 @@ FItemAddResult UInventoryComponent::HandleAddItem(FName ItemID, int32 RequestedA
 	return FItemAddResult::AddedNone();
 }
 
+void UInventoryComponent::Server_HandleAddItem_Implementation(FName ItemID, int32 RequestedAmount)
+{
+	if (!GetOwner() || ItemID == NAME_None || RequestedAmount <= 0)
+	{
+		return;
+	}
+
+	HandleAddItem_Internal(ItemID, RequestedAmount);
+}
+
+// ---- RemoveAmountOfItem ----
 int32 UInventoryComponent::RemoveAmountOfItem(int32 InventoryIndex, int32 DesiredAmountToRemove)
+{
+	if (!GetOwner())
+	{
+		return 0;
+	}
+
+	if (GetOwner()->HasAuthority())
+	{
+		return RemoveAmountOfItem_Internal(InventoryIndex, DesiredAmountToRemove);
+	}
+
+	ServerRemoveAmountOfItem(InventoryIndex, DesiredAmountToRemove);
+	return 0;
+}
+
+int32 UInventoryComponent::RemoveAmountOfItem_Internal(int32 InventoryIndex, int32 DesiredAmountToRemove)
 {
 	if (!InventoryContents.Items.IsValidIndex(InventoryIndex))
 	{
@@ -286,19 +318,87 @@ int32 UInventoryComponent::RemoveAmountOfItem(int32 InventoryIndex, int32 Desire
 	{
 		Slot.ItemID = NAME_None;
 		Slot.Quantity = 0;
-		RemoveItemFromHotbarIfPresent(InventoryIndex);
 	}
 
-	if (GetOwner() && GetOwner()->HasAuthority())
-	{
-		InventoryContents.MarkItemDirty(Slot);
-	}
+	InventoryContents.MarkItemDirty(Slot);
 
 	OnInventoryUpdated.Broadcast();
 	return ActualAmountToRemove;
 }
 
+void UInventoryComponent::ServerRemoveAmountOfItem_Implementation(int32 InventoryIndex, int32 DesiredAmountToRemove)
+{
+	RemoveAmountOfItem_Internal(InventoryIndex, DesiredAmountToRemove);
+}
+
+// ---- RemoveAmountOfHotbarItem ----
+int32 UInventoryComponent::RemoveAmountOfHotbarItem(int32 HotbarIndex, int32 DesiredAmountToRemove)
+{
+	if (!GetOwner())
+	{
+		return 0;
+	}
+
+	if (GetOwner()->HasAuthority())
+	{
+		return RemoveAmountOfHotbarItem_Internal(HotbarIndex, DesiredAmountToRemove);
+	}
+
+	ServerRemoveAmountOfHotbarItem(HotbarIndex, DesiredAmountToRemove);
+	return 0;
+}
+
+int32 UInventoryComponent::RemoveAmountOfHotbarItem_Internal(int32 HotbarIndex, int32 DesiredAmountToRemove)
+{
+	if (!HotbarContents.Items.IsValidIndex(HotbarIndex))
+	{
+		return 0;
+	}
+
+	FInventoryItemInstance& Slot = HotbarContents.Items[HotbarIndex];
+	if (!Slot.IsValidItem())
+	{
+		return 0;
+	}
+
+	const int32 ActualAmountToRemove = FMath::Min(DesiredAmountToRemove, Slot.Quantity);
+	Slot.Quantity -= ActualAmountToRemove;
+
+	if (Slot.Quantity <= 0)
+	{
+		Slot.ItemID = NAME_None;
+		Slot.Quantity = 0;
+	}
+
+	HotbarContents.MarkItemDirty(Slot);
+
+	OnInventoryUpdated.Broadcast();
+	return ActualAmountToRemove;
+}
+
+void UInventoryComponent::ServerRemoveAmountOfHotbarItem_Implementation(int32 HotbarIndex, int32 DesiredAmountToRemove)
+{
+	RemoveAmountOfHotbarItem_Internal(HotbarIndex, DesiredAmountToRemove);
+}
+
+// ---- RemoveItemAtIndex ----
 void UInventoryComponent::RemoveItemAtIndex(int32 InventoryIndex)
+{
+	if (!GetOwner())
+	{
+		return;
+	}
+
+	if (GetOwner()->HasAuthority())
+	{
+		RemoveItemAtIndex_Internal(InventoryIndex);
+		return;
+	}
+
+	ServerRemoveItemAtIndex(InventoryIndex);
+}
+
+void UInventoryComponent::RemoveItemAtIndex_Internal(int32 InventoryIndex)
 {
 	if (!InventoryContents.Items.IsValidIndex(InventoryIndex))
 	{
@@ -309,24 +409,52 @@ void UInventoryComponent::RemoveItemAtIndex(int32 InventoryIndex)
 	Slot.ItemID = NAME_None;
 	Slot.Quantity = 0;
 
-	RemoveItemFromHotbarIfPresent(InventoryIndex);
-
-	if (GetOwner() && GetOwner()->HasAuthority())
-	{
-		InventoryContents.MarkItemDirty(Slot);
-	}
+	InventoryContents.MarkItemDirty(Slot);
 
 	OnInventoryUpdated.Broadcast();
 }
 
+void UInventoryComponent::ServerRemoveItemAtIndex_Implementation(int32 InventoryIndex)
+{
+	RemoveItemAtIndex_Internal(InventoryIndex);
+}
+
+// ---- SplitExistingStack ----
 bool UInventoryComponent::SplitExistingStack(int32 InventoryIndex, int32 AmountToSplit)
 {
+	if (!GetOwner())
+	{
+		return false;
+	}
+
 	if (!InventoryContents.Items.IsValidIndex(InventoryIndex))
 	{
 		return false;
 	}
 
 	const FInventoryItemInstance& SourceSlot = InventoryContents.Items[InventoryIndex];
+	if (!SourceSlot.IsValidItem() || AmountToSplit <= 0 || AmountToSplit >= SourceSlot.Quantity)
+	{
+		return false;
+	}
+
+	if (GetOwner()->HasAuthority())
+	{
+		return SplitExistingStack_Internal(InventoryIndex, AmountToSplit);
+	}
+
+	ServerSplitExistingStack(InventoryIndex, AmountToSplit);
+	return true;
+}
+
+bool UInventoryComponent::SplitExistingStack_Internal(int32 InventoryIndex, int32 AmountToSplit)
+{
+	if (!InventoryContents.Items.IsValidIndex(InventoryIndex))
+	{
+		return false;
+	}
+
+	FInventoryItemInstance& SourceSlot = InventoryContents.Items[InventoryIndex];
 	if (!SourceSlot.IsValidItem() || AmountToSplit <= 0 || AmountToSplit >= SourceSlot.Quantity)
 	{
 		return false;
@@ -342,16 +470,57 @@ bool UInventoryComponent::SplitExistingStack(int32 InventoryIndex, int32 AmountT
 	}
 
 	const FName ItemID = SourceSlot.ItemID;
-	const int32 ActualRemoved = RemoveAmountOfItem(InventoryIndex, AmountToSplit);
+
+	const int32 ActualRemoved = FMath::Min(AmountToSplit, SourceSlot.Quantity);
+	SourceSlot.Quantity -= ActualRemoved;
+	if (SourceSlot.Quantity <= 0)
+	{
+		SourceSlot.ItemID = NAME_None;
+		SourceSlot.Quantity = 0;
+	}
+	InventoryContents.MarkItemDirty(SourceSlot);
+
 	AddNewItemAtIndex(EmptyIndex, ItemID, ActualRemoved);
 
 	OnInventoryUpdated.Broadcast();
 	return true;
 }
 
-// ===================== 이동 (Move) =====================
+void UInventoryComponent::ServerSplitExistingStack_Implementation(int32 InventoryIndex, int32 AmountToSplit)
+{
+	SplitExistingStack_Internal(InventoryIndex, AmountToSplit);
+}
 
+// ===================== Move =====================
+
+// ---- MoveInventoryItem ----
 bool UInventoryComponent::MoveInventoryItem(int32 FromIndex, int32 ToIndex)
+{
+	if (!GetOwner())
+	{
+		return false;
+	}
+
+	if (!InventoryContents.Items.IsValidIndex(FromIndex) || !InventoryContents.Items.IsValidIndex(ToIndex))
+	{
+		return false;
+	}
+
+	if (FromIndex == ToIndex)
+	{
+		return true;
+	}
+
+	if (GetOwner()->HasAuthority())
+	{
+		return MoveInventoryItem_Internal(FromIndex, ToIndex);
+	}
+
+	ServerMoveInventoryItem(FromIndex, ToIndex);
+	return true;
+}
+
+bool UInventoryComponent::MoveInventoryItem_Internal(int32 FromIndex, int32 ToIndex)
 {
 	if (!InventoryContents.Items.IsValidIndex(FromIndex) || !InventoryContents.Items.IsValidIndex(ToIndex))
 	{
@@ -365,91 +534,177 @@ bool UInventoryComponent::MoveInventoryItem(int32 FromIndex, int32 ToIndex)
 
 	Swap(InventoryContents.Items[FromIndex], InventoryContents.Items[ToIndex]);
 
-	if (GetOwner() && GetOwner()->HasAuthority())
-	{
-		InventoryContents.MarkItemDirty(InventoryContents.Items[FromIndex]);
-		InventoryContents.MarkItemDirty(InventoryContents.Items[ToIndex]);
-	}
-
-	for (int32& HotbarSlot : HotbarToInventoryIndex)
-	{
-		if (HotbarSlot == FromIndex)
-		{
-			HotbarSlot = ToIndex;
-		}
-		else if (HotbarSlot == ToIndex)
-		{
-			HotbarSlot = FromIndex;
-		}
-	}
+	InventoryContents.MarkItemDirty(InventoryContents.Items[FromIndex]);
+	InventoryContents.MarkItemDirty(InventoryContents.Items[ToIndex]);
 
 	OnInventoryUpdated.Broadcast();
 	return true;
 }
 
+void UInventoryComponent::ServerMoveInventoryItem_Implementation(int32 FromIndex, int32 ToIndex)
+{
+	MoveInventoryItem_Internal(FromIndex, ToIndex);
+}
+
+// ---- MoveItemToHotbar ----
 bool UInventoryComponent::MoveItemToHotbar(int32 InventoryIndex, int32 HotbarIndex)
 {
-	if (!InventoryContents.Items.IsValidIndex(InventoryIndex) || !HotbarToInventoryIndex.IsValidIndex(HotbarIndex))
+	if (!GetOwner())
 	{
 		return false;
 	}
 
-	if (!InventoryContents.Items[InventoryIndex].IsValidItem())
+	if (!InventoryContents.Items.IsValidIndex(InventoryIndex) || !HotbarContents.Items.IsValidIndex(HotbarIndex))
 	{
 		return false;
 	}
 
-	HotbarToInventoryIndex[HotbarIndex] = InventoryIndex;
+	const FInventoryItemInstance& InvSlot = InventoryContents.Items[InventoryIndex];
+	if (!InvSlot.IsValidItem())
+	{
+		return false;
+	}
+
+	if (GetOwner()->HasAuthority())
+	{
+		return MoveItemToHotbar_Internal(InventoryIndex, HotbarIndex);
+	}
+
+	ServerMoveItemToHotbar(InventoryIndex, HotbarIndex);
+	return true;
+}
+
+bool UInventoryComponent::MoveItemToHotbar_Internal(int32 InventoryIndex, int32 HotbarIndex)
+{
+	if (!InventoryContents.Items.IsValidIndex(InventoryIndex) || !HotbarContents.Items.IsValidIndex(HotbarIndex))
+	{
+		return false;
+	}
+
+	FInventoryItemInstance& InvSlot = InventoryContents.Items[InventoryIndex];
+	if (!InvSlot.IsValidItem())
+	{
+		return false;
+	}
+
+	FInventoryItemInstance& HotbarSlot = HotbarContents.Items[HotbarIndex];
+
+	Swap(InvSlot, HotbarSlot);
+
+	InventoryContents.MarkItemDirty(InvSlot);
+	HotbarContents.MarkItemDirty(HotbarSlot);
 
 	OnInventoryUpdated.Broadcast();
 	return true;
 }
 
+void UInventoryComponent::ServerMoveItemToHotbar_Implementation(int32 InventoryIndex, int32 HotbarIndex)
+{
+	MoveItemToHotbar_Internal(InventoryIndex, HotbarIndex);
+}
+
+// ---- MoveItemFromHotbarToInventorySlot ----
 bool UInventoryComponent::MoveItemFromHotbarToInventorySlot(int32 HotbarIndex, int32 TargetInventoryIndex)
 {
-	const int32 SourceInventoryIndex = GetHotbarSlotInventoryIndex(HotbarIndex);
-	if (SourceInventoryIndex == INDEX_NONE)
+	if (!GetOwner())
 	{
 		return false;
 	}
 
-	return MoveInventoryItem(SourceInventoryIndex, TargetInventoryIndex);
+	if (!HotbarContents.Items.IsValidIndex(HotbarIndex) || !InventoryContents.Items.IsValidIndex(TargetInventoryIndex))
+	{
+		return false;
+	}
+
+	const FInventoryItemInstance& HotbarSlot = HotbarContents.Items[HotbarIndex];
+	if (!HotbarSlot.IsValidItem())
+	{
+		return false;
+	}
+
+	if (GetOwner()->HasAuthority())
+	{
+		return MoveItemFromHotbarToInventorySlot_Internal(HotbarIndex, TargetInventoryIndex);
+	}
+
+	ServerMoveItemFromHotbarToInventorySlot(HotbarIndex, TargetInventoryIndex);
+	return true;
 }
 
+bool UInventoryComponent::MoveItemFromHotbarToInventorySlot_Internal(int32 HotbarIndex, int32 TargetInventoryIndex)
+{
+	if (!HotbarContents.Items.IsValidIndex(HotbarIndex) || !InventoryContents.Items.IsValidIndex(TargetInventoryIndex))
+	{
+		return false;
+	}
+
+	FInventoryItemInstance& HotbarSlot = HotbarContents.Items[HotbarIndex];
+	if (!HotbarSlot.IsValidItem())
+	{
+		return false;
+	}
+
+	FInventoryItemInstance& InvSlot = InventoryContents.Items[TargetInventoryIndex];
+
+	Swap(HotbarSlot, InvSlot);
+
+	HotbarContents.MarkItemDirty(HotbarSlot);
+	InventoryContents.MarkItemDirty(InvSlot);
+
+	OnInventoryUpdated.Broadcast();
+	return true;
+}
+
+void UInventoryComponent::ServerMoveItemFromHotbarToInventorySlot_Implementation(int32 HotbarIndex, int32 TargetInventoryIndex)
+{
+	MoveItemFromHotbarToInventorySlot_Internal(HotbarIndex, TargetInventoryIndex);
+}
+
+// ---- SwapHotbarSlots ----
 void UInventoryComponent::SwapHotbarSlots(int32 HotbarIndexA, int32 HotbarIndexB)
 {
-	if (!HotbarToInventoryIndex.IsValidIndex(HotbarIndexA) || !HotbarToInventoryIndex.IsValidIndex(HotbarIndexB))
+	if (!GetOwner())
 	{
 		return;
 	}
 
-	Swap(HotbarToInventoryIndex[HotbarIndexA], HotbarToInventoryIndex[HotbarIndexB]);
+	if (!HotbarContents.Items.IsValidIndex(HotbarIndexA) || !HotbarContents.Items.IsValidIndex(HotbarIndexB))
+	{
+		return;
+	}
+
+	if (GetOwner()->HasAuthority())
+	{
+		SwapHotbarSlots_Internal(HotbarIndexA, HotbarIndexB);
+		return;
+	}
+
+	ServerSwapHotbarSlots(HotbarIndexA, HotbarIndexB);
+}
+
+void UInventoryComponent::SwapHotbarSlots_Internal(int32 HotbarIndexA, int32 HotbarIndexB)
+{
+	if (!HotbarContents.Items.IsValidIndex(HotbarIndexA) || !HotbarContents.Items.IsValidIndex(HotbarIndexB))
+	{
+		return;
+	}
+
+	Swap(HotbarContents.Items[HotbarIndexA], HotbarContents.Items[HotbarIndexB]);
+
+	HotbarContents.MarkItemDirty(HotbarContents.Items[HotbarIndexA]);
+	HotbarContents.MarkItemDirty(HotbarContents.Items[HotbarIndexB]);
+
 	OnInventoryUpdated.Broadcast();
 }
 
-void UInventoryComponent::SetHotbarSlot(int32 HotbarIndex, int32 InventoryIndex)
+void UInventoryComponent::ServerSwapHotbarSlots_Implementation(int32 HotbarIndexA, int32 HotbarIndexB)
 {
-	if (HotbarToInventoryIndex.IsValidIndex(HotbarIndex))
-	{
-		HotbarToInventoryIndex[HotbarIndex] = InventoryIndex;
-		OnInventoryUpdated.Broadcast();
-	}
-}
-
-void UInventoryComponent::RemoveItemFromHotbarIfPresent(int32 InventoryIndex)
-{
-	for (int32& HotbarSlot : HotbarToInventoryIndex)
-	{
-		if (HotbarSlot == InventoryIndex)
-		{
-			HotbarSlot = INDEX_NONE;
-		}
-	}
+	SwapHotbarSlots_Internal(HotbarIndexA, HotbarIndexB);
 }
 
 void UInventoryComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(UInventoryComponent, InventoryContents);
-	DOREPLIFETIME(UInventoryComponent, HotbarToInventoryIndex);
+	DOREPLIFETIME(UInventoryComponent, HotbarContents);
 }

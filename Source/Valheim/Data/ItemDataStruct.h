@@ -33,15 +33,15 @@ struct FItemCategory : public FTableRowBase
     GENERATED_BODY()
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    EItemCategory ItemCategory;
+    EItemCategory ItemCategory = EItemCategory::Etc;
 
     //Consumable type
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    EItemType ItemType;
+    EItemType ItemType = EItemType::Heal;
 
     //type Value
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    float Value;
+    float Value = 0.f;
 };
 
 USTRUCT(BlueprintType)
@@ -62,10 +62,10 @@ struct FItemAssetData : public FTableRowBase
     GENERATED_BODY()
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    UTexture2D* ItemImage;
+    UTexture2D* ItemImage = nullptr;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    UStaticMesh* ItemMesh;
+    UStaticMesh* ItemMesh = nullptr;
 };
 
 USTRUCT(BlueprintType)

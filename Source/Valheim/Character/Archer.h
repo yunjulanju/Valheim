@@ -94,6 +94,10 @@ protected:
 	void ServerUseItem_Implementation(int32 InventoryIndex);
 
 	UFUNCTION(Server, Reliable)
+	void ServerUseHotbarItem(int32 HotbarIndex);
+	void ServerUseHotbarItem_Implementation(int32 HotbarIndex);
+
+	UFUNCTION(Server, Reliable)
 	void ServerRecoil();
 	void ServerRecoil_Implementation();
 
@@ -117,6 +121,9 @@ protected:
 	void SelectHotbar4(); void SelectHotbar5(); void SelectHotbar6();
 	void SelectHotbar7(); void SelectHotbar8(); void SelectHotbar9();
 
+	// ÎßàÏö∞?????ÖÎ†•. ?ÑÎ°ú ?¨Î¶¨Î©?ActiveHotbarIndex Ï¶ùÍ?, ?ÑÎûòÎ°??¥Î¶¨Î©?Í∞êÏÜå (???ùÏ? ?úÎ°ú ?úÌôò)
+	void ScrollHotbar(const FInputActionValue& Value);
+
 	void SetActiveHotbarIndex(int32 NewIndex);
 
 	void RefreshActiveHotbarEquip();
@@ -135,10 +142,15 @@ public:
 	void DropItem(int32 InventoryIndex, const int32 QuantityToDrop);
 
 	void UseItem(int32 InventoryIndex);
+	void UseHotbarItem(int32 HotbarIndex);
 
 	//Weapon
 	FORCEINLINE EEquipType GetEquipType() const { return CurrentEquipType; }
-	FORCEINLINE void SetEquipType(EEquipType NewEquipType) { CurrentEquipType = NewEquipType; }
+	FORCEINLINE void SetEquipType(EEquipType NewEquipType) { ServerSetEquipType(NewEquipType); }
+
+	UFUNCTION(Server, Reliable)
+	void ServerSetEquipType(EEquipType NewEquipType);
+	void ServerSetEquipType_Implementation(EEquipType NewEquipType);
 
 	FORCEINLINE bool GetIsDrawing() const { return bIsDrawingBow; }
 	FORCEINLINE void SetIsDrawing(bool Drawing) { bIsDrawingBow = Drawing; }
@@ -253,4 +265,8 @@ protected:
 	/** Attack HotBar Action */
 	UPROPERTY(EditAnywhere, Category = "Input|Hotbar")
 	TArray<UInputAction*> HotbarActions;
+
+	/** Hotbar Scroll (Mouse Wheel) Input Action. Axis1D(float) Í∞íÏúºÎ°?Îß§Ìïë??Í≤?*/
+	UPROPERTY(EditAnywhere, Category = "Input|Hotbar")
+	UInputAction* HotbarScrollAction;
 };

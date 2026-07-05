@@ -4,10 +4,26 @@
 #include "UserInterface/Inventory/HotBarSlot.h"
 #include "ItemDragDropOperation.h"
 #include "Inventory/InventoryComponent.h"
+#include "Character/Archer.h"
 
 void UHotBarSlot::NativeConstruct()
 {
 	Super::NativeConstruct();
+}
+
+FReply UHotBarSlot::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
+{
+	// 핫바 슬롯은 이제 인벤토리 인덱스가 아니라 SlotIndex 자체로 아이템을 사용함
+	if (InMouseEvent.GetEffectingButton() == EKeys::RightMouseButton)
+	{
+		if (AArcher* Player = Cast<AArcher>(GetOwningPlayerPawn()))
+		{
+			Player->UseHotbarItem(SlotIndex);
+		}
+		return FReply::Handled();
+	}
+
+	return Super::NativeOnMouseButtonDown(InGeometry, InMouseEvent);
 }
 
 void UHotBarSlot::NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation)
@@ -40,7 +56,7 @@ bool UHotBarSlot::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent
 			return true;
 		}
 
-		// 핫바는 실체가 아니라 인벤토리 인덱스를 참조만 하므로, 두 핫바 슬롯이 가리키는 인덱스를 서로 맞바꾸면 됨
+		// 두 핫바 슬롯이 들고 있는 아이템 실체를 서로 맞바꿈
 		Inventory->SwapHotbarSlots(DragOp->SourceHotbarIndex, SlotIndex);
 	}
 	else

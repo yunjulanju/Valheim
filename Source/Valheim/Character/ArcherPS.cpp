@@ -167,6 +167,7 @@ void AArcherPS::UpdateQuestProgressByEvent(EQuestType Type, FName TargetID, int3
 {
 	if (!HasAuthority())
 	{
+		ServerUpdateQuestProgressByEvent(Type, TargetID, Amount);
 		return;
 	}
 
@@ -207,6 +208,7 @@ void AArcherPS::UpdateQuestProgressByEvent(EQuestType Type, FName TargetID, int3
 
 void AArcherPS::ServerUpdateQuestProgressByEvent_Implementation(EQuestType Type, FName TargetID, int32 Amount)
 {
+	UpdateQuestProgressByEvent(Type, TargetID, Amount);
 }
 
 void AArcherPS::OnRep_ActiveQuests()

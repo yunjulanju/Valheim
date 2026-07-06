@@ -3,29 +3,41 @@
 
 #include "UserInterface/Quest/QuestEntryWidget.h"
 #include "Components/TextBlock.h"
+#include <Data/QuestDataStruct.h>
 
 void UQuestEntryWidget::NativeOnInitialized()
 {
 }
 
-void UQuestEntryWidget::SetInfo(FText InTitle, FText InDescription, int32 InAmount)
+void UQuestEntryWidget::SetInfo(FText InTitle, FText InDescription, int32 InCurrentAmount, int32 InRequiredAmount, EQuestStatus InStatus)
 {
-	if (InTitle.IsEmpty() || InDescription.IsEmpty())
+	if (!Title || !Description || !Amount || !SuccessText) return;
+
+	Title->SetText(InTitle);
+
+	if (InStatus == EQuestStatus::ReadyToComplete)
 	{
-		return;
+		SuccessText->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+		SuccessText->SetText(FText::FromString(TEXT("Go to NPC")));
+
+		Description->SetVisibility(ESlateVisibility::Collapsed);
+		Amount->SetVisibility(ESlateVisibility::Collapsed);
 	}
-	if (Title && Description && Amount)
+	else
 	{
-		Title->SetText(InTitle);
+		SuccessText->SetVisibility(ESlateVisibility::Collapsed);
+
+		Description->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+		Amount->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+
 		Description->SetText(InDescription);
 
-		/*const FText ProgressString = FText::Format(
-			NSLOCTEXT("Quest", "ProgressFormat", "{0}/{1}"),
-			FText::AsNumber(CurrentAmount),
-			FText::AsNumber(RequiredAmount)
-		);*/
-
-		Amount->SetText(FText::AsNumber(InAmount));
+		FText ProgressString = FText::Format(
+			FText::FromString(TEXT("{0} / {1}")),
+			FText::AsNumber(InCurrentAmount),
+			FText::AsNumber(InRequiredAmount)
+		);
+		Amount->SetText(ProgressString);
 	}
-	
 }
+

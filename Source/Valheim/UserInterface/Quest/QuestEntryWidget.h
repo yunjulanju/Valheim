@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include <Data/QuestDataStruct.h>
 #include "QuestEntryWidget.generated.h"
 
 /**
@@ -27,5 +28,8 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* Amount;
 
-	void SetInfo(FText InTitle, FText InDescription, int32 InAmount);
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* SuccessText;
+
+	void SetInfo(FText InTitle, FText InDescription, int32 InCurrentAmount, int32 InRequiredAmount, EQuestStatus InStatus);
 };

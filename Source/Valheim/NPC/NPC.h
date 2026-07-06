@@ -10,6 +10,7 @@
 
 class UQuestSubsystem;
 class AArcherPS;
+class UWidgetComponent;
 UCLASS()
 class VALHEIM_API ANPC : public ACharacter, public IInteractable
 {
@@ -20,6 +21,12 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "Quest")
 	FName NPCID;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
+	UWidgetComponent* QuestMarkerWidget;
+
+	UFUNCTION(BlueprintCallable, Category = "Quest")
+	void UpdateQuestMarker();
 
 	virtual void Interact(APawn* Interactor) override;
 

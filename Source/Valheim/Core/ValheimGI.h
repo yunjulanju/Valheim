@@ -23,5 +23,7 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Item")
 	UItemRegistry* ItemRegistry;
-	
+
+	UPROPERTY(BlueprintReadWrite, Category = "Network")
+	FString LevelName;
 };

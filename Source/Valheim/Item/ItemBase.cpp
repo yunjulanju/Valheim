@@ -55,7 +55,6 @@ void AItemBase::InitializeItem(const int32 InQuantity)
 	Quantity = FMath::Max(InQuantity, 0);
 	CurrentMeshAsset = DesiredItemAsset->AssetData.ItemMesh;
 
-	// 서버(리슨서버 포함)는 OnRep이 호출되지 않으므로 직접 적용
 	ItemMesh->SetStaticMesh(CurrentMeshAsset);
 }
 
@@ -114,7 +113,6 @@ bool AItemBase::TryAddToInventory(AArcher* Taker)
 	case EItemAddResult::NoItemAdded:
 		return false;
 	case EItemAddResult::PartialItemAdded:
-		// 일부만 들어간 경우: 남은 수량만 픽업에 남겨두고 파괴하지 않음
 		Quantity -= AddResult.ActualAmountAdded;
 		return false;
 	case EItemAddResult::AllItemAdded:

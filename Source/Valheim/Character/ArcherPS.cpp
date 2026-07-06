@@ -28,7 +28,6 @@ void AArcherPS::BeginPlay()
 
 bool AArcherPS::AcceptQuest(FName QuestID)
 {
-	//UE_LOG(LogTemp, Warning, TEXT("AArcherPS::AcceptQuest(FName QuestID)"))
 	if (!HasAuthority())
 	{
 		UE_LOG(LogTemp, Warning, TEXT("AArcherPS::AcceptQuest(FName QuestID) !HasAuthority()"))
@@ -58,7 +57,6 @@ bool AArcherPS::AcceptQuest(FName QuestID)
 
 void AArcherPS::ServerAcceptQuest_Implementation(FName QuestID)
 {
-	//UE_LOG(LogTemp, Warning, TEXT("[SERVER] ServerAcceptQuest_Implementation QuestID=%s, ActiveQuests.Num()=%d"), *QuestID.ToString(), ActiveQuests.Num());
 	FActiveQuest NewQuest;
 	NewQuest.QuestID = QuestID;
 	NewQuest.CurrentAmount = 0;
@@ -213,7 +211,6 @@ void AArcherPS::ServerUpdateQuestProgressByEvent_Implementation(EQuestType Type,
 
 void AArcherPS::OnRep_ActiveQuests()
 {
-	//UE_LOG(LogTemp, Warning, TEXT("[%s] OnRep_ActiveQuests fired, ActiveQuests.Num()=%d"), HasAuthority() ? TEXT("SERVER") : TEXT("CLIENT"), ActiveQuests.Num());
 	OnActiveQuestsChanged.Broadcast();
 }
 

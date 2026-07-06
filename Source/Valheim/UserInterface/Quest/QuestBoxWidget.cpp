@@ -65,7 +65,7 @@ void UQuestBoxWidget::UpdateQuestList()
 		TArray<FActiveQuest> Quests = ArcherPS->GetActiveQuests();
 		if (Quests.Num() == 0)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("UQuestBoxWidget::UpdateQuestList() Quests.Num() == 0"))
+			//UE_LOG(LogTemp, Warning, TEXT("UQuestBoxWidget::UpdateQuestList() Quests.Num() == 0"))
 			return;
 		}
 

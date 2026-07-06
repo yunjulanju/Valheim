@@ -33,29 +33,12 @@ AArrow::AArrow()
 	ProjectileMovement->bShouldBounce = false;
 	ProjectileMovement->ProjectileGravityScale = 1.0f;
 
-	UE_LOG(LogTemp, Warning,
-		TEXT("InitializeArrow Arrow=%s Damage=%f Authority=%d"),
-		*GetName(),
-		Damage,
-		HasAuthority());
-
 	InitialLifeSpan = 10.0f;
 }
 
 void AArrow::InitializeArrow(float InDamage, AController* InInstigator, AActor* InDamageCauser)
 {
-	UE_LOG(LogTemp, Warning,
-		TEXT("InitializeArrow CALLED %p InDamage=%f OldDamage=%f"),
-		this,
-		InDamage,
-		Damage);
-
 	Damage = InDamage;
-
-	UE_LOG(LogTemp, Warning,
-		TEXT("InitializeArrow END %p Damage=%f"),
-		this,
-		Damage);
 	InstigatorController = InInstigator;
 	DamageCauserActor = InDamageCauser;
 }
@@ -75,12 +58,6 @@ void AArrow::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimi
 
 	bHasHit = true;
 
-	UE_LOG(LogTemp, Warning,
-		TEXT("OnHit %p Damage=%f Authority=%d"),
-		this,
-		Damage,
-		HasAuthority());
-
 	if (AMonster* Monster = Cast<AMonster>(OtherActor))
 	{
 		UGameplayStatics::ApplyDamage(
@@ -91,7 +68,7 @@ void AArrow::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimi
 			UDamageType::StaticClass()
 		);
 	}
-	UE_LOG(LogTemp, Warning,TEXT("Spawn Arrow : %f"),Damage);
+	
 	ProjectileMovement->StopMovementImmediately();
 	ProjectileMovement->ProjectileGravityScale = 0.f;
 	CollisionBox->SetSimulatePhysics(false);

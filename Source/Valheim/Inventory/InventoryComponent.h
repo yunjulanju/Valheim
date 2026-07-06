@@ -108,20 +108,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	int32 FindInventoryIndexByID(FName ItemID) const;
 
-	// 구 FindNextPartialStack: 아직 다 안 찬 스택의 인덱스 (없으면 INDEX_NONE)
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	int32 FindNextPartialStackIndex(FName ItemID) const;
 
-	// ===================== 추가 / 제거 (Mutation) =====================
-	//
-	// 아래 공개 함수들의 공통 규칙:
-	// - 이미 Authority(서버) 상태에서 호출되면: RPC를 거치지 않고 대응하는
-	//   _Internal 함수를 그 자리에서 직접 호출하여 실제 처리 결과를 즉시 반환합니다.
-	//
-	// - 클라이언트에서 호출되면: Server RPC로 요청만 보내고,
-	//   실제 결과는 리플리케이션 + OnInventoryUpdated를 통해 반영됩니다.
-	//   반환값은 placeholder입니다.
-
+	// ===================== 추가 / 제거 (Mutation) 
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	FItemAddResult HandleAddItem(FName ItemID, int32 RequestedAmount);
 
@@ -193,18 +183,16 @@ protected:
 	UItemSubsystem* GetItemSubsystem() const;
 
 	FItemAddResult HandleNoneStackableItems(FName ItemID, int32 RequestedAddAmount);
+
 	int32 HandleStackableItems(FName ItemID, int32 RequestedAddAmount);
 
-	// 서버 로직 전용
 	int32 CalculateAmountForFullStack(
 		int32 CurrentQuantity,
 		int32 MaxStackSize,
 		int32 InitialRequestedAmount) const;
 
-	// 빈 슬롯에 새 스택 생성
 	void AddNewItemAtIndex(int32 SlotIndex, FName ItemID, int32 AmountToAdd);
 
-	// FFastArraySerializerItem의 ReplicationID 등은 건드리지 않고 ItemID/Quantity만 교환
 	static void SwapItemContents(FInventoryItemInstance& A, FInventoryItemInstance& B);
 
 	// ---- Internal 실제 처리 함수들 ----

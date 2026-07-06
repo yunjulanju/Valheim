@@ -285,7 +285,6 @@ void AArcher::ServerDropItem_Implementation(int32 InventoryIndex, const int32 Qu
 		return;
 	}
 
-	// 제거하기 전에 ItemID를 먼저 챙겨둠 (RemoveAmountOfItem이 슬롯을 완전히 비우면 ItemID도 같이 날아가기 때문)
 	const FInventoryItemInstance ItemToDrop = PlayerInventory->GetInventoryItem(InventoryIndex);
 	if (!ItemToDrop.IsValidItem())
 	{
@@ -346,8 +345,6 @@ void AArcher::SetEquipType(EEquipType NewEquipType)
 
 void AArcher::ServerSetEquipType_Implementation(EEquipType NewEquipType)
 {
-	UE_LOG(LogTemp, Warning, TEXT("ServerSetEquipType_Implementation: %d -> %d"),
-		(int32)CurrentEquipType, (int32)NewEquipType);
 	CurrentEquipType = NewEquipType;
 }
 
@@ -558,6 +555,12 @@ void AArcher::CallAttackRelease()
 
 void AArcher::StartDrawBow()
 {
+	if (GetInventory()->FindInventoryIndexByID("Arrow") < 0)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("AArcher::StartDrawBow GetInventory()->FindInventoryIndexByID Null"));
+		return;
+	}
+
 	SetIsDrawing(true);
 	GetCharacterMovement()->MaxWalkSpeed = DrawingWalkSpeed;
 	GetCharacterMovement()->bOrientRotationToMovement = false;
@@ -652,6 +655,7 @@ void AArcher::SetVisiblityMesh(EMeshType MeshType, bool OnOff)
 {
 	if (!IsLocallyControlled())
 	{
+		UE_LOG(LogTemp, Warning, TEXT("AArcher::SetVisiblityMesh !IsLocallyControlled()"));
 		return;
 	}
 	ServerSetVisiblityMesh(MeshType, OnOff);

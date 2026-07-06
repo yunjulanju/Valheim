@@ -40,7 +40,7 @@ float AMonster::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, 
 	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
 	HP -= DamageAmount;
-	UE_LOG(LogTemp, Warning, TEXT("Monster HP: %f"), HP);
+	//UE_LOG(LogTemp, Warning, TEXT("Monster HP: %f"), HP);
 
 	if (HP <= 0)
 	{	

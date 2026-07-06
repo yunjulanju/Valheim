@@ -117,8 +117,6 @@ struct FInventoryItemInstance : public FFastArraySerializerItem
     TObjectPtr<UItemPrimaryDataAsset> CachedItemData = nullptr;
 
     bool IsValidItem() const { return ItemID != NAME_None; }
-
-    // 선언만 (구현은 .cpp로 이동)
     bool IsStackable() const;
     bool IsFullStack() const;
 
@@ -135,7 +133,6 @@ struct FInventoryList : public FFastArraySerializer
     UPROPERTY()
     TArray<FInventoryItemInstance> Items;
 
-    // 리플리케이트 안 되는 로컬 전용 포인터. 콜백 안에서 GetWorld() 등에 접근하려고 둠.
     class UInventoryComponent* OwningComponent = nullptr;
 
     bool NetDeltaSerialize(FNetDeltaSerializeInfo& DeltaParms)

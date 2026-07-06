@@ -12,7 +12,7 @@
 
 void ULobbyUser::SetInfo(ALobbyPlayerState* InPlayerState)
 {
-	//PlayerState = InPlayerState;
+	PlayerState = InPlayerState;
 	RefreshUI();
 }
 

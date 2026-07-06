@@ -616,7 +616,8 @@ void AArcher::ServerRecoil_Implementation()
 	{
 		Arrow->InitializeArrow(GetDamageValue(), GetController(), this);
 	}
-
+	;
+	PlayerInventory->RemoveAmountOfItem(PlayerInventory->FindInventoryIndexByID("Arrow"), 1);
 	MultiRecoil();
 }
 

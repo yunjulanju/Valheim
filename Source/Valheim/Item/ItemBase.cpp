@@ -19,7 +19,7 @@ AItemBase::AItemBase()
 
 	ItemMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ItemMesh"));
 	SetRootComponent(ItemMesh);
-	ItemMesh->SetSimulatePhysics(true);
+	//ItemMesh->SetSimulatePhysics(true);
 	ItemMesh->SetEnableGravity(true);
 	ItemMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	ItemMesh->SetIsReplicated(true); //메시 동기화

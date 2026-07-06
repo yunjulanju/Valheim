@@ -18,7 +18,7 @@ public class Valheim : ModuleRules
 			"StateTreeModule",
 			"GameplayStateTreeModule",
 			"UMG",
-			"Slate",   "SlateCore","AIModule","GameplayTasks","NetCore"
+			"Slate",   "SlateCore","AIModule","GameplayTasks","NetCore", "OnlineSubsystem", "OnlineSubsystemUtils"
         });
 
 		PrivateDependencyModuleNames.AddRange(new string[] { });

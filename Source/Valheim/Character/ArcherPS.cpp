@@ -116,31 +116,61 @@ bool AArcherPS::CompleteQuest(FName QuestID)
 
 void AArcherPS::ServerCompleteQuest_Implementation(FName QuestID, int Index)
 {
-
-	if (QuestSubsystem)
+	if (!QuestSubsystem)
 	{
-		FQuestData QuestData;
-		if (QuestSubsystem->GetQuestData(QuestID, QuestData) && !QuestData.RewardItemID.IsNone())
-		{
-			if (AArcher* Archer = Cast<AArcher>(GetPawn()))
-			{
-				if (UInventoryComponent* Inv = Archer->GetInventory())
-				{
-					if (UItemSubsystem* ItemSub = GetGameInstance()->GetSubsystem<UItemSubsystem>())
-					{
-						if (!ItemSub->DoesItemExist(QuestData.RewardItemID))
-						{
-							UE_LOG(LogTemp, Warning, TEXT("Quest reward ItemID '%s' not registered in ItemRegistry"), *QuestData.RewardItemID.ToString());
-						}
-					}
+		UE_LOG(LogTemp, Warning, TEXT("CompleteQuest Failed: QuestSubsystem is NULL"));
+		return;
+	}
 
-					FItemAddResult Result = Inv->HandleAddItem(QuestData.RewardItemID, QuestData.RewardItemAmount);
-					if (Result.OperationResult == EItemAddResult::NoItemAdded)
-					{
-						UE_LOG(LogTemp, Warning, TEXT("Quest reward item could not be added, inventory full"));
-					}
-				}
-			}
+	FQuestData QuestData;
+	if (!QuestSubsystem->GetQuestData(QuestID, QuestData))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("CompleteQuest Failed: Failed to find QuestData for ID '%s'"), *QuestID.ToString());
+		return;
+	}
+
+	AArcher* Archer = Cast<AArcher>(GetPawn());
+	if (!Archer)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("CompleteQuest Failed: Pawn is not AArcher"));
+		return;
+	}
+
+	UInventoryComponent* Inv = Archer->GetInventory();
+	if (!Inv)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("CompleteQuest Failed: InventoryComponent is NULL on Archer"));
+		return;
+	}
+
+	UItemSubsystem* ItemSub = GetGameInstance()->GetSubsystem<UItemSubsystem>();
+	if (!ItemSub)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("CompleteQuest Failed: ItemSubsystem is NULL"));
+		return;
+	}
+
+	for (const FQuestRewardItem& Reward : QuestData.RewardItems)
+	{
+		if (Reward.RewardItemID.IsNone() || Reward.RewardItemAmount <= 0)
+		{
+			continue;
+		}
+
+		if (!ItemSub->DoesItemExist(Reward.RewardItemID))
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Quest reward ItemID '%s' not registered in ItemRegistry"), *Reward.RewardItemID.ToString());
+		}
+
+		FItemAddResult Result = Inv->HandleAddItem(Reward.RewardItemID, Reward.RewardItemAmount);
+
+		if (Result.OperationResult == EItemAddResult::NoItemAdded)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Quest reward item '%s' could not be added, inventory full"), *Reward.RewardItemID.ToString());
+		}
+		else
+		{
+			UE_LOG(LogTemp, Log, TEXT("Successfully added quest reward: %s x%d"), *Reward.RewardItemID.ToString(), Reward.RewardItemAmount);
 		}
 	}
 

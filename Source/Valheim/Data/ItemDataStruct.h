@@ -81,28 +81,6 @@ struct FItemNumericData : public FTableRowBase
 };
 
 USTRUCT(BlueprintType)
-struct FItemBaseRow : public FTableRowBase
-{
-    GENERATED_BODY()
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    FName  ItemID;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    FItemTextData TextData;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    FItemCategory ItemCategory;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    FItemAssetData AssetData;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    FItemNumericData NumericData;
-};
-
-
-USTRUCT(BlueprintType)
 struct FInventoryItemInstance : public FFastArraySerializerItem
 {
     GENERATED_BODY()

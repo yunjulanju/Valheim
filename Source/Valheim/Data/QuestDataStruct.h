@@ -22,6 +22,18 @@ enum class EQuestStatus : uint8
 };
 
 USTRUCT(BlueprintType)
+struct FQuestRewardItem
+{
+    GENERATED_BODY()
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Reward")
+    FName RewardItemID;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Reward")
+    int32 RewardItemAmount = 0;
+};
+
+USTRUCT(BlueprintType)
 struct FQuestData : public FTableRowBase
 {
     GENERATED_BODY()
@@ -48,12 +60,8 @@ struct FQuestData : public FTableRowBase
     int32 RequiredAmount = 1;
 
     // º¸»ó
-
-    UPROPERTY(EditAnywhere, BlueprintReadOnly)
-    FName RewardItemID;
-
-    UPROPERTY(EditAnywhere, BlueprintReadOnly)
-    int32 RewardItemAmount = 0;
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Reward")
+    TArray<FQuestRewardItem> RewardItems;
 };
 
 USTRUCT(BlueprintType)

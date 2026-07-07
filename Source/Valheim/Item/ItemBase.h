@@ -17,15 +17,12 @@ class VALHEIM_API AItemBase : public AActor, public IInteractable
 
     //------------------------------Function ////
 public:
-    // Sets default values for this actor's properties
     AItemBase();
 
-    // Called every frame
     virtual void Tick(float DeltaTime) override;
 
     void InitializeItem(const int32 InQuantity);
 
-    // 필드에서 드롭될 때 호출: 어떤 아이템인지는 이제 UObject가 아니라 ItemID로 전달받음
     void InitiallizeDrop(FName InItemID, const int32 InQuantity);
 
     FORCEINLINE FName GetItemID() const { return ItemID; }
@@ -37,7 +34,6 @@ public:
     virtual void Interact(APawn* Interactor) override;
 
 protected:
-    // Called when the game starts or when spawned
     virtual void BeginPlay() override;
 
     virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
@@ -47,7 +43,6 @@ protected:
     UFUNCTION()
     void OnRep_CurrentMeshAsset();
 
-    // ItemID로 인벤토리에 넣기를 시도하고, 성공하면 true (호출부에서 Destroy 여부 결정)
     bool TryAddToInventory(AArcher* Taker);
 
     //------------------------------Property ////

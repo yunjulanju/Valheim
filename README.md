@@ -54,6 +54,12 @@ Unreal Engine 5로 제작한 **Valheim 모작 멀티플레이어 생존 게임**
 
 ---
 
+## 데모 영상
+
+[![Valheim 모작 프로젝트 데모](썸네일_이미지_URL)](https://www.youtube.com/watch?v=영상ID)
+
+▶ [유튜브에서 전체 영상 보기](https://www.youtube.com/watch?v=영상ID)
+
 ## 프로젝트 구조
 
 ```

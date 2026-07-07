@@ -252,7 +252,7 @@ void AArcher::ServerInteraction_Implementation()
 		SphereShape,
 		Params
 	);
-	DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 1.f, 0, 1.f);
+	//DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 1.f, 0, 1.f);
 
 	if (bHit)
 	{
@@ -263,8 +263,8 @@ void AArcher::ServerInteraction_Implementation()
 			//UE_LOG(LogTemp, Warning, TEXT("Interaction HitObject->Interact(this)"));
 		}
 
-		DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, InteractRadius, 12, FColor::Red, false, 1.f);
-		DrawDebugLine(GetWorld(), Start, HitResult.ImpactPoint, FColor::Red, false, 1.f, 0, 1.f);
+		//DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, InteractRadius, 12, FColor::Red, false, 1.f);
+		//DrawDebugLine(GetWorld(), Start, HitResult.ImpactPoint, FColor::Red, false, 1.f, 0, 1.f);
 	}
 }
 
@@ -508,7 +508,7 @@ void AArcher::ServerCallAttackCollision_Implementation()
 		}
 	}
 
-	DrawDebugSphere(GetWorld(), SpawnLocation, SphereRadius, 12, FColor::Red, false, 1.f);
+	//DrawDebugSphere(GetWorld(), SpawnLocation, SphereRadius, 12, FColor::Red, false, 1.f);
 }
 
 void AArcher::CallAttack()

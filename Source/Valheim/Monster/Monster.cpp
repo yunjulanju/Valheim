@@ -102,7 +102,7 @@ void AMonster::CallAttackCollision()
 		}
 	}
 
-	DrawDebugSphere(GetWorld(), SpawnLocation, SphereRadius, 12, FColor::Magenta, false, 1.f);
+	//DrawDebugSphere(GetWorld(), SpawnLocation, SphereRadius, 12, FColor::Magenta, false, 1.f);
 
 }
 

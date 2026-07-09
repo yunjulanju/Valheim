@@ -26,19 +26,22 @@ Unreal Engine 5로 제작한 **Valheim 모작 멀티플레이어 생존 게임**
 - Title → Session → Lobby → Game 레벨 흐름 설계
 
 ### 무기 시스템
+- ![Inventory](docs/images/QuestNoWeapon.gif)
+- ![Inventory](docs/images/SwordAttack.gif)
+- ![Inventory](docs/images/BowArrow.gif)
 - 맨손, 도끼, 활 세 가지 무기 타입 구현
 - 근접/원거리 무기의 서로 다른 공격 판정 및 애니메이션 처리
 
 ### 인벤토리 시스템
+- ![Inventory](docs/images/ItemInventory.gif)
+- ![Inventory](docs/images/ItemQuickSlot.gif)
 - 아이템 습득, 정렬, 장착/해제
 - 인벤토리 UI와 데이터 구조 연동
 
 ### NPC 퀘스트 시스템
+- ![Inventory](docs/images/QuestNoWeapon.gif)
 - NPC와의 상호작용을 통한 퀘스트 수주 및 진행
 - 퀘스트 상태(수주/진행/완료)에 따른 데이터 관리
-
-### 월드 배치
-- 아이템 및 오브젝트를 월드에 배치하는 시스템 구현
 
 ---
 
@@ -69,14 +72,6 @@ Content/
 │  └─ SessionWidget/          # 세션 목록, 로비 UI 위젯
 Source/                       # C++ 소스
 ```
-
----
-
-## 실행 방법
-
-1. 저장소 클론
-2. `.uproject` 파일 실행 (Unreal Engine 5.7 필요)
-3. 멀티플레이 테스트 시 `Play` 옵션에서 Number of Players를 2 이상으로 설정 후 PIE 실행
 
 ---
 

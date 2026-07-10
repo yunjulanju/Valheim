@@ -1,5 +1,6 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
+using System.IO;
 using UnrealBuildTool;
 
 public class Valheim : ModuleRules
@@ -17,8 +18,8 @@ public class Valheim : ModuleRules
 			"AIModule",
 			"StateTreeModule",
 			"GameplayStateTreeModule",
-			"UMG",
-			"Slate",   "SlateCore","AIModule","GameplayTasks","NetCore", "OnlineSubsystem", "OnlineSubsystemUtils"
+			"UMG","Sockets","Networking",
+            "Slate","SlateCore","AIModule","GameplayTasks","NetCore", "OnlineSubsystem", "OnlineSubsystemUtils"
         });
 
 		PrivateDependencyModuleNames.AddRange(new string[] { });
@@ -40,12 +41,18 @@ public class Valheim : ModuleRules
 		//	"Valheim/Variant_SideScrolling/UI"
 		});
 
-		// Uncomment if you are using Slate UI
-		// PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
+        // Uncomment if you are using Slate UI
+        // PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
 
-		// Uncomment if you are using online features
-		// PrivateDependencyModuleNames.Add("OnlineSubsystem");
+        // Uncomment if you are using online features
+        // PrivateDependencyModuleNames.Add("OnlineSubsystem");
 
-		// To include OnlineSubsystemSteam, add it to the plugins section in your uproject file with the Enabled attribute set to true
-	}
+        // To include OnlineSubsystemSteam, add it to the plugins section in your uproject file with the Enabled attribute set to true
+
+
+        //장비 추가 할때, 라이브러리 추가 할때
+        string IncludePath = Path.Combine(ModuleDirectory, "..", "ThirdParty");
+
+        PublicIncludePaths.Add(IncludePath);
+    }
 }

@@ -119,7 +119,7 @@ bool UTCPClientSubsystem::SendChat(const FString& UserId, const FString& Message
 	auto UserIdOffset = Builder.CreateString(TCHAR_TO_UTF8(*UserId));
 	auto MessageOffset = Builder.CreateString(TCHAR_TO_UTF8(*Message));
 
-	auto ChatOffset = UserPacket::CreateC2S_Chat(Builder, UserIdOffset, MessageOffset);
+	auto ChatOffset = UserPacket::CreateC2S_Chat(Builder, 0, UserIdOffset, MessageOffset);
 	auto PacketOffset = UserPacket::CreatePacketData(Builder, UserPacket::PacketType_C2S_Chat, ChatOffset.Union());
 
 	UserPacket::FinishPacketDataBuffer(Builder, PacketOffset);

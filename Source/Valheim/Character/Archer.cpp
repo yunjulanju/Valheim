@@ -129,8 +129,9 @@ void AArcher::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 		// Interacting
 		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &AArcher::Interaction);
 
-		// MenuToggle
+		// WidgetToggle
 		EnhancedInputComponent->BindAction(MenuAction, ETriggerEvent::Started, this, &AArcher::ToggleMenuWidget);
+		EnhancedInputComponent->BindAction(ChatAction, ETriggerEvent::Started, this, &AArcher::ToggleChatWidget);
 
 		// Hotbar Using
 		if (HotbarActions.IsValidIndex(0) && HotbarActions[0])
@@ -201,6 +202,11 @@ void AArcher::StopCrouch()
 }
 
 void AArcher::ToggleMenuWidget()
+{
+	HUD->ToggleMainWidget();
+}
+
+void AArcher::ToggleChatWidget()
 {
 	HUD->ToggleMainWidget();
 }

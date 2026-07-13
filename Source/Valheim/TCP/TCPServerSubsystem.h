@@ -15,8 +15,17 @@ class FTCPRecvWorker;
 class FTCPAcceptWorker;
 class FRunnableThread;
 
+struct FTCPClientInfo
+{
+	FSocket* Socket;
+	FTCPRecvWorker* RecvWorker;
+	FRunnableThread* RecvThread;
+	TQueue<TArray<uint8>> RecvQueue;
+	int32 ClientId;
+};
+
 UCLASS()
-class VALHEIM_API UTCPServerSubsystem : public UGameInstanceSubsystem
+class VALHEIM_API UTCPServerSubsystem : public UGameInstanceSubsystem, public FTickableGameObject
 {
 	GENERATED_BODY()
 

@@ -26,6 +26,15 @@ void AArcherHUD::BeginPlay()
             CharacterWidget->SetVisibility(ESlateVisibility::Visible);
         }
     }
+    if (ChatWidgetClass)
+    {
+        ChatWidget = CreateWidget<UUserWidget>(GetWorld(), ChatWidgetClass);
+        if (ChatWidget)
+        {
+            ChatWidget->AddToViewport(2);
+            ChatWidget->SetVisibility(ESlateVisibility::Hidden);
+        }
+    }
 }
 
 void AArcherHUD::ToggleMainWidget()
@@ -50,5 +59,28 @@ void AArcherHUD::ToggleMainWidget()
         const FInputModeGameAndUI InputMode;
         GetOwningPlayerController()->SetInputMode(InputMode);
         GetOwningPlayerController()->SetShowMouseCursor(true);
+    }
+}
+
+void AArcherHUD::ToggleChatWidget()
+{
+    if (!ChatWidget)
+    {
+        return;
+    }
+
+    if (bIsChatVisible)
+    {
+        bIsChatVisible = false;
+        ChatWidget->SetVisibility(ESlateVisibility::Hidden);
+        const FInputModeGameOnly InputMode;
+        GetOwningPlayerController()->SetInputMode(InputMode);
+    }
+    else
+    {
+        bIsChatVisible = true;
+        ChatWidget->SetVisibility(ESlateVisibility::Visible);
+        const FInputModeGameAndUI InputMode;
+        GetOwningPlayerController()->SetInputMode(InputMode);
     }
 }

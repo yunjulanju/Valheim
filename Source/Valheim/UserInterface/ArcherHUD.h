@@ -18,6 +18,7 @@ public:
 	virtual void BeginPlay() override;
 
 	void ToggleMainWidget();
+	void ToggleChatWidget();
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Widget")
 	TSubclassOf<UUserWidget> MainWidgetClass;
@@ -31,7 +32,15 @@ public:
 	UPROPERTY()
 	UUserWidget* CharacterWidget;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Widget")
+	TSubclassOf<UUserWidget> ChatWidgetClass;
+
+	UPROPERTY()
+	UUserWidget* ChatWidget;
+
 	bool bIsMenuVisible = false;
+	
+	bool bIsChatVisible = false;
 
 	
 };

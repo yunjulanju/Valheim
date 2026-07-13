@@ -72,6 +72,8 @@ protected:
 	void StopCrouch();
 
 	void ToggleMenuWidget();
+	
+	void ToggleChatWidget();
 
 	void CallAttack();
 
@@ -265,9 +267,12 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* InteractAction;
 
-	/** Attack Input Action */
+	/** Widget Input Action */
 	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* MenuAction;
+
+	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputAction* ChatAction;
 
 	/** Attack HotBar Action */
 	UPROPERTY(EditAnywhere, Category = "Input|Hotbar")

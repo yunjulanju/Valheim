@@ -14,7 +14,7 @@ uint32 FTCPRecvWorker::Run()
 		uint32 Pending = 0;
 		if (!ServerSocket->HasPendingData(Pending) || Pending <= 0)
 		{
-			//FPlatformProcess::Sleep(0.01f);
+			FPlatformProcess::Sleep(0.01f);
 			continue;
 		}
 

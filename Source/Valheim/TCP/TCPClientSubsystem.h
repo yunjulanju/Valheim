@@ -24,7 +24,6 @@ public:
 
 	virtual void Deinitialize() override;
 
-
 	UFUNCTION(BlueprintCallable, Category = "TCP")
 	bool Connect(const FString& Host, int32 Port);
 
@@ -33,6 +32,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "TCP")
 	bool IsConncted() const;
+
+	UFUNCTION(BlueprintCallable, Category = "TCP")
+	bool SendChat(const FString& UserId, const FString& Message);
 
 	UPROPERTY(BlueprintAssignable, Category = "TCP")
 	FOnTCPConnected OnTCPConnected;
@@ -78,7 +80,6 @@ private:
 
 	void DispatchPacket();
 
-	// Inherited via FTickableGameObject
 	TStatId GetStatId() const override;
 
 	virtual void Tick(float DeltaTime) override;

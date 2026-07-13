@@ -3,6 +3,7 @@
 
 #include "Character/ArcherPC.h"
 #include "TCP/TCPClientSubSystem.h"
+#include <TCP/TCPServerSubsystem.h>
 
 AArcherPC::AArcherPC()
 {
@@ -31,8 +32,8 @@ void AArcherPC::BeginPlay()
 	else if (Mode == NM_ListenServer)
 	{
 		// 호스트 자신 → 채팅 서버 오픈 (TCPServerSubsystem 만들어지면 여기서 StartListen)
-		// UTCPServerSubsystem* Server = GetGameInstance()->GetSubsystem<UTCPServerSubsystem>();
-		// Server->StartListen(35000);
+		UTCPServerSubsystem* Server = GetGameInstance()->GetSubsystem<UTCPServerSubsystem>();
+		Server->StartListen(35000);
 	}
 }
 

@@ -11,12 +11,6 @@ class UInventoryComponent;
 class UHorizontalBox;
 class UHotBarSlot;
 
-/**
- * �ֹ�(HotbarContents)�� ������ ������ �׻� ȭ�鿡 �����ִ� ������ ��.
- * MainWidget(�κ��丮, Tab���� ���)�� �ƴ϶� CharacterWidget(��� ǥ��)�� �ִ´�.
- * InventoryPannel�� RefreshHotbar()�� ������ ���� ������(InventoryComponent::HotbarContents)��
- * �״�� �ٽ� �׷��� ������ ���̶�, �κ��丮 â�� ���� �ݵ� �׻� ���� ���¿� ����ȭ�ȴ�.
- */
 UCLASS()
 class VALHEIM_API UQuickSlotBar : public UUserWidget
 {

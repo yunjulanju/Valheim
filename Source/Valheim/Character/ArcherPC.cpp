@@ -14,6 +14,9 @@ void AArcherPC::BeginPlay()
 {
 	Super::BeginPlay();
 
+	const FInputModeGameOnly InputMode;
+	SetInputMode(InputMode);
+
 	if (!IsLocalController())
 	{
 		return; // 서버가 들고 있는 원격 클라이언트용 PC 인스턴스는 여기서 끝

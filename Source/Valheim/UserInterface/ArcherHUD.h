@@ -10,6 +10,7 @@
  * 
  */
 class UMainWidget;
+class UCharacterWidget;
 UCLASS()
 class VALHEIM_API AArcherHUD : public AHUD
 {
@@ -27,20 +28,12 @@ public:
 	UMainWidget* MainWidget;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Widget")
-	TSubclassOf<UUserWidget> CharacterWidgetClass;
+	TSubclassOf<UCharacterWidget> CharacterWidgetClass;
 
 	UPROPERTY()
-	UUserWidget* CharacterWidget;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Widget")
-	TSubclassOf<UUserWidget> ChatWidgetClass;
-
-	UPROPERTY()
-	UUserWidget* ChatWidget;
+	UCharacterWidget* CharacterWidget;
 
 	bool bIsMenuVisible = false;
-	
-	bool bIsChatVisible = false;
 
 	
 };

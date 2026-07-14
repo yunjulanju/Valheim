@@ -52,8 +52,8 @@ bool UTCPClientSubsystem::Connect(const FString& Host, int32 Port)
 	//RecvThread 생성
 	RecvQueue.Empty();
 
-	RecvWorker = new FTCPRecvWorker(ServerSocket, RecvQueue); //Thread에서 실행 되는 함수
-	RecvThread = FRunnableThread::Create(RecvWorker, TEXT("TCPRecvWoker"));  //쓰레드 생성(함수
+	RecvWorker = new FTCPRecvWorker(ServerSocket, RecvQueue);
+	RecvThread = FRunnableThread::Create(RecvWorker, TEXT("TCPRecvWoker"));
 
 
 	OnTCPConnected.Broadcast();

@@ -3,6 +3,7 @@
 
 #include "UserInterface/ArcherHUD.h"
 #include "UserInterface/MainWidget.h"
+#include "UserInterface/Character/CharacterWidget.h"
 
 void AArcherHUD::BeginPlay()
 {
@@ -19,20 +20,11 @@ void AArcherHUD::BeginPlay()
     }
     if (CharacterWidgetClass)
     {  
-        CharacterWidget = CreateWidget<UUserWidget>(GetWorld(), CharacterWidgetClass);
+        CharacterWidget = CreateWidget<UCharacterWidget>(GetWorld(), CharacterWidgetClass);
         if (CharacterWidget)
         {
             CharacterWidget->AddToViewport();
             CharacterWidget->SetVisibility(ESlateVisibility::Visible);
-        }
-    }
-    if (ChatWidgetClass)
-    {
-        ChatWidget = CreateWidget<UUserWidget>(GetWorld(), ChatWidgetClass);
-        if (ChatWidget)
-        {
-            ChatWidget->AddToViewport(2);
-            ChatWidget->SetVisibility(ESlateVisibility::Hidden);
         }
     }
 }
@@ -64,23 +56,5 @@ void AArcherHUD::ToggleMainWidget()
 
 void AArcherHUD::ToggleChatWidget()
 {
-    if (!ChatWidget)
-    {
-        return;
-    }
 
-    if (bIsChatVisible)
-    {
-        bIsChatVisible = false;
-        ChatWidget->SetVisibility(ESlateVisibility::Hidden);
-        const FInputModeGameOnly InputMode;
-        GetOwningPlayerController()->SetInputMode(InputMode);
-    }
-    else
-    {
-        bIsChatVisible = true;
-        ChatWidget->SetVisibility(ESlateVisibility::Visible);
-        const FInputModeGameAndUI InputMode;
-        GetOwningPlayerController()->SetInputMode(InputMode);
-    }
 }

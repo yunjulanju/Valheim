@@ -24,7 +24,7 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	UQuickSlotBar* QuickSlotBarWidget;
 
-	UPROPERTY(meta = (BindWidget))
-	UChatBox* ChatBoxWidget;
+	/*UPROPERTY(meta = (BindWidget))
+	UChatBox* ChatBoxWidget;*/
 	
 };

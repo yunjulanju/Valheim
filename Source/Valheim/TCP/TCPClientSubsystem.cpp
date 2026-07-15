@@ -106,27 +106,6 @@ bool UTCPClientSubsystem::IsConncted() const
 	return ServerSocket != nullptr && ServerSocket->GetConnectionState() == SCS_Connected;
 }
 
-bool UTCPClientSubsystem::SendChat(const FString& UserId, const FString& Message)
-{
-	if (!IsConncted())
-	{
-		UE_LOG(LogTemp, Warning, TEXT("SendChat failed: not connected."));
-		return false;
-	}
-
-	flatbuffers::FlatBufferBuilder Builder(256);
-
-	auto UserIdOffset = Builder.CreateString(TCHAR_TO_UTF8(*UserId));
-	auto MessageOffset = Builder.CreateString(TCHAR_TO_UTF8(*Message));
-
-	auto ChatOffset = UserPacket::CreateC2S_Chat(Builder, 0, UserIdOffset, MessageOffset);
-	auto PacketOffset = UserPacket::CreatePacketData(Builder, UserPacket::PacketType_C2S_Chat, ChatOffset.Union());
-
-	UserPacket::FinishPacketDataBuffer(Builder, PacketOffset);
-
-	return SendAll(Builder.GetBufferPointer(), Builder.GetSize());
-}
-
 void UTCPClientSubsystem::RecvAll()
 {
 }

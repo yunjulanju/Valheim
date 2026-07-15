@@ -33,9 +33,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TCP")
 	bool IsConncted() const;
 
-	UFUNCTION(BlueprintCallable, Category = "TCP")
-	bool SendChat(const FString& UserId, const FString& Message);
-
 	UPROPERTY(BlueprintAssignable, Category = "TCP")
 	FOnTCPConnected OnTCPConnected;
 

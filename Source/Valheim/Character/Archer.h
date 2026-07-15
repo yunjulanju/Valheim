@@ -73,6 +73,8 @@ protected:
 
 	void ToggleMenuWidget();
 
+	void ToggleChatWidget();
+
 	void CallAttack();
 
 	UFUNCTION(Server, Reliable)
@@ -265,9 +267,13 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* InteractAction;
 
-	/** Attack Input Action */
+	/** Menu Input Action */
 	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* MenuAction;
+
+	/** Chat Input Action */
+	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputAction* ChatAction;
 
 	/** Attack HotBar Action */
 	UPROPERTY(EditAnywhere, Category = "Input|Hotbar")

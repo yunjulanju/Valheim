@@ -205,6 +205,11 @@ void AArcher::ToggleMenuWidget()
 	HUD->ToggleMainWidget();
 }
 
+void AArcher::ToggleChatWidget()
+{
+	//HUD->
+}
+
 void AArcher::Interaction()
 {
 	if (!IsLocallyControlled())

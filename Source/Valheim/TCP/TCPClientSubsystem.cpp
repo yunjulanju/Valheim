@@ -21,7 +21,6 @@ void UTCPClientSubsystem::Deinitialize()
 bool UTCPClientSubsystem::Connect(const FString& Host, int32 Port)
 {
 	//WSStartup
-	//OS별 소켓 생성 시스템
 	ISocketSubsystem* SocketSubSystem = ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM);
 
 	//socket
@@ -49,11 +48,12 @@ bool UTCPClientSubsystem::Connect(const FString& Host, int32 Port)
 
 	ServerSocket->SetNonBlocking(false);
 
-	//RecvThread 생성
+	UE_LOG(LogTemp, Warning, TEXT("TCP Connected to %s:%d"), *Host, Port);
+
 	RecvQueue.Empty();
 
-	RecvWorker = new FTCPRecvWorker(ServerSocket, RecvQueue); //Thread에서 실행 되는 함수
-	RecvThread = FRunnableThread::Create(RecvWorker, TEXT("TCPRecvWoker"));  //쓰레드 생성(함수
+	RecvWorker = new FTCPRecvWorker(ServerSocket, RecvQueue);
+	RecvThread = FRunnableThread::Create(RecvWorker, TEXT("TCPRecvWoker"));
 
 
 	OnTCPConnected.Broadcast();
@@ -134,10 +134,40 @@ bool UTCPClientSubsystem::SendAll(const uint8* Body, uint32 BodyLength)
 	return true;
 }
 
+bool UTCPClientSubsystem::SendChat(const FString& UserId, const FString& Message)
+{
+	if (!IsConncted())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("SendChat failed: not connected."));
+		return false;
+	}
+
+	flatbuffers::FlatBufferBuilder Builder;
+
+	auto ChatData = UserPacket::CreateC2S_ChatDirect(
+		Builder,
+		0, // client_socketID: 서버가 실제 연결 소켓 값으로 채워줌
+		TCHAR_TO_UTF8(*UserId),
+		TCHAR_TO_UTF8(*Message)
+	);
+
+	auto PacketData = UserPacket::CreatePacketData(
+		Builder,
+		UserPacket::PacketType_C2S_Chat,
+		ChatData.Union()
+	);
+
+	Builder.Finish(PacketData);
+
+	bool bSent = SendAll(Builder.GetBufferPointer(), Builder.GetSize());
+	UE_LOG(LogTemp, Warning, TEXT("SendChat [%s]: %s -> %s"), *UserId, *Message, bSent ? TEXT("OK") : TEXT("FAILED"));
+	return bSent;
+}
+
 void UTCPClientSubsystem::DispatchPacket()
 {
 	//flatbuffer, -> Extract
-	//RecvBuffer 검증
+	//RecvBuffer
 	if (RecvBuffer.Num() == 0)
 	{
 		return;
@@ -163,46 +193,6 @@ void UTCPClientSubsystem::DispatchPacket()
 			FString Message = UTF8_TO_TCHAR(ChatData->message()->c_str());
 			OnChatReceived.Broadcast(UserId, Message);
 		}
-	}
-	break;
-	case UserPacket::PacketType_S2C_Login:
-	{
-		/*const auto* LoginData = UserPacketData->data_as_S2C_Login();
-
-		FString Message = UTF8_TO_TCHAR(LoginData->message()->c_str());
-
-		UE_LOG(LogTemp, Warning, TEXT("Login %d %s"), LoginData->client_socket_id(), *Message);
-
-		OnLogin.Broadcast(LoginData->success(), Message);*/
-	}
-	break;
-	case UserPacket::PacketType_S2C_Spawn:
-	{
-	}
-	break;
-	case UserPacket::PacketType_S2C_Move:
-	{
-
-	}
-	break;
-	case UserPacket::PacketType_S2C_Destroy:
-	{
-	}
-	break;
-	case UserPacket::PacketType_S2C_ChangeColor:
-	{
-	}
-	break;
-	case UserPacket::PacketType_S2C_Signup:
-	{
-		/*const auto SignupPacket = UserPacketData->data_as_S2C_Signup();
-
-		FString Message = UTF8_TO_TCHAR(SignupPacket->message()->c_str());
-
-		UE_LOG(LogTemp, Warning, TEXT("SignUp %s"), *Message);
-
-		OnSignUp.Broadcast(SignupPacket->success(), Message);*/
-
 	}
 	break;
 	}

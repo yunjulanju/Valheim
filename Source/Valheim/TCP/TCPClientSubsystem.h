@@ -45,6 +45,9 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "TCP")
 	FOnChatReceived OnChatReceived;
 
+	UFUNCTION(BlueprintCallable, Category = "TCP")
+	bool SendChat(const FString& UserId, const FString& Message);
+
 	/*UPROPERTY(BlueprintAssignable, Category = "TCP")
 	FOnLoginCallback OnLogin;
 

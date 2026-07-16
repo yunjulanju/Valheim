@@ -207,7 +207,7 @@ void AArcher::ToggleMenuWidget()
 
 void AArcher::ToggleChatWidget()
 {
-	//HUD->
+	HUD->ToggleChatWidget();
 }
 
 void AArcher::Interaction()

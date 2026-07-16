@@ -3,6 +3,7 @@
 
 #include "UserInterface/ArcherHUD.h"
 #include "UserInterface/MainWidget.h"
+#include "UserInterface/Character/CharacterWidget.h"
 
 void AArcherHUD::BeginPlay()
 {
@@ -19,7 +20,7 @@ void AArcherHUD::BeginPlay()
     }
     if (CharacterWidgetClass)
     {  
-        CharacterWidget = CreateWidget<UUserWidget>(GetWorld(), CharacterWidgetClass);
+        CharacterWidget = CreateWidget<UCharacterWidget>(GetWorld(), CharacterWidgetClass);
         if (CharacterWidget)
         {
             CharacterWidget->AddToViewport();
@@ -51,4 +52,9 @@ void AArcherHUD::ToggleMainWidget()
         GetOwningPlayerController()->SetInputMode(InputMode);
         GetOwningPlayerController()->SetShowMouseCursor(true);
     }
+}
+
+void AArcherHUD::ToggleChatWidget()
+{
+    CharacterWidget->ToggleChat();
 }

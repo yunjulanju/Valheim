@@ -62,10 +62,8 @@ void UChatBox::SendChatMessage()
 		}
 	}
 
-	// 보낸 후 입력창 비우기
 	ChatInputBox->SetText(FText::GetEmpty());
 
-	// 계속 타이핑할 수 있도록 다시 포커스
 	ChatInputBox->SetKeyboardFocus();
 }
 
@@ -105,6 +103,7 @@ void UChatBox::DeactivateChatInput()
 
 void UChatBox::HandleChatReceived(const FString& UserId, const FString& Message)
 {
+	UE_LOG(LogTemp, Warning, TEXT("ChatBox::HandleChatReceived [%s]: %s"), *UserId, *Message);
 	AddChatEntry(UserId, Message);
 }
 
@@ -128,18 +127,27 @@ void UChatBox::OnChatInputCommitted(const FText& Text, ETextCommit::Type CommitM
 
 void UChatBox::AddChatEntry(const FString& UserId, const FString& Message)
 {
-	if (!ChatScrollBox || !ChatEntryWidgetClass)
+	if (!ChatScrollBox)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("ChatBox::AddChatEntry aborted: ChatScrollBox is null (binding failed)."));
+		return;
+	}
+
+	if (!ChatEntryWidgetClass)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("ChatBox::AddChatEntry aborted: ChatEntryWidgetClass is not set in Class Defaults."));
 		return;
 	}
 
 	UChatEntry* NewEntry = CreateWidget<UChatEntry>(this, ChatEntryWidgetClass);
 	if (!NewEntry)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("ChatBox::AddChatEntry aborted: CreateWidget<UChatEntry> failed."));
 		return;
 	}
 
 	NewEntry->SetChatEntry(UserId, Message);
 	ChatScrollBox->AddChild(NewEntry);
 	ChatScrollBox->ScrollToEnd();
+	UE_LOG(LogTemp, Warning, TEXT("ChatBox::AddChatEntry added entry [%s]: %s"), *UserId, *Message);
 }

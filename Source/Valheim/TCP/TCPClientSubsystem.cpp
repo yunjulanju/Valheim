@@ -49,7 +49,6 @@ bool UTCPClientSubsystem::Connect(const FString& Host, int32 Port)
 	ServerSocket->SetNonBlocking(false);
 
 	UE_LOG(LogTemp, Warning, TEXT("TCP Connected to %s:%d"), *Host, Port);
-
 	RecvQueue.Empty();
 
 	RecvWorker = new FTCPRecvWorker(ServerSocket, RecvQueue);
@@ -146,7 +145,7 @@ bool UTCPClientSubsystem::SendChat(const FString& UserId, const FString& Message
 
 	auto ChatData = UserPacket::CreateC2S_ChatDirect(
 		Builder,
-		0, // client_socketID: 서버가 실제 연결 소켓 값으로 채워줌
+		0,
 		TCHAR_TO_UTF8(*UserId),
 		TCHAR_TO_UTF8(*Message)
 	);
@@ -166,8 +165,6 @@ bool UTCPClientSubsystem::SendChat(const FString& UserId, const FString& Message
 
 void UTCPClientSubsystem::DispatchPacket()
 {
-	//flatbuffer, -> Extract
-	//RecvBuffer
 	if (RecvBuffer.Num() == 0)
 	{
 		return;
@@ -182,6 +179,8 @@ void UTCPClientSubsystem::DispatchPacket()
 
 	const auto UserPacketData = UserPacket::GetPacketData(RecvBuffer.GetData());
 
+	UE_LOG(LogTemp, Warning, TEXT("DispatchPacket: received data_type=%d"), (int32)UserPacketData->data_type());
+
 	switch (UserPacketData->data_type())
 	{
 	case UserPacket::PacketType_S2C_Chat:
@@ -191,8 +190,41 @@ void UTCPClientSubsystem::DispatchPacket()
 		{
 			FString UserId = UTF8_TO_TCHAR(ChatData->user_id()->c_str());
 			FString Message = UTF8_TO_TCHAR(ChatData->message()->c_str());
+			UE_LOG(LogTemp, Warning, TEXT("DispatchPacket: S2C_Chat received [%s]: %s"), *UserId, *Message);
 			OnChatReceived.Broadcast(UserId, Message);
 		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("DispatchPacket: S2C_Chat data_as_S2C_Chat() returned null"));
+		}
+	}
+	break;
+	case UserPacket::PacketType_S2C_Login:
+	{
+		/*const auto* LoginData = UserPacketData->data_as_S2C_Login();
+
+		FString Message = UTF8_TO_TCHAR(LoginData->message()->c_str());
+
+		UE_LOG(LogTemp, Warning, TEXT("Login %d %s"), LoginData->client_socket_id(), *Message);
+
+		OnLogin.Broadcast(LoginData->success(), Message);*/
+	}
+	break;
+	case UserPacket::PacketType_S2C_Spawn:
+	{
+	}
+	break;
+	case UserPacket::PacketType_S2C_Move:
+	{
+
+	}
+	break;
+	case UserPacket::PacketType_S2C_Destroy:
+	{
+	}
+	break;
+	case UserPacket::PacketType_S2C_ChangeColor:
+	{
 	}
 	break;
 	}

@@ -10,6 +10,7 @@
  * 
  */
 class UMainWidget;
+class UCharacterWidget;
 UCLASS()
 class VALHEIM_API AArcherHUD : public AHUD
 {
@@ -29,9 +30,10 @@ public:
 	TSubclassOf<UUserWidget> CharacterWidgetClass;
 
 	UPROPERTY()
-	UUserWidget* CharacterWidget;
+	UCharacterWidget* CharacterWidget;
 
 	bool bIsMenuVisible = false;
 
+	void ToggleChatWidget();
 	
 };

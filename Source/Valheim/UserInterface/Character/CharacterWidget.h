@@ -9,9 +9,26 @@
 /**
  * 
  */
+class UChatBox;
 UCLASS()
 class VALHEIM_API UCharacterWidget : public UUserWidget
 {
 	GENERATED_BODY()
-	
+
+public:
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UChatBox> ChatBox;
+
+	UFUNCTION(BlueprintCallable, Category = "Chat")
+	void ShowChat();
+
+	UFUNCTION(BlueprintCallable, Category = "Chat")
+	void HideChat();
+
+	UFUNCTION(BlueprintCallable, Category = "Chat")
+	void ToggleChat();
+
+	UFUNCTION(BlueprintPure, Category = "Chat")
+	bool IsChatActive() const;
 };

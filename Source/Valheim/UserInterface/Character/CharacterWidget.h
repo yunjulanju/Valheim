@@ -21,12 +21,6 @@ public:
 	TObjectPtr<UChatBox> ChatBox;
 
 	UFUNCTION(BlueprintCallable, Category = "Chat")
-	void ShowChat();
-
-	UFUNCTION(BlueprintCallable, Category = "Chat")
-	void HideChat();
-
-	UFUNCTION(BlueprintCallable, Category = "Chat")
 	void ToggleChat();
 
 	UFUNCTION(BlueprintPure, Category = "Chat")

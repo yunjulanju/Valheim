@@ -4,22 +4,6 @@
 #include "UserInterface/Character/CharacterWidget.h"
 #include "UserInterface/Chat/ChatBox.h"
 
-void UCharacterWidget::ShowChat()
-{
-	if (ChatBox)
-	{
-		ChatBox->ActivateChatInput();
-	}
-}
-
-void UCharacterWidget::HideChat()
-{
-	if (ChatBox)
-	{
-		ChatBox->DeactivateChatInput();
-	}
-}
-
 void UCharacterWidget::ToggleChat()
 {
 	if (!ChatBox)

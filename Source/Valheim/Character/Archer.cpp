@@ -131,6 +131,8 @@ void AArcher::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 		// MenuToggle
 		EnhancedInputComponent->BindAction(MenuAction, ETriggerEvent::Started, this, &AArcher::ToggleMenuWidget);
+		// ChatToggle
+		EnhancedInputComponent->BindAction(ChatAction, ETriggerEvent::Started, this, &AArcher::ToggleChatWidget);
 
 		// Hotbar Using
 		if (HotbarActions.IsValidIndex(0) && HotbarActions[0])

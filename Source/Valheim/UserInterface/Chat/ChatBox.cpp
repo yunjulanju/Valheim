@@ -9,6 +9,7 @@
 #include "Components/ScrollBox.h"
 
 #include "TCP/TCPClientSubsystem.h"
+#include "Blueprint/WidgetBlueprintLibrary.h"
 
 void UChatBox::NativeConstruct()
 {
@@ -88,6 +89,8 @@ void UChatBox::ActivateChatInput()
 
 void UChatBox::DeactivateChatInput()
 {
+	UE_LOG(LogTemp, Warning, TEXT("DeactivateChatInput called."));
+
 	if (ChatInputBox)
 	{
 		ChatInputBox->SetText(FText::GetEmpty());
@@ -96,7 +99,13 @@ void UChatBox::DeactivateChatInput()
 	if (APlayerController* PC = GetOwningPlayer())
 	{
 		PC->SetInputMode(FInputModeGameOnly());
+		UE_LOG(LogTemp, Warning, TEXT("DeactivateChatInput: InputMode set to GameOnly."));
 	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("DeactivateChatInput: GetOwningPlayer() returned null!"));
+	}
+	UWidgetBlueprintLibrary::SetFocusToGameViewport();
 
 	bIsChatInputActive = false;
 }
@@ -109,6 +118,8 @@ void UChatBox::HandleChatReceived(const FString& UserId, const FString& Message)
 
 void UChatBox::OnChatInputCommitted(const FText& Text, ETextCommit::Type CommitMethod)
 {
+	UE_LOG(LogTemp, Warning, TEXT("OnChatInputCommitted: CommitMethod=%d, Text=[%s]"), (int32)CommitMethod, *Text.ToString());
+
 	if (CommitMethod != ETextCommit::OnEnter)
 	{
 		return;

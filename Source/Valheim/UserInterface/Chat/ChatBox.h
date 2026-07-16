@@ -33,9 +33,6 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Chat")
 	TSubclassOf<UChatEntry> ChatEntryWidgetClass;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Chat")
-	FString LocalUserId = TEXT("Player");
-
 	UFUNCTION(BlueprintCallable, Category = "Chat")
 	void SendChatMessage();
 

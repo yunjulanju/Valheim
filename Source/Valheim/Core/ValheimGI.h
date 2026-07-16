@@ -34,4 +34,7 @@ public:
 
 	UPROPERTY(BlueprintReadWrite, Category = "Network")
 	FString LevelName;
+
+	UPROPERTY(BlueprintReadWrite, Category = "Player")
+	FString SavedNickname;
 };

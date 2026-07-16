@@ -10,6 +10,7 @@
 
 #include "TCP/TCPClientSubsystem.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
+#include <Core/ValheimGI.h>
 
 void UChatBox::NativeConstruct()
 {
@@ -57,6 +58,13 @@ void UChatBox::SendChatMessage()
 
 	if (UGameInstance* GameInstance = GetGameInstance())
 	{
+		FString LocalUserId = "Player";
+		UValheimGI* VGI = Cast<UValheimGI>(GameInstance);
+		if (VGI)
+		{
+			LocalUserId = VGI->SavedNickname;
+		}
+		
 		if (UTCPClientSubsystem* TCPSubsystem = GameInstance->GetSubsystem<UTCPClientSubsystem>())
 		{
 			TCPSubsystem->SendChat(LocalUserId, Message);

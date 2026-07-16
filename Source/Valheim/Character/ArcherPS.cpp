@@ -21,6 +21,7 @@ void AArcherPS::BeginPlay()
 
 	if (GetGameInstance())
 	{
+
 		QuestSubsystem = GetGameInstance()->GetSubsystem<UQuestSubsystem>();
 	}
 }

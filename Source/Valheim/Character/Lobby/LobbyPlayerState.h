@@ -20,8 +20,14 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, ReplicatedUsing = OnRep_Nickname)
 	FText Nickname;
 
+	UFUNCTION(BlueprintCallable, Category = "Lobby")
+	void SetNickname(const FText& NewNickname);
+
 	UFUNCTION()
 	void OnRep_Nickname();
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+private:
+	void SaveNicknameToGameInstance();
 };

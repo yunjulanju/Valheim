@@ -48,7 +48,7 @@ bool UTCPClientSubsystem::Connect(const FString& Host, int32 Port)
 
 	ServerSocket->SetNonBlocking(false);
 
-	UE_LOG(LogTemp, Warning, TEXT("TCP Connected to %s:%d"), *Host, Port);
+	//UE_LOG(LogTemp, Warning, TEXT("TCP Connected to %s:%d"), *Host, Port);
 	RecvQueue.Empty();
 
 	RecvWorker = new FTCPRecvWorker(ServerSocket, RecvQueue);
@@ -159,7 +159,7 @@ bool UTCPClientSubsystem::SendChat(const FString& UserId, const FString& Message
 	Builder.Finish(PacketData);
 
 	bool bSent = SendAll(Builder.GetBufferPointer(), Builder.GetSize());
-	UE_LOG(LogTemp, Warning, TEXT("SendChat [%s]: %s -> %s"), *UserId, *Message, bSent ? TEXT("OK") : TEXT("FAILED"));
+	//UE_LOG(LogTemp, Warning, TEXT("SendChat [%s]: %s -> %s"), *UserId, *Message, bSent ? TEXT("OK") : TEXT("FAILED"));
 	return bSent;
 }
 
@@ -179,7 +179,7 @@ void UTCPClientSubsystem::DispatchPacket()
 
 	const auto UserPacketData = UserPacket::GetPacketData(RecvBuffer.GetData());
 
-	UE_LOG(LogTemp, Warning, TEXT("DispatchPacket: received data_type=%d"), (int32)UserPacketData->data_type());
+	//UE_LOG(LogTemp, Warning, TEXT("DispatchPacket: received data_type=%d"), (int32)UserPacketData->data_type());
 
 	switch (UserPacketData->data_type())
 	{
@@ -190,7 +190,7 @@ void UTCPClientSubsystem::DispatchPacket()
 		{
 			FString UserId = UTF8_TO_TCHAR(ChatData->user_id()->c_str());
 			FString Message = UTF8_TO_TCHAR(ChatData->message()->c_str());
-			UE_LOG(LogTemp, Warning, TEXT("DispatchPacket: S2C_Chat received [%s]: %s"), *UserId, *Message);
+			//UE_LOG(LogTemp, Warning, TEXT("DispatchPacket: S2C_Chat received [%s]: %s"), *UserId, *Message);
 			OnChatReceived.Broadcast(UserId, Message);
 		}
 		else

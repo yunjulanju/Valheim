@@ -353,17 +353,33 @@ git commit -m "feat: AI NPC 서버 WebSocket 클라이언트 서브시스템 추
 ### Task 2: `UNPCDialogueWidget` — 대화 UI
 
 **Files:**
+- Modify: `Source/Valheim/Core/ValheimGI.h`
 - Create: `Source/Valheim/UserInterface/AINpc/NPCDialogueWidget.h`
 - Create: `Source/Valheim/UserInterface/AINpc/NPCDialogueWidget.cpp`
 
 **Interfaces:**
 - Consumes:
-  - `UAINpcSubsystem` (Task 1): `RequestChat`, `IsAIServerConnected`, `OnAIChatReply`, `OnAIChatError`
+  - `UAINpcSubsystem` (Task 1): `Connect`, `RequestChat`, `IsAIServerConnected`, `OnAIChatReply`, `OnAIChatError`
   - `UChatEntry` (기존, `Source/Valheim/UserInterface/Chat/ChatEntry.h`): `SetChatEntry(const FString& InUserId, const FString& InMessage)` — 신규 위젯을 만들지 않고 그대로 재사용
   - `UValheimGI::SavedNickname` (기존, `Source/Valheim/Core/ValheimGI.h`)
 - Produces (Task 3이 사용):
   - `void UNPCDialogueWidget::OpenDialogue(const FString& InNpcId, const FString& InNpcDisplayName)`
   - `void UNPCDialogueWidget::CloseDialogue()`
+  - `UValheimGI::AIServerHost`(FString), `UValheimGI::AIServerPort`(int32) — 본 태스크에서 추가, Task 3에서도 참조 가능
+
+> 실행 중 발견: 원래 이 필드들은 Task 3에서 추가할 계획이었으나, `NPCDialogueWidget::OpenDialogue`가 바로 이 태스크에서 `Connect()` 호출에 사용하므로 순서상 여기서 먼저 추가해야 함 (Task 3은 추가하지 않고 그대로 사용).
+
+- [ ] **Step 0: `ValheimGI`에 AI 서버 접속 설정 추가**
+
+`Source/Valheim/Core/ValheimGI.h`의 기존 `UPROPERTY(BlueprintReadWrite, Category = "Player") FString SavedNickname;` 아래에 추가:
+
+```cpp
+	UPROPERTY(EditDefaultsOnly, Category = "AINpc")
+	FString AIServerHost = TEXT("127.0.0.1");
+
+	UPROPERTY(EditDefaultsOnly, Category = "AINpc")
+	int32 AIServerPort = 8765;
+```
 
 - [ ] **Step 1: 헤더 작성**
 
@@ -690,27 +706,14 @@ git commit -m "feat: AI NPC 대화 위젯(NPCDialogueWidget) 추가"
 ### Task 3: `ANPC` 확장 + `ValheimGI` 설정 필드
 
 **Files:**
-- Modify: `Source/Valheim/Core/ValheimGI.h`
 - Modify: `Source/Valheim/NPC/NPC.h`
 - Modify: `Source/Valheim/NPC/NPC.cpp`
 
 **Interfaces:**
-- Consumes: `UNPCDialogueWidget::OpenDialogue` (Task 2), `UValheimGI::AIServerHost`/`AIServerPort` (본 태스크에서 추가)
+- Consumes: `UNPCDialogueWidget::OpenDialogue` (Task 2), `UValheimGI::AIServerHost`/`AIServerPort` (Task 2에서 추가됨)
 - Produces (Task 4가 사용): `ANPC::bAIEnabled` (EditAnywhere, 레벨의 NPC 인스턴스에서 켬), `ANPC::AIDialogueWidgetClass` (EditAnywhere, BP에서 위젯 클래스 지정)
 
-- [ ] **Step 1: `ValheimGI`에 AI 서버 접속 설정 추가**
-
-`Source/Valheim/Core/ValheimGI.h`의 기존 `UPROPERTY(BlueprintReadWrite, Category = "Player") FString SavedNickname;` 아래에 추가:
-
-```cpp
-	UPROPERTY(EditDefaultsOnly, Category = "AINpc")
-	FString AIServerHost = TEXT("127.0.0.1");
-
-	UPROPERTY(EditDefaultsOnly, Category = "AINpc")
-	int32 AIServerPort = 8765;
-```
-
-- [ ] **Step 2: `ANPC.h`에 AI 대화 관련 필드/함수 추가**
+- [ ] **Step 1: `ANPC.h`에 AI 대화 관련 필드/함수 추가**
 
 `Source/Valheim/NPC/NPC.h`에서 `NPCID` 선언부 아래, `Interact` 선언 위에 추가:
 
@@ -731,7 +734,7 @@ git commit -m "feat: AI NPC 대화 위젯(NPCDialogueWidget) 추가"
 	void OpenAIDialogue(APawn* Interactor);
 ```
 
-- [ ] **Step 3: `ANPC.cpp`의 `Interact()`에 분기 추가**
+- [ ] **Step 2: `ANPC.cpp`의 `Interact()`에 분기 추가**
 
 기존 `Interact()`를 아래로 교체 (`HandleQuestInteraction(QuestPlayerState);` 호출 부분만 분기로 변경, 나머지 null 체크는 그대로 유지):
 
@@ -805,7 +808,7 @@ void ANPC::OpenAIDialogue(APawn* Interactor)
 }
 ```
 
-- [ ] **Step 4: 컴파일 확인**
+- [ ] **Step 3: 컴파일 확인**
 
 ```
 "C:/Program Files/Epic Games/UE_5.7/Engine/Build/BatchFiles/Build.bat" ValheimEditor Win64 Development -Project="D:/Projects/Valheim/Valheim.uproject" -WaitMutex
@@ -813,10 +816,10 @@ void ANPC::OpenAIDialogue(APawn* Interactor)
 
 Expected: 컴파일 성공.
 
-- [ ] **Step 5: 커밋**
+- [ ] **Step 4: 커밋**
 
 ```bash
-git add Source/Valheim/Core/ValheimGI.h Source/Valheim/NPC/NPC.h Source/Valheim/NPC/NPC.cpp
+git add Source/Valheim/NPC/NPC.h Source/Valheim/NPC/NPC.cpp
 git commit -m "feat: ANPC에 AI 대화 분기(bAIEnabled) 추가"
 ```
 

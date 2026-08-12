@@ -37,4 +37,10 @@ public:
 
 	UPROPERTY(BlueprintReadWrite, Category = "Player")
 	FString SavedNickname;
+
+	UPROPERTY(EditDefaultsOnly, Category = "AINpc")
+	FString AIServerHost = TEXT("127.0.0.1");
+
+	UPROPERTY(EditDefaultsOnly, Category = "AINpc")
+	int32 AIServerPort = 8765;
 };

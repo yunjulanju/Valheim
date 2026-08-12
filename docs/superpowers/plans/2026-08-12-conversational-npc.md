@@ -223,7 +223,7 @@ void UAINpcSubsystem::HandleMessage(const FString& MessageString)
 #include "Misc/AutomationTest.h"
 #include "AINPC/AINpcSubsystem.h"
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FAINpcSubsystemBuildRequestTest, "Valheim.AINpc.BuildChatRequestJson", EAutomationTestFlags::ApplicationContextMask | EAutomationTestFlags::ProductFilter)
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FAINpcSubsystemBuildRequestTest, "Valheim.AINpc.BuildChatRequestJson", EAutomationTestFlags_ApplicationContextMask | EAutomationTestFlags::ProductFilter)
 
 bool FAINpcSubsystemBuildRequestTest::RunTest(const FString& Parameters)
 {
@@ -237,7 +237,7 @@ bool FAINpcSubsystemBuildRequestTest::RunTest(const FString& Parameters)
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FAINpcSubsystemParseReplyTest, "Valheim.AINpc.ParseServerMessage.ChatReply", EAutomationTestFlags::ApplicationContextMask | EAutomationTestFlags::ProductFilter)
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FAINpcSubsystemParseReplyTest, "Valheim.AINpc.ParseServerMessage.ChatReply", EAutomationTestFlags_ApplicationContextMask | EAutomationTestFlags::ProductFilter)
 
 bool FAINpcSubsystemParseReplyTest::RunTest(const FString& Parameters)
 {
@@ -255,7 +255,7 @@ bool FAINpcSubsystemParseReplyTest::RunTest(const FString& Parameters)
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FAINpcSubsystemParseErrorTest, "Valheim.AINpc.ParseServerMessage.Error", EAutomationTestFlags::ApplicationContextMask | EAutomationTestFlags::ProductFilter)
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FAINpcSubsystemParseErrorTest, "Valheim.AINpc.ParseServerMessage.Error", EAutomationTestFlags_ApplicationContextMask | EAutomationTestFlags::ProductFilter)
 
 bool FAINpcSubsystemParseErrorTest::RunTest(const FString& Parameters)
 {
@@ -295,7 +295,7 @@ FString UAINpcSubsystem::BuildChatRequestJson(const FString& PlayerId, const FSt
 	Json->SetStringField(TEXT("message"), Message);
 
 	FString Output;
-	TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Output);
+	TSharedRef<TJsonWriter<TCHAR, TCondensedJsonPrintPolicy<TCHAR>>> Writer = TJsonWriterFactory<TCHAR, TCondensedJsonPrintPolicy<TCHAR>>::Create(&Output);
 	FJsonSerializer::Serialize(Json, Writer);
 	return Output;
 }

@@ -19,7 +19,8 @@ public class Valheim : ModuleRules
 			"StateTreeModule",
 			"GameplayStateTreeModule",
 			"UMG","Sockets","Networking",
-            "Slate","SlateCore","AIModule","GameplayTasks","NetCore", "OnlineSubsystem", "OnlineSubsystemUtils"
+            "Slate","SlateCore","AIModule","GameplayTasks","NetCore", "OnlineSubsystem", "OnlineSubsystemUtils",
+            "WebSockets", "Json", "JsonUtilities"
         });
 
 		PrivateDependencyModuleNames.AddRange(new string[] { });
@@ -50,7 +51,7 @@ public class Valheim : ModuleRules
         // To include OnlineSubsystemSteam, add it to the plugins section in your uproject file with the Enabled attribute set to true
 
 
-        //Àåºñ Ãß°¡ ÇÒ¶§, ¶óÀÌºê·¯¸® Ãß°¡ ÇÒ¶§
+        //ï¿½ï¿½ï¿½ ï¿½ß°ï¿½ ï¿½Ò¶ï¿½, ï¿½ï¿½ï¿½Ìºê·¯ï¿½ï¿½ ï¿½ß°ï¿½ ï¿½Ò¶ï¿½
         string IncludePath = Path.Combine(ModuleDirectory, "..", "ThirdParty");
 
         PublicIncludePaths.Add(IncludePath);

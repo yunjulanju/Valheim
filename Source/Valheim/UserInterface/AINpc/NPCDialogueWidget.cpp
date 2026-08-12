@@ -30,15 +30,17 @@ void UNPCDialogueWidget::NativeConstruct()
 	}
 }
 
-FReply UNPCDialogueWidget::NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
+void UNPCDialogueWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 {
-	if (InKeyEvent.GetKey() == EKeys::X)
-	{
-		CloseDialogue();
-		return FReply::Handled();
-	}
+	Super::NativeTick(MyGeometry, InDeltaTime);
 
-	return Super::NativeOnKeyDown(InGeometry, InKeyEvent);
+	if (APlayerController* PC = GetOwningPlayer())
+	{
+		if (PC->WasInputKeyJustPressed(EKeys::X))
+		{
+			CloseDialogue();
+		}
+	}
 }
 
 void UNPCDialogueWidget::NativeDestruct()

@@ -25,6 +25,15 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
 	UWidgetComponent* QuestMarkerWidget;
 
+	UPROPERTY(EditAnywhere, Category = "AINpc")
+	bool bAIEnabled = false;
+
+	UPROPERTY(EditAnywhere, Category = "AINpc")
+	FText DisplayName;
+
+	UPROPERTY(EditDefaultsOnly, Category = "AINpc")
+	TSubclassOf<class UNPCDialogueWidget> AIDialogueWidgetClass;
+
 	UFUNCTION(BlueprintCallable, Category = "Quest")
 	void UpdateQuestMarker();
 
@@ -37,6 +46,7 @@ protected:
 	TArray<FName> CachedQuestIDs;
 
 	void HandleQuestInteraction(class AArcherPS* QuestPlayerState);
+	void OpenAIDialogue(APawn* Interactor);
 
 	const UQuestSubsystem* QuestSubsystem;
 

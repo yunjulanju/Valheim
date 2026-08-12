@@ -6,6 +6,7 @@
 #include "Character/ArcherPS.h"
 #include <Character/Archer.h>
 #include "Components/WidgetComponent.h"
+#include "UserInterface/AINpc/NPCDialogueWidget.h"
 
 ANPC::ANPC()
 {
@@ -92,6 +93,12 @@ void ANPC::Interact(APawn* Interactor)
 		return;
 	}
 
+	if (bAIEnabled)
+	{
+		OpenAIDialogue(Interactor);
+		return;
+	}
+
 	AArcher* Taker = Cast<AArcher>(Interactor);
 	if (!Taker)
 	{
@@ -137,4 +144,31 @@ void ANPC::HandleQuestInteraction(AArcherPS* QuestPlayerState)
 		QuestPlayerState->AcceptQuest(QuestID);
 		return;
 	}
+}
+
+void ANPC::OpenAIDialogue(APawn* Interactor)
+{
+	if (!AIDialogueWidgetClass)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("ANPC::OpenAIDialogue !AIDialogueWidgetClass"))
+		return;
+	}
+
+	APlayerController* PC = Cast<APlayerController>(Interactor->GetController());
+	if (!PC || !PC->IsLocalController())
+	{
+		return;
+	}
+
+	UNPCDialogueWidget* DialogueWidget = CreateWidget<UNPCDialogueWidget>(PC, AIDialogueWidgetClass);
+	if (!DialogueWidget)
+	{
+		return;
+	}
+
+	const FString ResolvedNpcId = NPCID.ToString();
+	const FString ResolvedDisplayName = DisplayName.IsEmpty() ? ResolvedNpcId : DisplayName.ToString();
+
+	DialogueWidget->AddToViewport();
+	DialogueWidget->OpenDialogue(ResolvedNpcId, ResolvedDisplayName);
 }

@@ -207,14 +207,22 @@ void UNPCDialogueWidget::HandleTimeout()
 
 void UNPCDialogueWidget::AddDialogueEntry(const FString& Speaker, const FString& Message)
 {
-	if (!DialogueScrollBox || !DialogueEntryWidgetClass)
+	if (!DialogueScrollBox)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("UNPCDialogueWidget::AddDialogueEntry aborted: DialogueScrollBox is null (binding failed)."));
+		return;
+	}
+
+	if (!DialogueEntryWidgetClass)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("UNPCDialogueWidget::AddDialogueEntry aborted: DialogueEntryWidgetClass is not set in Class Defaults."));
 		return;
 	}
 
 	UChatEntry* NewEntry = CreateWidget<UChatEntry>(this, DialogueEntryWidgetClass);
 	if (!NewEntry)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("UNPCDialogueWidget::AddDialogueEntry aborted: CreateWidget<UChatEntry> failed."));
 		return;
 	}
 

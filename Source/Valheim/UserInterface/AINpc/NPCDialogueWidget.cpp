@@ -30,6 +30,17 @@ void UNPCDialogueWidget::NativeConstruct()
 	}
 }
 
+FReply UNPCDialogueWidget::NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
+{
+	if (InKeyEvent.GetKey() == EKeys::X)
+	{
+		CloseDialogue();
+		return FReply::Handled();
+	}
+
+	return Super::NativeOnKeyDown(InGeometry, InKeyEvent);
+}
+
 void UNPCDialogueWidget::NativeDestruct()
 {
 	if (UGameInstance* GameInstance = GetGameInstance())
@@ -128,7 +139,7 @@ void UNPCDialogueWidget::SendDialogueMessage()
 
 	if (!Subsystem->IsAIServerConnected())
 	{
-		AddDialogueEntry(NpcDisplayName, TEXT("지금은 대답할 수 없다."));
+		AddDialogueEntry(NpcDisplayName, TEXT("지금�? ?�?�할 ???�다."));
 		DialogueInputBox->SetText(FText::GetEmpty());
 		return;
 	}
@@ -190,7 +201,7 @@ void UNPCDialogueWidget::HandleAIChatError(const FString& PlayerId, const FStrin
 	}
 
 	UE_LOG(LogTemp, Warning, TEXT("UNPCDialogueWidget: AI chat error [%s]"), *ErrorCode);
-	AddDialogueEntry(NpcDisplayName, TEXT("지금은 대답할 수 없다."));
+	AddDialogueEntry(NpcDisplayName, TEXT("지금�? ?�?�할 ???�다."));
 	SetWaitingForReply(false);
 }
 
@@ -201,28 +212,20 @@ void UNPCDialogueWidget::HandleTimeout()
 		return;
 	}
 
-	AddDialogueEntry(NpcDisplayName, TEXT("지금은 대답할 수 없다."));
+	AddDialogueEntry(NpcDisplayName, TEXT("지금�? ?�?�할 ???�다."));
 	SetWaitingForReply(false);
 }
 
 void UNPCDialogueWidget::AddDialogueEntry(const FString& Speaker, const FString& Message)
 {
-	if (!DialogueScrollBox)
+	if (!DialogueScrollBox || !DialogueEntryWidgetClass)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("UNPCDialogueWidget::AddDialogueEntry aborted: DialogueScrollBox is null (binding failed)."));
-		return;
-	}
-
-	if (!DialogueEntryWidgetClass)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("UNPCDialogueWidget::AddDialogueEntry aborted: DialogueEntryWidgetClass is not set in Class Defaults."));
 		return;
 	}
 
 	UChatEntry* NewEntry = CreateWidget<UChatEntry>(this, DialogueEntryWidgetClass);
 	if (!NewEntry)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("UNPCDialogueWidget::AddDialogueEntry aborted: CreateWidget<UChatEntry> failed."));
 		return;
 	}
 
